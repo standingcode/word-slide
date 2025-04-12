@@ -17,10 +17,7 @@ public class PoolManager : MonoBehaviour
 
 		if (poolableObjectRoot.transform.childCount == 0)
 		{
-			Debug.Log("Instantiating");
-
 			GameObject instantiatedObject = Instantiate(poolableObjectRoot.PoolableObjectPrefab);
-
 			instantiatedObject.transform.parent = poolableObjectRoot.transform;
 		}
 

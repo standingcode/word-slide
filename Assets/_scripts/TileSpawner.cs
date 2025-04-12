@@ -15,6 +15,13 @@ public class TileSpawner : MonoBehaviour
 	{
 		// Set initial tiles
 		SetInitialTiles();
+
+		DetectScreenSizeChange.ScreenSizeChanged += ScaleToScreensize;
+	}
+
+	private void ScaleToScreensize(Vector2 differenceInScale)
+	{
+		transform.localScale = new Vector3(differenceInScale.x, differenceInScale.y, 1);
 	}
 
 	private void SetInitialTiles()
