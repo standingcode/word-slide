@@ -6,5 +6,5 @@ For any potential recruiters visiting looking for code samples, I have made my o
 
 And have just finished this tile spawner:
 
-[https://github.com/standingcode/word-slide/blob/5e1880ce87e993695ec8d64a589ea44098067d9f/Assets/_scripts/TileSpawner.cs](https://github.com/standingcode/word-slide/blob/5e1880ce87e993695ec8d64a589ea44098067d9f/Assets/_scripts/TileSpawner.cs)
+[Assets/_scripts/TileSpawner.cs](https://github.com/standingcode/word-slide/blob/5e1880ce87e993695ec8d64a589ea44098067d9f/Assets/_scripts/TileSpawner.cs)
 
