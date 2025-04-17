@@ -1,31 +1,34 @@
 using System;
 using UnityEngine;
 
-public class DetectScreenSizeChange : MonoBehaviour
+namespace WordSlide
 {
-	[SerializeField]
-	private RectTransform rectTransform;
-
-	[SerializeField]
-	private Vector2 referenceResolution;
-
-	// This event triggers on the event of a screen change, and passes the pixel difference
-	public static Action<Vector2> ScreenSizeChanged;
-
-	private Vector2 previousFrameScreenSize;
-
-	void Start()
+	public class DetectScreenSizeChange : MonoBehaviour
 	{
-		previousFrameScreenSize = rectTransform.sizeDelta;
-	}
+		[SerializeField]
+		private RectTransform rectTransform;
 
+		[SerializeField]
+		private Vector2 referenceResolution;
 
-	void Update()
-	{
-		if (previousFrameScreenSize != rectTransform.sizeDelta)
+		// This event triggers on the event of a screen change, and passes the pixel difference
+		public static Action<Vector2> ScreenSizeChanged;
+
+		private Vector2 previousFrameScreenSize;
+
+		void Start()
 		{
-			ScreenSizeChanged?.Invoke(referenceResolution / rectTransform.sizeDelta);
 			previousFrameScreenSize = rectTransform.sizeDelta;
+		}
+
+
+		void Update()
+		{
+			if (previousFrameScreenSize != rectTransform.sizeDelta)
+			{
+				ScreenSizeChanged?.Invoke(referenceResolution / rectTransform.sizeDelta);
+				previousFrameScreenSize = rectTransform.sizeDelta;
+			}
 		}
 	}
 }
