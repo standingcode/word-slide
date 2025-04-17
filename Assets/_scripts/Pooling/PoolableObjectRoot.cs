@@ -1,8 +1,12 @@
 using UnityEngine;
 
-public class PoolableObjectRoot : MonoBehaviour
+namespace Pooling
 {
-	[SerializeField]
-	protected GameObject poolableObjectPrefab;
-	public GameObject PoolableObjectPrefab { get => poolableObjectPrefab; set => poolableObjectPrefab = value; }
+
+	public class PoolableObjectRoot : MonoBehaviour
+	{
+		[SerializeField]
+		protected GameObject poolableObjectPrefab;
+		public GameObject PoolableObjectPrefab { get => poolableObjectPrefab; set => poolableObjectPrefab = value; }
+	}
 }
