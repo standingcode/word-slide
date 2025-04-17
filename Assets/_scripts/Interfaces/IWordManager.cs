@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace WordSlide
 {
 	public interface IWordManager
