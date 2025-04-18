@@ -1,19 +1,33 @@
+using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace WordSlide
 {
 	public class WordManager : IWordManager
 	{
-		public WordManager()
+		private IDictionaryImporter _dictionaryImporter;
+
+		private Dictionary<string, Word> _currentDictionary = new();
+
+		public WordManager(IDictionaryImporter dictionaryImporter)
 		{
 			Debug.Log("WordManager: Constructor called");
+			_dictionaryImporter = dictionaryImporter;
+			_currentDictionary = _dictionaryImporter.GetDictionary("english");
 		}
 
 		public bool CheckWord(string word)
 		{
-			Debug.Log("WordManager: Checking word: " + word);
-			// Check if the word is in the dictionary
-			return true;
+			var timer = new System.Diagnostics.Stopwatch();
+			timer.Start();
+
+			bool wordWasFound = _currentDictionary.ContainsKey(word);
+
+			Debug.Log($"_currentDictionary.ContainsKey(word) took {timer.ElapsedMilliseconds} ms");
+
+			return wordWasFound;
+
 		}
 	}
 }

@@ -24,10 +24,9 @@ namespace WordSlide
 			_wordManager = wordManager;
 		}
 
-		// Start is called once before the first execution of Update after the MonoBehaviour is created
 		void Start()
 		{
-			_wordManager.CheckWord("test");
+			Debug.Log(_wordManager.CheckWord("teeest"));
 		}
 	}
 }

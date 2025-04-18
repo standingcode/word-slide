@@ -9,5 +9,9 @@ public class GameInstaller : MonoInstaller
 		Container.Bind<IWordManager>().
 		To<WordManager>()
 		.AsSingle();
+
+		Container.Bind<IDictionaryImporter>().
+		To<DictionaryImporter>()
+		.AsSingle();
 	}
 }
