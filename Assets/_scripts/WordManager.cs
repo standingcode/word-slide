@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 
 namespace WordSlide
@@ -19,12 +18,13 @@ namespace WordSlide
 
 		public bool CheckWord(string word)
 		{
-			var timer = new System.Diagnostics.Stopwatch();
-			timer.Start();
+			var sw = System.Diagnostics.Stopwatch.StartNew();
 
 			bool wordWasFound = _currentDictionary.ContainsKey(word);
 
-			Debug.Log($"_currentDictionary.ContainsKey(word) took {timer.ElapsedMilliseconds} ms");
+			sw.Stop();
+
+			Debug.Log($"_currentDictionary.ContainsKey(word) took {sw.ElapsedMilliseconds} ms");
 
 			return wordWasFound;
 
