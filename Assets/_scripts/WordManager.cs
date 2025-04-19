@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using System.Threading;
-using UnityEngine;
+using System.Threading.Tasks;
 
 namespace WordSlide
 {
@@ -13,7 +12,11 @@ namespace WordSlide
 		public WordManager(IDictionaryImporter dictionaryImporter)
 		{
 			_dictionaryImporter = dictionaryImporter;
-			_currentDictionary = _dictionaryImporter.GetDictionary("english");
+		}
+
+		public async Task LoadDictionary(string language)
+		{
+			_currentDictionary = await _dictionaryImporter.GetDictionary(language);
 		}
 
 		public bool CheckWord(string word)

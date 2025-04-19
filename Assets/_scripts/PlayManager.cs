@@ -26,7 +26,7 @@ namespace WordSlide
 
 		void Start()
 		{
-			Debug.Log(_wordManager.CheckWord("teeest"));
+
 		}
 	}
 }

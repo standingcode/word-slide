@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace WordSlide
 {
 	public interface IDictionaryImporter
 	{
-		public Dictionary<string, Word> GetDictionary(string language);
+		public Task<Dictionary<string, Word>> GetDictionary(string language);
 	}
 }

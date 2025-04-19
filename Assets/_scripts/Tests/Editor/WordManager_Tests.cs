@@ -1,9 +1,20 @@
 using NUnit.Framework;
+using System.Threading.Tasks;
 using UnityEngine;
 using WordSlide;
 
 public class WordManager_Tests
 {
+	private WordManager sut;
+
+	public async Task<WordManager> GetWordManagerWithDictionary(string dictionaryToLoad)
+	{
+		sut = new WordManager(new DictionaryImporter());
+		await sut.LoadDictionary(dictionaryToLoad);
+
+		return sut;
+	}
+
 	[Test]
 	public void CheckWord_WordDoesntExist_MethodReturnsFalse()
 	{
@@ -15,9 +26,9 @@ public class WordManager_Tests
 	}
 
 	[Test]
-	public void CheckWord_WordDoesExist_MethodReturnsTrue()
+	public async Task CheckWord_WordDoesExist_MethodReturnsTrue()
 	{
-		var sut = new WordManager(new DictionaryImporter());
+		var sut = await GetWordManagerWithDictionary("english");
 
 		var result = sut.CheckWord("hello");
 

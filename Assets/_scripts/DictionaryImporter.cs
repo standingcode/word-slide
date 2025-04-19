@@ -1,18 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace WordSlide
 {
 	public class DictionaryImporter : IDictionaryImporter
 	{
-		public Dictionary<string, Word> GetDictionary(string language)
+		public async Task<Dictionary<string, Word>> GetDictionary(string language)
 		{
 			Dictionary<string, Word> dictionary = new Dictionary<string, Word>();
 
-			var thingy = Resources.Load<TextAsset>("Dictionaries/" + language);
+			var fileAsset = Resources.LoadAsync<TextAsset>("Dictionaries/" + language);
+			await fileAsset;
 
-			foreach (var line in thingy.text.Split('\n'))
+			var fileContents = fileAsset.asset as TextAsset;
+
+			foreach (var line in fileContents.text.Split('\n'))
 			{
 				var word = line.Trim();
 
