@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace WordSlide
@@ -11,23 +12,18 @@ namespace WordSlide
 
 		public WordManager(IDictionaryImporter dictionaryImporter)
 		{
-			Debug.Log("WordManager: Constructor called");
 			_dictionaryImporter = dictionaryImporter;
 			_currentDictionary = _dictionaryImporter.GetDictionary("english");
 		}
 
 		public bool CheckWord(string word)
 		{
-			var sw = System.Diagnostics.Stopwatch.StartNew();
+			if (string.IsNullOrEmpty(word))
+			{
+				return false;
+			}
 
-			bool wordWasFound = _currentDictionary.ContainsKey(word);
-
-			sw.Stop();
-
-			Debug.Log($"_currentDictionary.ContainsKey(word) took {sw.ElapsedMilliseconds} ms");
-
-			return wordWasFound;
-
+			return _currentDictionary.ContainsKey(word);
 		}
 	}
 }
