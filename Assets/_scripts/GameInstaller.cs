@@ -6,8 +6,8 @@ public class GameInstaller : MonoInstaller
 {
 	public override void InstallBindings()
 	{
-		Container.Bind<IWordManager>().
-		To<WordManager>()
+		Container.Bind<IDictionaryManager>().
+		To<DictionaryManager>()
 		.AsSingle();
 
 		Container.Bind<IDictionaryImporter>().

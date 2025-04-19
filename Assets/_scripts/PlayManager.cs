@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
 
@@ -14,19 +15,15 @@ namespace WordSlide
 
 	public class PlayManager : MonoBehaviour
 	{
-		private Dictionary<string, Word> englishDictionary = new();
-
-		private IWordManager _wordManager;
+		private IDictionaryManager _dictionaryManager;
 
 		[Inject]
-		public void Construct(IWordManager wordManager)
+		public async Task Construct(IDictionaryManager dictionaryManager)
 		{
-			_wordManager = wordManager;
-		}
+			_dictionaryManager = dictionaryManager;
 
-		void Start()
-		{
-
+			await _dictionaryManager.LoadDictionary("english");
+			await _dictionaryManager.LoadCharacterSet("english");
 		}
 	}
 }
