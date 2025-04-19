@@ -7,7 +7,7 @@ public class WordManager_Tests
 {
 	private WordManager sut;
 
-	public async Task<WordManager> GetWordManagerWithDictionary(string dictionaryToLoad)
+	public async Task<WordManager> GetWordManagerWithDictionaryLoaded(string dictionaryToLoad)
 	{
 		sut = new WordManager(new DictionaryImporter());
 		await sut.LoadDictionary(dictionaryToLoad);
@@ -16,9 +16,9 @@ public class WordManager_Tests
 	}
 
 	[Test]
-	public void CheckWord_WordDoesntExist_MethodReturnsFalse()
+	public async Task CheckWord_WordDoesntExist_MethodReturnsFalse()
 	{
-		var sut = new WordManager(new DictionaryImporter());
+		var sut = await GetWordManagerWithDictionaryLoaded("english");
 
 		var result = sut.CheckWord("heello");
 
@@ -28,7 +28,7 @@ public class WordManager_Tests
 	[Test]
 	public async Task CheckWord_WordDoesExist_MethodReturnsTrue()
 	{
-		var sut = await GetWordManagerWithDictionary("english");
+		var sut = await GetWordManagerWithDictionaryLoaded("english");
 
 		var result = sut.CheckWord("hello");
 
@@ -36,19 +36,21 @@ public class WordManager_Tests
 	}
 
 	[Test]
-	public void CheckWord_EmptyString_MethodReturnsFalse()
+	public async Task CheckWord_EmptyString_MethodReturnsFalse()
 	{
-		var sut = new WordManager(new DictionaryImporter());
+		var sut = await GetWordManagerWithDictionaryLoaded("english");
+
 		var result = sut.CheckWord("");
+
 		Assert.IsFalse(result, "CheckWord should return false for an empty string.");
 	}
 
 	[Test]
-	public void CheckWord_ValidWord_TimeTakenIsAcceptable()
+	public async Task CheckWord_ValidWord_TimeTakenIsAcceptable()
 	{
 		int acceptableMilliseconds = 2;
 
-		var sut = new WordManager(new DictionaryImporter());
+		var sut = await GetWordManagerWithDictionaryLoaded("english");
 		var sw = System.Diagnostics.Stopwatch.StartNew();
 
 		sut.CheckWord("hello");

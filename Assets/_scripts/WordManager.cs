@@ -9,6 +9,8 @@ namespace WordSlide
 
 		private Dictionary<string, Word> _currentDictionary = new();
 
+		public bool DictionaryLoaded => _currentDictionary.Count > 0;
+
 		public WordManager(IDictionaryImporter dictionaryImporter)
 		{
 			_dictionaryImporter = dictionaryImporter;
@@ -21,6 +23,11 @@ namespace WordSlide
 
 		public bool CheckWord(string word)
 		{
+			if (!DictionaryLoaded)
+			{
+				throw new System.Exception("Dictionary not loaded. Please load a dictionary before checking words.");
+			}
+
 			if (string.IsNullOrEmpty(word))
 			{
 				return false;
