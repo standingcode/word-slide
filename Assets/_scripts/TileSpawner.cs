@@ -1,5 +1,6 @@
 using Pooling;
 using UnityEngine;
+using Zenject;
 
 namespace WordSlide
 {
@@ -10,6 +11,9 @@ namespace WordSlide
 
 		[SerializeField]
 		private float tilePaddingRatio = 0.1f, minimumMarginFromBoardAsRatio = 0.05f;
+
+		[Inject]
+		private IDictionaryManager dictionaryManager;
 
 		void Start()
 		{
@@ -113,6 +117,12 @@ namespace WordSlide
 			tile.transform.position = new Vector3(requiredXPosition, requiredYPosition, 0);
 		}
 
+
+		private void SetSingleTileCharacterToRandomCharacter(SingleTile singleTile)
+		{
+			singleTile.SetShownCharacter(dictionaryManager.GetRandomChar());
+		}
+
 		/// <summary>
 		/// Sets the initial tiles, we may have to do something later to cope with changing screen resolutions etc.
 		/// </summary>
@@ -143,6 +153,18 @@ namespace WordSlide
 
 					// Set the position of the tile
 					SetSingleTilePosition(i, j, tile.transform, tileSize, interiorPaddingSizes, tileSpawnTopLeftStartingPoint);
+
+					// Set the character of the tile to a random character
+					SingleTile singleTile = tile.GetComponent<SingleTile>();
+
+					if (singleTile != null)
+					{
+						SetSingleTileCharacterToRandomCharacter(singleTile);
+					}
+					else
+					{
+						Debug.LogError("SingleTile component not found on the tile prefab.");
+					}
 				}
 			}
 		}
