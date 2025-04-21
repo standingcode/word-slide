@@ -5,6 +5,7 @@ namespace WordSlide
 	public interface IDictionaryManager
 	{
 		public bool DictionaryLoaded { get; }
+
 		public bool CharacterSetLoaded { get; }
 
 		public Task LoadDictionary(string language);
