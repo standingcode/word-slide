@@ -1,5 +1,4 @@
 using Pooling;
-using System;
 using UnityEngine;
 using Zenject;
 
@@ -10,28 +9,33 @@ namespace WordSlide
 		[Inject]
 		private IDictionaryManager dictionaryManager;
 
+		[SerializeField]
 		private SingleTile[,] boardTiles;
+
+		[SerializeField]
 		private SingleTile[,] waitingTiles;
+
+		[SerializeField]
+		private Transform boardTilesRoot, waitingTilesRoot;
 
 		void Start()
 		{
 			sizeManager = SizeManager.Instance;
-			manager = Manager.Instance;
+			settings = Settings.Instance;
 
 			// Set initial tiles		
 			SetInitialTiles();
 		}
 
 		private SizeManager sizeManager;
-		private Manager manager;
+		private Settings settings;
 
 		/// <summary>
 		/// Sets the initial tiles
 		/// </summary>
 		private void SetInitialTiles()
 		{
-			SetWaitingTiles();
-			SetBoardTiles();
+			SetTiles();
 		}
 
 		private void SetWaitingTiles()
@@ -39,45 +43,61 @@ namespace WordSlide
 			Debug.LogError("Please implement waiting tiles");
 		}
 
-		//private SingleTile[,] getSetOfTiles(bool setCannotContainValidWord)
-		//{
-
-
-		//}
-
 		/// <summary>
 		/// Sets the tiles which will be seen initially on the screen.
 		/// </summary>
-		private void SetBoardTiles()
+		private void SetTiles()
 		{
-			for (int i = 0; i < manager.Rows; i++)
+			boardTiles = new SingleTile[settings.Rows, settings.Columns];
+			waitingTiles = new SingleTile[settings.Rows, settings.Columns];
+
+			for (int i = 0; i < settings.Rows; i++)
 			{
-				for (int j = 0; j < manager.Columns; j++)
+				for (int j = 0; j < settings.Columns; j++)
 				{
-					// Create a new tile from the object pool
-					PoolObject tile = Manager.PoolManager.GetObjectFromPool("tile");
+					// Create 2 new tiles from the object pool
+					PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile");
+					PoolObject waitingTile = PoolManager.Instance.GetObjectFromPool("tile");
 
-					// Set the transfrom as a child of this transform.
-					tile.transform.parent = transform;
+					boardTile.transform.parent = boardTilesRoot;
+					waitingTile.transform.parent = waitingTilesRoot;
 
-					// Set the scale based on the tile size
-					tile.transform.localScale = new Vector3(sizeManager.TileSize.x, sizeManager.TileSize.y, 1f);
+					// Set the scales based on the tile size
+					waitingTile.transform.localScale = boardTile.transform.localScale = new Vector3(
+					sizeManager.TileSize.x,
+					sizeManager.TileSize.y,
+					1f);
 
-					// Set the position of the tile
+					// Set the position of the board tile
 					SetSingleTilePosition(
 						i,
 						j,
-						tile.transform, sizeManager.TileSize,
+						boardTile.transform, sizeManager.TileSize,
 						sizeManager.InteriorPaddingSizes,
 						sizeManager.TileSpawnTopLeftStartingPoint
 					);
 
-					// Set the character of the tile to a random character
-					SingleTile singleTile = tile.GetComponent<SingleTile>();
+					// Set the character of the tiles to a random character
+					SingleTile boardSingleTile = boardTile.GetComponent<SingleTile>();
+					SingleTile waitingSingleTile = waitingTile.GetComponent<SingleTile>();
 
-					if (singleTile != null)
+					// For the board tile
+					if (boardSingleTile != null)
 					{
-						SetSingleTileCharacterToRandomCharacter(singleTile);
+						SetSingleTileCharacterToRandomCharacter(boardSingleTile);
+						boardTiles[i, j] = boardSingleTile;
+						boardSingleTile.ActivateTile();
+					}
+					else
+					{
+						Debug.LogError("SingleTile component not found on the tile prefab.");
+					}
+
+					// For the waiting tile
+					if (waitingSingleTile != null)
+					{
+						SetSingleTileCharacterToRandomCharacter(boardSingleTile);
+						waitingTiles[i, j] = boardSingleTile;
 					}
 					else
 					{
@@ -99,8 +119,8 @@ namespace WordSlide
 		/// <param name="tileSpawnTopLeftStartingPoint">The top left starting point of the board</param>
 		private void SetSingleTilePosition(int i, int j, Transform tile, Vector2 tileSize, Vector2 tilePadding, Vector2 tileSpawnTopLeftStartingPoint)
 		{
-			int columnMultiplier = j % manager.Columns;
-			int rowMultiplier = i % manager.Rows;
+			int columnMultiplier = j % settings.Columns;
+			int rowMultiplier = i % settings.Rows;
 
 			float requiredXPosition = tileSpawnTopLeftStartingPoint.x + (columnMultiplier * (tileSize.x + tilePadding.x));
 			float requiredYPosition = tileSpawnTopLeftStartingPoint.y - (rowMultiplier * (tileSize.y + tilePadding.y));

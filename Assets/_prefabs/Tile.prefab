@@ -247,11 +247,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7013272148948384371}
+  - component: {fileID: 810480648988876237}
   - component: {fileID: 4455411631575713389}
   - component: {fileID: 3210051625092539890}
   - component: {fileID: 1435310567558780645}
   - component: {fileID: -1667713944468916382}
-  - component: {fileID: 810480648988876237}
   m_Layer: 0
   m_Name: Tile
   m_TagString: Untagged
@@ -275,6 +275,22 @@ Transform:
   - {fileID: 7078230789654957540}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -5, y: -5, z: 0}
+--- !u!114 &810480648988876237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4629240430293829437}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e9884647a0ed004e915659a779d5239, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  textMesh: {fileID: 7744930552171424848}
+  meshRenderer: {fileID: 3210051625092539890}
+  boxCollider: {fileID: 1435310567558780645}
+  tileIsActive: 0
 --- !u!33 &4455411631575713389
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -362,16 +378,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   poolObjectIdentifier: tile
---- !u!114 &810480648988876237
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4629240430293829437}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e9884647a0ed004e915659a779d5239, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  textMesh: {fileID: 7744930552171424848}

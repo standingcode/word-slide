@@ -8,6 +8,24 @@ namespace Pooling
 		[SerializeField]
 		SerializableDictionary<string, PoolableObjectRoot> poolableObjectRoots;
 
+		public static PoolManager Instance { get; private set; }
+
+		private void Awake()
+		{
+			if (Instance != null && Instance != this)
+			{
+				Destroy(this);
+				return;
+			}
+
+			Instance = this;
+		}
+
+		private void OnDestroy()
+		{
+			Instance = null;
+		}
+
 		public PoolObject GetObjectFromPool(string objectIdentifier)
 		{
 			if (!poolableObjectRoots.ContainsKey(objectIdentifier))

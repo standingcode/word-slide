@@ -86,6 +86,11 @@ namespace WordSlide
 			Instance = this;
 		}
 
+		private void OnDestroy()
+		{
+			Instance = null;
+		}
+
 		[SerializeField]
 		private float tilePaddingRatio = 0.1f, minimumMarginFromBoardAsRatio = 0.05f;
 
@@ -124,16 +129,16 @@ namespace WordSlide
 		private (Vector2, Vector2) GetTileSizeAndInteriorPaddingSize(Vector2 boardSize)
 		{
 			// Step 1: Calculate the initial tile size based on board dimensions and grid layout  
-			float initialTileSizeX = boardSize.x / Manager.Instance.Columns;
-			float initialTileSizeY = boardSize.y / Manager.Instance.Rows;
+			float initialTileSizeX = boardSize.x / Settings.Instance.Columns;
+			float initialTileSizeY = boardSize.y / Settings.Instance.Rows;
 
 			// Step 2: Calculate the interior padding as a ratio of the initial tile size  
 			float xInteriorPadding = initialTileSizeX * tilePaddingRatio;
 			float yInteriorPadding = initialTileSizeY * tilePaddingRatio;
 
 			// Step 3: Adjust the tile size to account for the interior padding  
-			float adjustedTileSizeX = initialTileSizeX - (xInteriorPadding * (Manager.Instance.Columns - 1) / Manager.Instance.Columns);
-			float adjustedTileSizeY = initialTileSizeY - (yInteriorPadding * (Manager.Instance.Rows - 1) / Manager.Instance.Rows);
+			float adjustedTileSizeX = initialTileSizeX - (xInteriorPadding * (Settings.Instance.Columns - 1) / Settings.Instance.Columns);
+			float adjustedTileSizeY = initialTileSizeY - (yInteriorPadding * (Settings.Instance.Rows - 1) / Settings.Instance.Rows);
 
 			return (new Vector2(adjustedTileSizeX, adjustedTileSizeY), new Vector2(xInteriorPadding, yInteriorPadding));
 		}
