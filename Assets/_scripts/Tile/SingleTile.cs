@@ -41,4 +41,9 @@ public class SingleTile : MonoBehaviour
 		meshRenderer.enabled = false;
 		textMesh.enabled = false;
 	}
+
+	public void TileWasPressed()
+	{
+		Debug.Log($"Tile {textMesh.text} was pressed.");
+	}
 }

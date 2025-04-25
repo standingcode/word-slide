@@ -23,25 +23,12 @@ namespace WordSlide
 			sizeManager = SizeManager.Instance;
 			settings = Settings.Instance;
 
-			// Set initial tiles		
-			SetInitialTiles();
+			// Set the tiles		
+			SetTiles();
 		}
 
 		private SizeManager sizeManager;
 		private Settings settings;
-
-		/// <summary>
-		/// Sets the initial tiles
-		/// </summary>
-		private void SetInitialTiles()
-		{
-			SetTiles();
-		}
-
-		private void SetWaitingTiles()
-		{
-			Debug.LogError("Please implement waiting tiles");
-		}
 
 		/// <summary>
 		/// Sets the tiles which will be seen initially on the screen.
@@ -56,11 +43,8 @@ namespace WordSlide
 				for (int j = 0; j < settings.Columns; j++)
 				{
 					// Create 2 new tiles from the object pool
-					PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile");
-					PoolObject waitingTile = PoolManager.Instance.GetObjectFromPool("tile");
-
-					boardTile.transform.parent = boardTilesRoot;
-					waitingTile.transform.parent = waitingTilesRoot;
+					PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile", boardTilesRoot);
+					PoolObject waitingTile = PoolManager.Instance.GetObjectFromPool("tile", waitingTilesRoot);
 
 					// Set the scales based on the tile size
 					waitingTile.transform.localScale = boardTile.transform.localScale = new Vector3(
@@ -96,8 +80,8 @@ namespace WordSlide
 					// For the waiting tile
 					if (waitingSingleTile != null)
 					{
-						SetSingleTileCharacterToRandomCharacter(boardSingleTile);
-						waitingTiles[i, j] = boardSingleTile;
+						SetSingleTileCharacterToRandomCharacter(waitingSingleTile);
+						waitingTiles[i, j] = waitingSingleTile;
 					}
 					else
 					{
@@ -128,6 +112,10 @@ namespace WordSlide
 			tile.transform.position = new Vector3(requiredXPosition, requiredYPosition, 0);
 		}
 
+		/// <summary>
+		/// Assigns a random character to the given single tile.
+		/// </summary>
+		/// <param name="singleTile"></param>
 		private void SetSingleTileCharacterToRandomCharacter(SingleTile singleTile)
 		{
 			singleTile.SetShownCharacter(dictionaryManager.GetRandomChar());

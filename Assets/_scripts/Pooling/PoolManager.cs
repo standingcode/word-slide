@@ -26,7 +26,7 @@ namespace Pooling
 			Instance = null;
 		}
 
-		public PoolObject GetObjectFromPool(string objectIdentifier)
+		public PoolObject GetObjectFromPool(string objectIdentifier, Transform parentForPoolObjectTransform = null)
 		{
 			if (!poolableObjectRoots.ContainsKey(objectIdentifier))
 			{
@@ -38,7 +38,7 @@ namespace Pooling
 			if (poolableObjectRoot.transform.childCount == 0)
 			{
 				GameObject instantiatedObject = Instantiate(poolableObjectRoot.PoolableObjectPrefab);
-				instantiatedObject.transform.parent = poolableObjectRoot.transform;
+				instantiatedObject.transform.SetParent(poolableObjectRoot.transform);
 			}
 
 			PoolObject poolObject = poolableObjectRoot.transform.GetChild(0).GetComponent<PoolObject>();
@@ -48,12 +48,17 @@ namespace Pooling
 				poolObject.PoolObjectIdentifier = objectIdentifier;
 			}
 
+			if (parentForPoolObjectTransform != null)
+			{
+				poolObject.transform.SetParent(parentForPoolObjectTransform);
+			}
+
 			return poolObject;
 		}
 
 		public void ReturnObjectToPool(PoolObject poolObject)
 		{
-			poolObject.transform.parent = poolableObjectRoots[poolObject.PoolObjectIdentifier].transform;
+			poolObject.transform.SetParent(poolableObjectRoots[poolObject.PoolObjectIdentifier].transform);
 			poolObject.gameObject.SetActive(false);
 		}
 
