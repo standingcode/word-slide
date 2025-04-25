@@ -230,6 +230,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7013272148948384371}
   - component: {fileID: 810480648988876237}
+  - component: {fileID: 240128338872377688}
   - component: {fileID: 4455411631575713389}
   - component: {fileID: 3210051625092539890}
   - component: {fileID: 1435310567558780645}
@@ -273,6 +274,20 @@ MonoBehaviour:
   meshRenderer: {fileID: 3210051625092539890}
   boxCollider: {fileID: 1435310567558780645}
   tileIsActive: 0
+  singleTileMover: {fileID: 240128338872377688}
+--- !u!114 &240128338872377688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4629240430293829437}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d58d141b4977e4a4a801a8f4ed8c3181, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  zMovementWhenSliding: -1
 --- !u!33 &4455411631575713389
 MeshFilter:
   m_ObjectHideFlags: 0
