@@ -20,14 +20,14 @@ namespace WordSlide
 		private Transform boardTilesRoot, waitingTilesRoot;
 
 		[SerializeField]
-		private MouseClickEvent mouseClickEvent;
+		private ClickEventHandler ClickEventHandler;
 
 		private SingleTileManager currentlyMovingTile = null;
 
 		void Start()
 		{
-			mouseClickEvent.AddMouseDownListener(CheckIfTileWasClicked);
-			mouseClickEvent.AddMouseUpListener(CheckIfTileNeedsToBeDropped);
+			ClickEventHandler.AddClickDownListener(CheckIfTileWasClicked);
+			ClickEventHandler.AddClickUpListener(CheckIfTileNeedsToBeDropped);
 
 			sizeManager = SizeManager.Instance;
 			settings = Settings.Instance;
@@ -130,10 +130,17 @@ namespace WordSlide
 			singleTile.SetShownCharacter(dictionaryManager.GetRandomChar());
 		}
 
-		public void CheckIfTileWasClicked(Vector2 mousePosition)
+		/// <summary>
+		/// When mouse is clicked, we fire a ray and see if it hits a tile's collider, we then know if the tile is selected.
+		/// </summary>
+		/// <param name="mousePosition"></param>
+		private void CheckIfTileWasClicked(Vector2 mousePosition)
 		{
+			// If a tile is alerady in motion, it needs dropping first
+			CheckIfTileNeedsToBeDropped();
+
 			// Shoot ray from main camera and detect what it hits
-			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+			Ray ray = Camera.main.ScreenPointToRay(mousePosition);
 			if (Physics.Raycast(ray, out RaycastHit hit))
 			{
 				Debug.Log($"Hit object: {hit.collider.gameObject.name}");
@@ -141,11 +148,15 @@ namespace WordSlide
 				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
 				{
 					currentlyMovingTile = singleTileManager;
-					currentlyMovingTile.TileWasClickedOn(Input.mousePosition);
+					currentlyMovingTile.TileWasClickedOn(mousePosition);
 				}
 			}
 		}
 
+		/// <summary>
+		/// Drop a tile if the click event is up and there is a tile in motion
+		/// This dropping procedure will need to check for tile swapping and then for words eventually
+		/// </summary>
 		private void CheckIfTileNeedsToBeDropped()
 		{
 			if (currentlyMovingTile != null)

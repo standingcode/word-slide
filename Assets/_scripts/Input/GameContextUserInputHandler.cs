@@ -6,19 +6,19 @@ namespace WordSlide
 	public class GameContextUserInputHandler : MonoBehaviour
 	{
 		[SerializeField]
-		private MouseClickEvent mouseClickEvent;
+		private ClickEventHandler ClickEventHandler;
 
 		public void MainSelectOrDeselectPerformed(InputAction.CallbackContext callbackContext)
 		{
 			if (callbackContext.ReadValue<float>() == 1)
 			{
 				// Mouse was pressed
-				mouseClickEvent.RaiseMouseClicked(Input.mousePosition);
+				ClickEventHandler.RaiseInputClicked(PointerMethods.GetMouseOrPointerPosition());
 			}
 			else
 			{
 				// Mouse was released
-				mouseClickEvent.RaiseMouseReleased();
+				ClickEventHandler.RaiseMouseReleased();
 			}
 		}
 	}

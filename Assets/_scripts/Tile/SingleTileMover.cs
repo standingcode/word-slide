@@ -75,8 +75,7 @@ namespace WordSlide
 
 		private void MoveTile()
 		{
-
-			var mouseWorldPositionThisFrame = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+			var mouseWorldPositionThisFrame = Camera.main.ScreenToWorldPoint(PointerMethods.GetMouseOrPointerPosition());
 
 			if (mouseWorldPositionThisFrame.x == _mousePositionPreviousFrame.x
 				&& mouseWorldPositionThisFrame.y == _mousePositionPreviousFrame.y)
@@ -108,12 +107,7 @@ namespace WordSlide
 				transform.position = new Vector3(transform.position.x, transform.position.y + yToMove, transform.position.z);
 			}
 
-			_mousePositionPreviousFrame = GetWorldPointForMousePosition(Input.mousePosition);
-		}
-
-		private Vector2 GetWorldPointForMousePosition(Vector2 mousePosition)
-		{
-			return Camera.main.ScreenToWorldPoint(mousePosition);
+			_mousePositionPreviousFrame = mouseWorldPositionThisFrame;
 		}
 
 		private void OnDisable()
