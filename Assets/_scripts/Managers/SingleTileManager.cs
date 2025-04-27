@@ -30,6 +30,11 @@ public class SingleTileManager : MonoBehaviour
 		DeactivateTile();
 	}
 
+	public void InitializeMovementRestrictions(MovementRestrictions movementRestrictions)
+	{
+		singleTileMover.InitializeMovementRestrictions(movementRestrictions);
+	}
+
 	// When the tile is first selected, this can be called from the tile manager which should get a reference via a ray	
 	public void TileWasClickedOn(Vector2 mousePosition)
 	{

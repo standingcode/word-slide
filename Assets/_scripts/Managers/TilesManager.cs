@@ -77,6 +77,9 @@ namespace WordSlide
 					// For the board tile
 					if (boardSingleTile != null)
 					{
+						// Set the movement restrictions for the tile	
+						boardSingleTile.InitializeMovementRestrictions(GetMovementRestrictionsForSingleTile(boardSingleTile, i, j));
+
 						SetSingleTileCharacterToRandomCharacter(boardSingleTile);
 						boardTiles[i, j] = boardSingleTile;
 						boardSingleTile.ActivateTile();
@@ -98,6 +101,66 @@ namespace WordSlide
 					}
 				}
 			}
+		}
+
+		private MovementRestrictions GetMovementRestrictionsForSingleTile(SingleTileManager singletileManager, int row, int column)
+		{
+			float xMin;
+			float xMax;
+			float yMin;
+			float yMax;
+
+			// X PLAIN
+
+			// If the tile is on the left-hand side of the board, it can only move to the right
+			if (column == 0)
+			{
+				xMin = singletileManager.transform.position.x;
+			}
+			// Otherwise the tile can move left one tile size plus padding		
+			else
+			{
+				xMin = singletileManager.transform.position.x - sizeManager.TileSize.x - sizeManager.InteriorPaddingSizes.x;
+			}
+
+
+			// if the tile is on the right-hand side of the board, it can only move to the left
+			if (column == settings.Columns - 1)
+			{
+				xMax = singletileManager.transform.position.x;
+			}
+			// Otherwise the tile can move right one tile size plus padding
+			else
+			{
+				xMax = singletileManager.transform.position.x + sizeManager.TileSize.x + sizeManager.InteriorPaddingSizes.x;
+			}
+
+			// Y PLAIN
+
+			// if the tile is on the top of the board, it can only move down
+			if (row == 0)
+			{
+				yMax = singletileManager.transform.position.y;
+			}
+			// Otherwise the tile can move up one tile size plus padding
+			else
+			{
+				yMax = singletileManager.transform.position.y + sizeManager.TileSize.y + sizeManager.InteriorPaddingSizes.y;
+			}
+
+
+			// if the tile is on the bottom of the board, it can only move up
+			if (row == settings.Rows - 1)
+			{
+				yMin = singletileManager.transform.position.y;
+			}
+			// Otherwise the tile can move down one tile size plus padding
+			else
+			{
+				yMin = singletileManager.transform.position.y - sizeManager.TileSize.y - sizeManager.InteriorPaddingSizes.y;
+			}
+
+			return new MovementRestrictions() { xMin = xMin, xMax = xMax, yMin = yMin, yMax = yMax };
 		}
 
 		/// <summary>
@@ -143,8 +206,6 @@ namespace WordSlide
 			Ray ray = Camera.main.ScreenPointToRay(mousePosition);
 			if (Physics.Raycast(ray, out RaycastHit hit))
 			{
-				Debug.Log($"Hit object: {hit.collider.gameObject.name}");
-
 				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
 				{
 					currentlyMovingTile = singleTileManager;

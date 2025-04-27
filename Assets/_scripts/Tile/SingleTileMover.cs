@@ -1,17 +1,15 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace WordSlide
 {
-	public struct MoveRestriction
+	public struct MovementRestrictions
 	{
 		public float xMin;
 		public float xMax;
 		public float yMin;
 		public float yMax;
 	}
-
 	public class SingleTileMover : MonoBehaviour
 	{
 		[SerializeField]
@@ -19,13 +17,20 @@ namespace WordSlide
 
 		Coroutine moveCoroutine;
 
-		private bool moveX = false;
-		private bool moveY = false;
+		private MovementRestrictions _movementRestrictions;
+
+		private bool tileIsmovingOnXPlain = false;
+		private bool tileIsMovingOnYPlain = false;
 
 		private bool tileIsInMotion = false;
 
 		private Vector2 _tileStartingPosition;
 		private Vector2 _mousePositionPreviousFrame;
+
+		public void InitializeMovementRestrictions(MovementRestrictions movementRestrictions)
+		{
+			_movementRestrictions = movementRestrictions;
+		}
 
 		public void StartMoving(Vector2 mouseStartingposition)
 		{
@@ -54,7 +59,7 @@ namespace WordSlide
 
 			StopCoroutine(moveCoroutine);
 
-			moveX = moveY = false;
+			tileIsmovingOnXPlain = tileIsMovingOnYPlain = false;
 
 			moveCoroutine = null;
 
@@ -83,28 +88,38 @@ namespace WordSlide
 				return;
 			}
 
-			if (moveX == false && moveY == false)
+			if (tileIsmovingOnXPlain == false && tileIsMovingOnYPlain == false)
 			{
 				if (Mathf.Abs(_mousePositionPreviousFrame.x - mouseWorldPositionThisFrame.x)
 					>= Mathf.Abs(_mousePositionPreviousFrame.y - mouseWorldPositionThisFrame.y))
 				{
-					moveX = true;
+					tileIsmovingOnXPlain = true;
 				}
 				else
 				{
-					moveY = true;
+					tileIsMovingOnYPlain = true;
 				}
 			}
 
-			if (moveX)
+			if (tileIsmovingOnXPlain)
 			{
 				float xToMove = mouseWorldPositionThisFrame.x - _mousePositionPreviousFrame.x;
-				transform.position = new Vector3(transform.position.x + xToMove, transform.position.y, transform.position.z);
+
+				transform.position = new Vector3(
+				Mathf.Clamp(transform.position.x + xToMove, _movementRestrictions.xMin, _movementRestrictions.xMax),
+				transform.position.y,
+				transform.position.z
+				);
 			}
-			else
+			else if (tileIsMovingOnYPlain)
 			{
 				float yToMove = mouseWorldPositionThisFrame.y - _mousePositionPreviousFrame.y;
-				transform.position = new Vector3(transform.position.x, transform.position.y + yToMove, transform.position.z);
+
+				transform.position = new Vector3(
+				transform.position.x,
+				Mathf.Clamp(transform.position.y + yToMove, _movementRestrictions.yMin, _movementRestrictions.yMax),
+				transform.position.z
+				);
 			}
 
 			_mousePositionPreviousFrame = mouseWorldPositionThisFrame;
