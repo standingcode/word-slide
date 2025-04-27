@@ -83,7 +83,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boardTilesRoot: {fileID: 5671399881637228800}
   waitingTilesRoot: {fileID: 3506854143857560487}
-  mouseClickEvent: {fileID: 11400000, guid: f6cbd98fe27ff2242a9a84bc08cc5e55, type: 2}
+  ClickEventHandler: {fileID: 11400000, guid: f6cbd98fe27ff2242a9a84bc08cc5e55, type: 2}
 --- !u!114 &8390247585327511750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -108,7 +108,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc920539178f73542b5434ded39b88e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseClickEvent: {fileID: 11400000, guid: f6cbd98fe27ff2242a9a84bc08cc5e55, type: 2}
+  ClickEventHandler: {fileID: 11400000, guid: f6cbd98fe27ff2242a9a84bc08cc5e55, type: 2}
 --- !u!114 &7855413313656994955
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,22 +187,6 @@ MonoBehaviour:
     m_ActionId: 32b35790-4ed0-4e9a-aa41-69ac6d629449
     m_ActionName: 'UI/Point[/Mouse/position]'
   - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1971055762343976071}
-        m_TargetAssemblyTypeName: WordSlide.UserInputHandler, MainProject
-        m_MethodName: MainSelectOrDeselectPerformed
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 3c7022bf-7922-4f7c-a998-c437916075ad
-    m_ActionName: 'UI/Click[/Mouse/leftButton]'
-  - m_PersistentCalls:
       m_Calls: []
     m_ActionId: 44b200b1-1557-4083-816c-b22cbdf77ddf
     m_ActionName: 'UI/RightClick[/Mouse/rightButton]'
@@ -222,6 +206,22 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1971055762343976071}
+        m_TargetAssemblyTypeName: WordSlide.GameContextUserInputHandler, MainProject
+        m_MethodName: MainSelectOrDeselectPerformed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 3c7022bf-7922-4f7c-a998-c437916075ad
+    m_ActionName: 'UI/Click[/Mouse/leftButton]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: UI
@@ -239,6 +239,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d58d141b4977e4a4a801a8f4ed8c3181, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  zMovementWhenSliding: -1
 --- !u!1 &8610899238817674750
 GameObject:
   m_ObjectHideFlags: 0

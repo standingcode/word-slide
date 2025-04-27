@@ -46,8 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 750c40fc96a973e4f8801b5b165fb0e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  columns: 10
-  rows: 10
+  columns: 8
+  rows: 8
 --- !u!114 &6319885573358546760
 MonoBehaviour:
   m_ObjectHideFlags: 0
