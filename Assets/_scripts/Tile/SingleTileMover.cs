@@ -78,46 +78,34 @@ namespace WordSlide
 			}
 		}
 
+
+		private float positionToMoveToX;
+		private float positionToMoveToY;
 		private void MoveTile()
 		{
+			Debug.Log("Moving tile");
+
 			var mouseWorldPositionThisFrame = Camera.main.ScreenToWorldPoint(PointerMethods.GetMouseOrPointerPosition());
 
-			if (mouseWorldPositionThisFrame.x == _mousePositionPreviousFrame.x
-				&& mouseWorldPositionThisFrame.y == _mousePositionPreviousFrame.y)
-			{
-				return;
-			}
+			positionToMoveToX = Mathf.Clamp(mouseWorldPositionThisFrame.x, _movementRestrictions.xMin, _movementRestrictions.xMax);
+			positionToMoveToY = Mathf.Clamp(mouseWorldPositionThisFrame.y, _movementRestrictions.yMin, _movementRestrictions.yMax);
 
-			if (tileIsmovingOnXPlain == false && tileIsMovingOnYPlain == false)
-			{
-				if (Mathf.Abs(_mousePositionPreviousFrame.x - mouseWorldPositionThisFrame.x)
-					>= Mathf.Abs(_mousePositionPreviousFrame.y - mouseWorldPositionThisFrame.y))
-				{
-					tileIsmovingOnXPlain = true;
-				}
-				else
-				{
-					tileIsMovingOnYPlain = true;
-				}
-			}
+			float xDistanceFromStartingPosition = Mathf.Abs(positionToMoveToX - _tileStartingPosition.x);
+			float yDistanceFromStartingPosition = Mathf.Abs(positionToMoveToY - _tileStartingPosition.y);
 
-			if (tileIsmovingOnXPlain)
+			if (xDistanceFromStartingPosition >= yDistanceFromStartingPosition)
 			{
-				float xToMove = mouseWorldPositionThisFrame.x - _mousePositionPreviousFrame.x;
-
 				transform.position = new Vector3(
-				Mathf.Clamp(transform.position.x + xToMove, _movementRestrictions.xMin, _movementRestrictions.xMax),
-				transform.position.y,
+				Mathf.Clamp(mouseWorldPositionThisFrame.x, _movementRestrictions.xMin, _movementRestrictions.xMax),
+				_tileStartingPosition.y,
 				transform.position.z
 				);
 			}
-			else if (tileIsMovingOnYPlain)
+			else
 			{
-				float yToMove = mouseWorldPositionThisFrame.y - _mousePositionPreviousFrame.y;
-
 				transform.position = new Vector3(
-				transform.position.x,
-				Mathf.Clamp(transform.position.y + yToMove, _movementRestrictions.yMin, _movementRestrictions.yMax),
+				_tileStartingPosition.x,
+				Mathf.Clamp(mouseWorldPositionThisFrame.y, _movementRestrictions.yMin, _movementRestrictions.yMax),
 				transform.position.z
 				);
 			}
