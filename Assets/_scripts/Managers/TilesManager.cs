@@ -1,6 +1,5 @@
 using Pooling;
 using UnityEngine;
-using UnityEngine.TextCore.LowLevel;
 using Zenject;
 
 namespace WordSlide
@@ -144,13 +143,6 @@ namespace WordSlide
 
 		private void SwapMovingTileWithThisTile(SingleTileManager tileToSwapWithMovingTile)
 		{
-			if (tileToSwapWithMovingTile == null)
-			{
-				return;
-			}
-
-			Debug.Log($"Swap {currentlyMovingTile.MatrixIndex} and {tileToSwapWithMovingTile.MatrixIndex}");
-
 			// Swap in the matrix
 			boardTiles[currentlyMovingTile.MatrixIndex.Item1, currentlyMovingTile.MatrixIndex.Item2] = tileToSwapWithMovingTile;
 			boardTiles[tileToSwapWithMovingTile.MatrixIndex.Item1, tileToSwapWithMovingTile.MatrixIndex.Item2] = currentlyMovingTile;
