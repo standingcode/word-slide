@@ -1,6 +1,6 @@
 using Pooling;
-using System;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
 using Zenject;
 
 namespace WordSlide
@@ -29,21 +29,23 @@ namespace WordSlide
 			ClickEventHandler.AddClickDownListener(CheckIfTileWasClicked);
 			ClickEventHandler.AddClickUpListener(CheckIfTileNeedsToBeDropped);
 
-			sizeManager = SizeManager.Instance;
+			//sizeManager = SizeManager.Instance;
 			settings = Settings.Instance;
 
 			// Set the tiles		
 			SetTiles();
 		}
 
-		private SizeManager sizeManager;
+		//private SizeManager sizeManager;
 		private Settings settings;
 
 		/// <summary>
 		/// Sets the tiles which will be seen initially on the screen.
 		/// </summary>
-		private void SetTiles()
+		public void SetTiles()
 		{
+			DestroyExistingTiles();
+
 			boardTiles = new SingleTileManager[settings.Rows, settings.Columns];
 			waitingTiles = new SingleTileManager[settings.Rows, settings.Columns];
 
@@ -55,142 +57,43 @@ namespace WordSlide
 					PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile", boardTilesRoot);
 					PoolObject waitingTile = PoolManager.Instance.GetObjectFromPool("tile", waitingTilesRoot);
 
-					// Set the scales based on the tile size
-					waitingTile.transform.localScale = boardTile.transform.localScale = new Vector3(
-					sizeManager.TileSize.x,
-					sizeManager.TileSize.y,
-					1f);
-
-					// Set the position of the board tile
-					SetSingleTilePosition(
-						i,
-						j,
-						boardTile.transform, sizeManager.TileSize,
-						sizeManager.InteriorPaddingSizes,
-						sizeManager.TileSpawnTopLeftStartingPoint
-					);
-
-					// Set the character of the tiles to a random character
 					SingleTileManager boardSingleTile = boardTile.GetComponent<SingleTileManager>();
 					SingleTileManager waitingSingleTile = waitingTile.GetComponent<SingleTileManager>();
 
-					// For the board tile
-					if (boardSingleTile != null)
-					{
-						// Set the movement restrictions for the tile	
-						boardSingleTile.InitializeMovementRestrictions(GetMovementRestrictionsForSingleTile(boardSingleTile, i, j));
+					boardSingleTile.InitializeTile(dictionaryManager.GetRandomChar(), i, j);
+					boardSingleTile.ActivateTile();
+					boardTiles[i, j] = boardSingleTile;
 
-						SetSingleTileCharacterToRandomCharacter(boardSingleTile);
-						boardTiles[i, j] = boardSingleTile;
-						boardSingleTile.ActivateTile();
-					}
-					else
-					{
-						Debug.LogError("SingleTile component not found on the tile prefab.");
-					}
-
-					// For the waiting tile
-					if (waitingSingleTile != null)
-					{
-						SetSingleTileCharacterToRandomCharacter(waitingSingleTile);
-						waitingTiles[i, j] = waitingSingleTile;
-					}
-					else
-					{
-						Debug.LogError("SingleTile component not found on the tile prefab.");
-					}
+					waitingSingleTile.InitializeTile(dictionaryManager.GetRandomChar(), i, j);
+					waitingTiles[i, j] = waitingSingleTile;
 				}
 			}
 		}
 
-		private MovementRestrictions GetMovementRestrictionsForSingleTile(SingleTileManager singletileManager, int row, int column)
+		public void DestroyExistingTiles()
 		{
-			float xMin;
-			float xMax;
-			float yMin;
-			float yMax;
-
-			// X PLAIN
-
-			// If the tile is on the left-hand side of the board, it can only move to the right
-			if (column == 0)
+			if (boardTiles != null)
 			{
-				xMin = singletileManager.transform.position.x;
-			}
-			// Otherwise the tile can move left one tile size plus padding		
-			else
-			{
-				xMin = singletileManager.transform.position.x - sizeManager.TileSize.x - sizeManager.InteriorPaddingSizes.x;
+				foreach (SingleTileManager tile in boardTiles)
+				{
+					if (tile != null)
+					{
+						tile.DeactivateTile();
+						PoolManager.Instance.ReturnObjectToPool(tile.GetComponent<PoolObject>());
+					}
+				}
 			}
 
-
-			// if the tile is on the right-hand side of the board, it can only move to the left
-			if (column == settings.Columns - 1)
+			if (waitingTiles != null)
 			{
-				xMax = singletileManager.transform.position.x;
+				foreach (SingleTileManager tile in waitingTiles)
+				{
+					if (tile != null)
+					{
+						PoolManager.Instance.ReturnObjectToPool(tile.GetComponent<PoolObject>());
+					}
+				}
 			}
-			// Otherwise the tile can move right one tile size plus padding
-			else
-			{
-				xMax = singletileManager.transform.position.x + sizeManager.TileSize.x + sizeManager.InteriorPaddingSizes.x;
-			}
-
-			// Y PLAIN
-
-			// if the tile is on the top of the board, it can only move down
-			if (row == 0)
-			{
-				yMax = singletileManager.transform.position.y;
-			}
-			// Otherwise the tile can move up one tile size plus padding
-			else
-			{
-				yMax = singletileManager.transform.position.y + sizeManager.TileSize.y + sizeManager.InteriorPaddingSizes.y;
-			}
-
-
-			// if the tile is on the bottom of the board, it can only move up
-			if (row == settings.Rows - 1)
-			{
-				yMin = singletileManager.transform.position.y;
-			}
-			// Otherwise the tile can move down one tile size plus padding
-			else
-			{
-				yMin = singletileManager.transform.position.y - sizeManager.TileSize.y - sizeManager.InteriorPaddingSizes.y;
-			}
-
-			return new MovementRestrictions() { xMin = xMin, xMax = xMax, yMin = yMin, yMax = yMax };
-		}
-
-		/// <summary>
-		/// Sets a single tile position for the given index within a martix (i,j) the tile transform, 
-		/// the tile size, the tile padding and the top left starting point
-		/// </summary>
-		/// <param name="i">Index of the row</param>
-		/// <param name="j">Index of the column</param>
-		/// <param name="tile">The transform of the tile to be positioned</param>
-		/// <param name="tileSize">The size of the tiles</param>
-		/// <param name="tilePadding">The padding between the tiles</param>
-		/// <param name="tileSpawnTopLeftStartingPoint">The top left starting point of the board</param>
-		private void SetSingleTilePosition(int i, int j, Transform tile, Vector2 tileSize, Vector2 tilePadding, Vector2 tileSpawnTopLeftStartingPoint)
-		{
-			int columnMultiplier = j % settings.Columns;
-			int rowMultiplier = i % settings.Rows;
-
-			float requiredXPosition = tileSpawnTopLeftStartingPoint.x + (columnMultiplier * (tileSize.x + tilePadding.x));
-			float requiredYPosition = tileSpawnTopLeftStartingPoint.y - (rowMultiplier * (tileSize.y + tilePadding.y));
-
-			tile.transform.position = new Vector3(requiredXPosition, requiredYPosition, 0);
-		}
-
-		/// <summary>
-		/// Assigns a random character to the given single tile.
-		/// </summary>
-		/// <param name="singleTile"></param>
-		private void SetSingleTileCharacterToRandomCharacter(SingleTileManager singleTile)
-		{
-			singleTile.SetShownCharacter(dictionaryManager.GetRandomChar());
 		}
 
 		/// <summary>
@@ -208,6 +111,7 @@ namespace WordSlide
 			{
 				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
 				{
+					Debug.Log($"{singleTileManager.MatrixIndex}");
 					currentlyMovingTile = singleTileManager;
 					currentlyMovingTile.TileWasClickedOn(mousePosition);
 				}
@@ -215,16 +119,97 @@ namespace WordSlide
 		}
 
 		/// <summary>
-		/// Drop a tile if the click event is up and there is a tile in motion
-		/// This dropping procedure will need to check for tile swapping and then for words eventually
+		/// Check for tile swap or return to original position if click event is up and there is a tile in motion
+		/// This dropping procedure will then need to check for words eventually
 		/// </summary>
 		private void CheckIfTileNeedsToBeDropped()
 		{
 			if (currentlyMovingTile != null)
 			{
 				currentlyMovingTile.TileShouldBeDropped();
+				SwapMovingTileWithThisTile(TileToBeSwappedWithCurrentlyMovingTile());
 				currentlyMovingTile = null;
 			}
+		}
+
+		private void SwapMovingTileWithThisTile(SingleTileManager tileToSwapWithMovingTile)
+		{
+			if (tileToSwapWithMovingTile == null)
+			{
+				return;
+			}
+
+			Debug.Log($"Swap {currentlyMovingTile.MatrixIndex} and {tileToSwapWithMovingTile.MatrixIndex}");
+
+			// Swap in the matrix
+			boardTiles[currentlyMovingTile.MatrixIndex.Item1, currentlyMovingTile.MatrixIndex.Item2] = tileToSwapWithMovingTile;
+			boardTiles[tileToSwapWithMovingTile.MatrixIndex.Item1, tileToSwapWithMovingTile.MatrixIndex.Item2] = currentlyMovingTile;
+
+			// Now set the SingleTileManage settings correctly
+			var currentlyMovingTileMatrixIndex = currentlyMovingTile.MatrixIndex;
+			currentlyMovingTile.MoveTileToNewPosition(tileToSwapWithMovingTile.MatrixIndex.Item1, tileToSwapWithMovingTile.MatrixIndex.Item2);
+			tileToSwapWithMovingTile.MoveTileToNewPosition(currentlyMovingTileMatrixIndex.Item1, currentlyMovingTileMatrixIndex.Item2);
+		}
+
+		private SingleTileManager TileToBeSwappedWithCurrentlyMovingTile()
+		{
+			// Check for the 4 tiles around this tile
+
+			// Check the index to make sure there is a row above
+			int indexOfRowAbove = currentlyMovingTile.MatrixIndex.Item1 - 1;
+			int indexOfRowBelow = currentlyMovingTile.MatrixIndex.Item1 + 1;
+			int indexOfColumnLeft = currentlyMovingTile.MatrixIndex.Item2 - 1;
+			int indexOfColumnRight = currentlyMovingTile.MatrixIndex.Item2 + 1;
+
+			if (indexOfRowAbove >= 0)
+			{
+				SingleTileManager tileAbove = boardTiles[indexOfRowAbove, currentlyMovingTile.MatrixIndex.Item2];
+
+				// If moving tile is closer to tile above than its resting position they need swapping
+				if (Vector2.Distance(currentlyMovingTile.transform.position, tileAbove.transform.position)
+				< Vector2.Distance(currentlyMovingTile.transform.position, currentlyMovingTile.TileRestingPosition))
+				{
+					return tileAbove;
+				}
+			}
+
+			if (indexOfRowBelow < settings.Rows)
+			{
+				SingleTileManager tileBelow = boardTiles[indexOfRowBelow, currentlyMovingTile.MatrixIndex.Item2];
+
+				// If moving tile is closer to tile below than its resting position they need swapping
+				if (Vector2.Distance(currentlyMovingTile.transform.position, tileBelow.transform.position)
+				< Vector2.Distance(currentlyMovingTile.transform.position, currentlyMovingTile.TileRestingPosition))
+				{
+					return tileBelow;
+				}
+			}
+
+			if (indexOfColumnLeft >= 0)
+			{
+				SingleTileManager tileToTheLeft = boardTiles[currentlyMovingTile.MatrixIndex.Item1, indexOfColumnLeft];
+
+				// If moving tile is closer to tile to the left than its resting position they need swapping
+				if (Vector2.Distance(currentlyMovingTile.transform.position, tileToTheLeft.transform.position)
+				< Vector2.Distance(currentlyMovingTile.transform.position, currentlyMovingTile.TileRestingPosition))
+				{
+					return tileToTheLeft;
+				}
+			}
+
+			if (indexOfColumnRight < settings.Columns)
+			{
+				SingleTileManager tileToTheRight = boardTiles[currentlyMovingTile.MatrixIndex.Item1, indexOfColumnRight];
+
+				// If moving tile is closer to tile to the right than its resting position they need swapping
+				if (Vector2.Distance(currentlyMovingTile.transform.position, tileToTheRight.transform.position)
+				< Vector2.Distance(currentlyMovingTile.transform.position, currentlyMovingTile.TileRestingPosition))
+				{
+					return tileToTheRight;
+				}
+			}
+
+			return null;
 		}
 	}
 }

@@ -53,6 +53,8 @@ namespace Pooling
 				poolObject.transform.SetParent(parentForPoolObjectTransform);
 			}
 
+			poolObject.gameObject.SetActive(true);
+
 			return poolObject;
 		}
 

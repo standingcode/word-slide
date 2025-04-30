@@ -29,6 +29,7 @@ namespace WordSlide
 		Coroutine moveCoroutine;
 
 		private MovementRestrictions _movementRestrictions;
+		public MovementRestrictions MovementRestrictions => _movementRestrictions;
 
 		private bool tileIsInMotion = false;
 
@@ -37,7 +38,7 @@ namespace WordSlide
 			newPosition.z = zMovementWhenSliding;
 		}
 
-		public void InitializeMovementRestrictions(MovementRestrictions movementRestrictions)
+		public void SetMovementRestrictions(MovementRestrictions movementRestrictions)
 		{
 			_movementRestrictions = movementRestrictions;
 		}
@@ -70,7 +71,6 @@ namespace WordSlide
 			moveCoroutine = null;
 			tileIsInMotion = false;
 			planeOfMovement = null;
-			transform.position = tileStartingPosition;
 		}
 
 		private IEnumerator MoveTileCoroutine()
