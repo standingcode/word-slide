@@ -33,7 +33,7 @@ namespace WordSlide
 
 		private bool tileIsInMotion = false;
 
-		public void Awake()
+		private void Awake()
 		{
 			newPosition.z = zMovementWhenSliding;
 		}

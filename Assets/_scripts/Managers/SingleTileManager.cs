@@ -25,13 +25,15 @@ public class SingleTileManager : MonoBehaviour
 	private bool tileIsActive = false;
 	public bool TileIsActive => tileIsActive;
 
+	private Vector3 tileRestingPosition;
+	public Vector3 TileRestingPosition => tileRestingPosition;
+
 	[SerializeField]
 	private SingleTileMover singleTileMover;
 
-	private Vector2 tileRestingPosition;
-	public Vector2 TileRestingPosition => tileRestingPosition;
+	public MovementRestrictions MovementRestrictions => singleTileMover.MovementRestrictions;
 
-	public void Awake()
+	private void Awake()
 	{
 		DeactivateTile();
 	}
@@ -45,7 +47,7 @@ public class SingleTileManager : MonoBehaviour
 		SetMovementRestrictions();
 	}
 
-	private void SetTileScale()
+	public void SetTileScale()
 	{
 		// Set the scales based on the tile size
 		transform.localScale = new Vector3(
@@ -72,9 +74,16 @@ public class SingleTileManager : MonoBehaviour
 
 	public void MoveTileToNewPosition(int i, int j)
 	{
+		singleTileMover.StopMoving();
 		SetTileMatrixIndex(i, j);
 		SetTileDefaultPosition();
 		SetMovementRestrictions();
+	}
+
+	public void ResetTileToOriginalPosition()
+	{
+		singleTileMover.StopMoving();
+		transform.position = tileRestingPosition;
 	}
 
 	public void SetTileShownCharacter(char character)
@@ -83,12 +92,34 @@ public class SingleTileManager : MonoBehaviour
 		textMesh.text = tileCharacter.ToString().ToUpper();
 	}
 
-	public void SetTileMatrixIndex(int row, int column)
+	// When the tile is first selected, this can be called from the tile manager which should get a reference via a ray	
+	public void TileWasClickedOn(Vector2 mousePosition)
+	{
+		singleTileMover.StartMoving(mousePosition);
+	}
+
+	public void ActivateTile()
+	{
+		tileIsActive = true;
+		boxCollider.enabled = true;
+		meshRenderer.enabled = true;
+		textMesh.enabled = true;
+	}
+
+	public void DeactivateTile()
+	{
+		tileIsActive = false;
+		boxCollider.enabled = false;
+		meshRenderer.enabled = false;
+		textMesh.enabled = false;
+	}
+
+	private void SetTileMatrixIndex(int row, int column)
 	{
 		matrixIndex = (row, column);
 	}
 
-	public void SetMovementRestrictions()
+	private void SetMovementRestrictions()
 	{
 		var movementRestrictions = new MovementRestrictions();
 
@@ -143,32 +174,5 @@ public class SingleTileManager : MonoBehaviour
 		}
 
 		singleTileMover.SetMovementRestrictions(movementRestrictions);
-	}
-
-	// When the tile is first selected, this can be called from the tile manager which should get a reference via a ray	
-	public void TileWasClickedOn(Vector2 mousePosition)
-	{
-		singleTileMover.StartMoving(mousePosition);
-	}
-
-	public void TileShouldBeDropped()
-	{
-		singleTileMover.StopMoving();
-	}
-
-	public void ActivateTile()
-	{
-		tileIsActive = true;
-		boxCollider.enabled = true;
-		meshRenderer.enabled = true;
-		textMesh.enabled = true;
-	}
-
-	public void DeactivateTile()
-	{
-		tileIsActive = false;
-		boxCollider.enabled = false;
-		meshRenderer.enabled = false;
-		textMesh.enabled = false;
 	}
 }

@@ -22,9 +22,12 @@ namespace WordSlide
 		[SerializeField]
 		private ClickEventHandler ClickEventHandler;
 
+		[SerializeField]
+		private float ratioToSwapTiles = 0.7f;
+
 		private SingleTileManager currentlyMovingTile = null;
 
-		void Start()
+		private void Start()
 		{
 			ClickEventHandler.AddClickDownListener(CheckIfTileWasClicked);
 			ClickEventHandler.AddClickUpListener(CheckIfTileNeedsToBeDropped);
@@ -36,7 +39,6 @@ namespace WordSlide
 			SetTiles();
 		}
 
-		//private SizeManager sizeManager;
 		private Settings settings;
 
 		/// <summary>
@@ -70,7 +72,7 @@ namespace WordSlide
 			}
 		}
 
-		public void DestroyExistingTiles()
+		private void DestroyExistingTiles()
 		{
 			if (boardTiles != null)
 			{
@@ -111,7 +113,7 @@ namespace WordSlide
 			{
 				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
 				{
-					Debug.Log($"{singleTileManager.MatrixIndex}");
+					//Debug.Log($"{singleTileManager.MatrixIndex}");
 					currentlyMovingTile = singleTileManager;
 					currentlyMovingTile.TileWasClickedOn(mousePosition);
 				}
@@ -126,8 +128,16 @@ namespace WordSlide
 		{
 			if (currentlyMovingTile != null)
 			{
-				currentlyMovingTile.TileShouldBeDropped();
-				SwapMovingTileWithThisTile(TileToBeSwappedWithCurrentlyMovingTile());
+				var tileToSwapWith = TileToBeSwappedWithCurrentlyMovingTile();
+
+				if (tileToSwapWith == null)
+				{
+					currentlyMovingTile.ResetTileToOriginalPosition();
+				}
+				else
+				{
+					SwapMovingTileWithThisTile(tileToSwapWith);
+				}
 				currentlyMovingTile = null;
 			}
 		}
@@ -153,60 +163,54 @@ namespace WordSlide
 
 		private SingleTileManager TileToBeSwappedWithCurrentlyMovingTile()
 		{
-			// Check for the 4 tiles around this tile
+			var vectorFromOriginalPosition = currentlyMovingTile.transform.position - currentlyMovingTile.TileRestingPosition;
 
-			// Check the index to make sure there is a row above
-			int indexOfRowAbove = currentlyMovingTile.MatrixIndex.Item1 - 1;
-			int indexOfRowBelow = currentlyMovingTile.MatrixIndex.Item1 + 1;
-			int indexOfColumnLeft = currentlyMovingTile.MatrixIndex.Item2 - 1;
-			int indexOfColumnRight = currentlyMovingTile.MatrixIndex.Item2 + 1;
-
-			if (indexOfRowAbove >= 0)
+			// tile went up
+			if (vectorFromOriginalPosition.y > 0)
 			{
-				SingleTileManager tileAbove = boardTiles[indexOfRowAbove, currentlyMovingTile.MatrixIndex.Item2];
+				int indexOfRowAbove = currentlyMovingTile.MatrixIndex.Item1 - 1;
 
-				// If moving tile is closer to tile above than its resting position they need swapping
-				if (Vector2.Distance(currentlyMovingTile.transform.position, tileAbove.transform.position)
-				< Vector2.Distance(currentlyMovingTile.transform.position, currentlyMovingTile.TileRestingPosition))
-				{
-					return tileAbove;
-				}
+				var ratioOfLimit =
+					(currentlyMovingTile.transform.position.y - currentlyMovingTile.TileRestingPosition.y)
+					/ (currentlyMovingTile.MovementRestrictions.yMax - currentlyMovingTile.TileRestingPosition.y);
+
+				return ratioOfLimit > ratioToSwapTiles ? boardTiles[indexOfRowAbove, currentlyMovingTile.MatrixIndex.Item2] : null;
 			}
 
-			if (indexOfRowBelow < settings.Rows)
+			// tile went right
+			if (vectorFromOriginalPosition.x > 0)
 			{
-				SingleTileManager tileBelow = boardTiles[indexOfRowBelow, currentlyMovingTile.MatrixIndex.Item2];
+				int indexOfColumnRight = currentlyMovingTile.MatrixIndex.Item2 + 1;
 
-				// If moving tile is closer to tile below than its resting position they need swapping
-				if (Vector2.Distance(currentlyMovingTile.transform.position, tileBelow.transform.position)
-				< Vector2.Distance(currentlyMovingTile.transform.position, currentlyMovingTile.TileRestingPosition))
-				{
-					return tileBelow;
-				}
+				var ratioOfLimit =
+				(currentlyMovingTile.transform.position.x - currentlyMovingTile.TileRestingPosition.x)
+				/ (currentlyMovingTile.MovementRestrictions.xMax - currentlyMovingTile.TileRestingPosition.x);
+
+				return ratioOfLimit > ratioToSwapTiles ? boardTiles[currentlyMovingTile.MatrixIndex.Item1, indexOfColumnRight] : null;
 			}
 
-			if (indexOfColumnLeft >= 0)
+			// tile went down
+			if (vectorFromOriginalPosition.y < 0)
 			{
-				SingleTileManager tileToTheLeft = boardTiles[currentlyMovingTile.MatrixIndex.Item1, indexOfColumnLeft];
+				int indexOfRowBelow = currentlyMovingTile.MatrixIndex.Item1 + 1;
 
-				// If moving tile is closer to tile to the left than its resting position they need swapping
-				if (Vector2.Distance(currentlyMovingTile.transform.position, tileToTheLeft.transform.position)
-				< Vector2.Distance(currentlyMovingTile.transform.position, currentlyMovingTile.TileRestingPosition))
-				{
-					return tileToTheLeft;
-				}
+				var ratioOfLimit =
+				(currentlyMovingTile.TileRestingPosition.y - currentlyMovingTile.transform.position.y)
+				/ (currentlyMovingTile.TileRestingPosition.y - currentlyMovingTile.MovementRestrictions.yMin);
+
+				return ratioOfLimit > ratioToSwapTiles ? boardTiles[indexOfRowBelow, currentlyMovingTile.MatrixIndex.Item2] : null;
 			}
 
-			if (indexOfColumnRight < settings.Columns)
+			// tile went left	
+			if (vectorFromOriginalPosition.x < 0)
 			{
-				SingleTileManager tileToTheRight = boardTiles[currentlyMovingTile.MatrixIndex.Item1, indexOfColumnRight];
+				int indexOfColumnLeft = currentlyMovingTile.MatrixIndex.Item2 - 1;
 
-				// If moving tile is closer to tile to the right than its resting position they need swapping
-				if (Vector2.Distance(currentlyMovingTile.transform.position, tileToTheRight.transform.position)
-				< Vector2.Distance(currentlyMovingTile.transform.position, currentlyMovingTile.TileRestingPosition))
-				{
-					return tileToTheRight;
-				}
+				var ratioOfLimit =
+				(currentlyMovingTile.TileRestingPosition.x - currentlyMovingTile.transform.position.x)
+				/ (currentlyMovingTile.TileRestingPosition.x - currentlyMovingTile.MovementRestrictions.xMin);
+
+				return ratioOfLimit > ratioToSwapTiles ? boardTiles[currentlyMovingTile.MatrixIndex.Item1, indexOfColumnLeft] : null;
 			}
 
 			return null;
