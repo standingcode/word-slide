@@ -240,6 +240,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   zMovementWhenSliding: -1
+  distanceToConsiderCloseToCentre: 0.1
 --- !u!1 &8610899238817674750
 GameObject:
   m_ObjectHideFlags: 0

@@ -3,6 +3,12 @@ using UnityEngine;
 
 namespace WordSlide
 {
+	public enum PlaneOfMovement
+	{
+		XAxis,
+		YAxis
+	}
+
 	public struct MovementRestrictions
 	{
 		public float xMin;
@@ -15,17 +21,21 @@ namespace WordSlide
 		[SerializeField]
 		private float zMovementWhenSliding = -1f;
 
+		PlaneOfMovement? planeOfMovement = null;
+
+		[SerializeField]
+		private float distanceToConsiderCloseToCentre = 0.1f;
+
 		Coroutine moveCoroutine;
 
 		private MovementRestrictions _movementRestrictions;
 
-		private bool tileIsmovingOnXPlain = false;
-		private bool tileIsMovingOnYPlain = false;
-
 		private bool tileIsInMotion = false;
 
-		private Vector2 _tileStartingPosition;
-		private Vector2 _mousePositionPreviousFrame;
+		public void Awake()
+		{
+			newPosition.z = zMovementWhenSliding;
+		}
 
 		public void InitializeMovementRestrictions(MovementRestrictions movementRestrictions)
 		{
@@ -41,11 +51,9 @@ namespace WordSlide
 
 			tileIsInMotion = true;
 
-			_tileStartingPosition = transform.position;
+			tileStartingPosition = transform.position;
 
-			_mousePositionPreviousFrame = Camera.main.ScreenToWorldPoint(mouseStartingposition);
-
-			transform.position = new Vector3(_tileStartingPosition.x, _tileStartingPosition.y, zMovementWhenSliding);
+			_pointerPositionPreviousFrame = Camera.main.ScreenToWorldPoint(mouseStartingposition);
 
 			moveCoroutine = StartCoroutine(MoveTileCoroutine());
 		}
@@ -59,13 +67,10 @@ namespace WordSlide
 
 			StopCoroutine(moveCoroutine);
 
-			tileIsmovingOnXPlain = tileIsMovingOnYPlain = false;
-
 			moveCoroutine = null;
-
 			tileIsInMotion = false;
-
-			transform.position = _tileStartingPosition;
+			planeOfMovement = null;
+			transform.position = tileStartingPosition;
 		}
 
 		private IEnumerator MoveTileCoroutine()
@@ -78,39 +83,97 @@ namespace WordSlide
 			}
 		}
 
-
-		private float positionToMoveToX;
-		private float positionToMoveToY;
+		private Vector2 tileStartingPosition;
+		private Vector2 _pointerPositionPreviousFrame;
+		private Vector2 pointerWorldPositionThisFrame;
+		private float xDistanceFromStartingPosition;
+		private float yDistanceFromStartingPosition;
+		private Vector3 newPosition;
+		private Vector2 vectorToMove;
 		private void MoveTile()
 		{
-			Debug.Log("Moving tile");
+			pointerWorldPositionThisFrame = Camera.main.ScreenToWorldPoint(PointerMethods.GetMouseOrPointerPosition());
 
-			var mouseWorldPositionThisFrame = Camera.main.ScreenToWorldPoint(PointerMethods.GetMouseOrPointerPosition());
-
-			positionToMoveToX = Mathf.Clamp(mouseWorldPositionThisFrame.x, _movementRestrictions.xMin, _movementRestrictions.xMax);
-			positionToMoveToY = Mathf.Clamp(mouseWorldPositionThisFrame.y, _movementRestrictions.yMin, _movementRestrictions.yMax);
-
-			float xDistanceFromStartingPosition = Mathf.Abs(positionToMoveToX - _tileStartingPosition.x);
-			float yDistanceFromStartingPosition = Mathf.Abs(positionToMoveToY - _tileStartingPosition.y);
-
-			if (xDistanceFromStartingPosition >= yDistanceFromStartingPosition)
+			// No point in doing anything if the pointer hasn't moved
+			if (pointerWorldPositionThisFrame == _pointerPositionPreviousFrame)
 			{
-				transform.position = new Vector3(
-				Mathf.Clamp(mouseWorldPositionThisFrame.x, _movementRestrictions.xMin, _movementRestrictions.xMax),
-				_tileStartingPosition.y,
-				transform.position.z
-				);
+				return;
 			}
+
+			// Get the vector that the point has moved
+			vectorToMove = pointerWorldPositionThisFrame - _pointerPositionPreviousFrame;
+
+			// If we are close to centre, use direction as intent
+			if (closeToCenter())
+			{
+				planeOfMovement = Mathf.Abs(vectorToMove.x) >= Mathf.Abs(vectorToMove.y) ? PlaneOfMovement.XAxis : PlaneOfMovement.YAxis;
+			}
+			// Otherwise the plane should be selected based on tile position compared to original position
 			else
 			{
-				transform.position = new Vector3(
-				_tileStartingPosition.x,
-				Mathf.Clamp(mouseWorldPositionThisFrame.y, _movementRestrictions.yMin, _movementRestrictions.yMax),
-				transform.position.z
-				);
+				xDistanceFromStartingPosition = Mathf.Abs(transform.position.x - tileStartingPosition.x);
+				yDistanceFromStartingPosition = Mathf.Abs(transform.position.y - tileStartingPosition.y);
+
+				planeOfMovement = xDistanceFromStartingPosition >= yDistanceFromStartingPosition ? PlaneOfMovement.XAxis : PlaneOfMovement.YAxis;
 			}
 
-			_mousePositionPreviousFrame = mouseWorldPositionThisFrame;
+
+			// If we are moving in the x axis, restrict the movement.
+			// (It's not enough to just clampThe position as if finger moves quicklt the tile can get stuck not at the max position)			
+			if (planeOfMovement == PlaneOfMovement.XAxis)
+			{
+				// Clamp to xMin
+				if (pointerWorldPositionThisFrame.x < _movementRestrictions.xMin)
+				{
+					newPosition.x = _movementRestrictions.xMin;
+				}
+				// Clamp to xMax
+				else if (pointerWorldPositionThisFrame.x > _movementRestrictions.xMax)
+				{
+					newPosition.x = _movementRestrictions.xMax;
+				}
+				// Set the position normally
+				else
+				{
+					newPosition.x = Mathf.Clamp(transform.position.x + vectorToMove.x, _movementRestrictions.xMin, _movementRestrictions.xMax);
+				}
+
+				// Always set y to default when moving in the x plane
+				newPosition.y = tileStartingPosition.y;
+			}
+			// And if we're moving in the y axis, restrict the movement.
+			else
+			{
+				// Clamp to yMin
+				if (pointerWorldPositionThisFrame.y < _movementRestrictions.yMin)
+				{
+					newPosition.y = _movementRestrictions.yMin;
+				}
+				// Clamp to yMax
+				else if (pointerWorldPositionThisFrame.y > _movementRestrictions.yMax)
+				{
+					newPosition.y = _movementRestrictions.yMax;
+				}
+				// Set the position normally
+				else
+				{
+					newPosition.y = Mathf.Clamp(transform.position.y + vectorToMove.y, _movementRestrictions.yMin, _movementRestrictions.yMax);
+				}
+
+				// Always set x to default position when moving in the y plane
+				newPosition.x = tileStartingPosition.x;
+			}
+
+			// Move the tile to the new position
+			transform.position = newPosition;
+
+			// Save the pointer location this frame
+			_pointerPositionPreviousFrame = pointerWorldPositionThisFrame;
+		}
+
+		private bool closeToCenter()
+		{
+			return Vector2.Distance(transform.position, tileStartingPosition) < distanceToConsiderCloseToCentre;
 		}
 
 		private void OnDisable()
