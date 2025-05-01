@@ -26,6 +26,18 @@ namespace WordSlide
 
 		private SingleTileManager currentlyMovingTile = null;
 
+		public TilesManager Instance { get; private set; }
+
+		private void Awake()
+		{
+			if (Instance != null && Instance != this)
+			{
+				Destroy(this);
+				Debug.LogError("TilesManager instance already exists. Destroying the new instance.");
+				return;
+			}
+		}
+
 		private void Start()
 		{
 			ClickEventHandler.AddClickDownListener(CheckIfTileWasClicked);

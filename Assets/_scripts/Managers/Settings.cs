@@ -13,13 +13,18 @@ namespace WordSlide
 		private int rows = 10;
 		public int Rows => rows;
 
+		[SerializeField]
+		private int minimumWordLength = 3;
+		public int MinimumWordLength => minimumWordLength;
+
 		public static Settings Instance { get; private set; }
 
-		private void Awake()
+		public void Awake()
 		{
 			if (Instance != null && Instance != this)
 			{
 				Destroy(this);
+				Debug.LogError("Settings instance already exists. Destroying the new instance.");
 				return;
 			}
 
