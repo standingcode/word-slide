@@ -24,6 +24,9 @@ namespace WordSlide
 		private ClickEventHandler ClickEventHandler;
 
 		[SerializeField]
+		private TileSwappedEventHandler TileSwappedEventHandler;
+
+		[SerializeField]
 		private float ratioToSwapTiles = 0.7f;
 
 		private SingleTileManager currentlyMovingTile = null;
@@ -149,22 +152,74 @@ namespace WordSlide
 				}
 				else
 				{
-					SwapMovingTileWithThisTile(tileToSwapWith);
+					SwapMovingTileWithThisTile(currentlyMovingTile, tileToSwapWith);
+					DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent(currentlyMovingTile, tileToSwapWith);
 				}
 				currentlyMovingTile = null;
 			}
 		}
 
-		private void SwapMovingTileWithThisTile(SingleTileManager tileToSwapWithMovingTile)
+		private void DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent(SingleTileManager tile1, SingleTileManager tile2)
+		{
+			List<SingleTileManagersRepresentingAString> listOfRowsAndColumnsToCheck = new();
+
+			// Determine which rows and columns were affected by the swap	
+			if (tile1.MatrixIndex.Item1 == tile2.MatrixIndex.Item1)
+			{
+				listOfRowsAndColumnsToCheck = new List<SingleTileManagersRepresentingAString>
+				{
+					new SingleTileManagersRepresentingAString(GetFullRow(tile1.MatrixIndex.Item1)),
+					new SingleTileManagersRepresentingAString(GetFullColumn(tile1.MatrixIndex.Item2)),
+					new SingleTileManagersRepresentingAString(GetFullColumn(tile2.MatrixIndex.Item2))
+				};
+			}
+			else
+			{
+				listOfRowsAndColumnsToCheck = new List<SingleTileManagersRepresentingAString>
+				{
+					new SingleTileManagersRepresentingAString(GetFullRow(tile1.MatrixIndex.Item1)),
+					new SingleTileManagersRepresentingAString(GetFullRow(tile2.MatrixIndex.Item1)),
+					new SingleTileManagersRepresentingAString(GetFullColumn(tile1.MatrixIndex.Item2))
+				};
+			}
+
+			TileSwappedEventHandler.RaiseTileSwapped(listOfRowsAndColumnsToCheck);
+		}
+
+		private SingleTileManager[] GetFullRow(int index)
+		{
+			var row = new List<SingleTileManager>();
+
+			for (int i = 0; i < boardTiles.GetLength(1); i++)
+			{
+				row.Add(boardTiles[index, i]);
+			}
+
+			return row.ToArray();
+		}
+
+		private SingleTileManager[] GetFullColumn(int index)
+		{
+			var column = new List<SingleTileManager>();
+
+			for (int i = 0; i < boardTiles.GetLength(0); i++)
+			{
+				column.Add(boardTiles[i, index]);
+			}
+
+			return column.ToArray();
+		}
+
+		private void SwapMovingTileWithThisTile(SingleTileManager tile1, SingleTileManager tile2)
 		{
 			// Swap in the matrix
-			boardTiles[currentlyMovingTile.MatrixIndex.Item1, currentlyMovingTile.MatrixIndex.Item2] = tileToSwapWithMovingTile;
-			boardTiles[tileToSwapWithMovingTile.MatrixIndex.Item1, tileToSwapWithMovingTile.MatrixIndex.Item2] = currentlyMovingTile;
+			boardTiles[tile1.MatrixIndex.Item1, tile1.MatrixIndex.Item2] = tile2;
+			boardTiles[tile2.MatrixIndex.Item1, tile2.MatrixIndex.Item2] = tile1;
 
 			// Now set the SingleTileManage settings correctly
-			var currentlyMovingTileMatrixIndex = currentlyMovingTile.MatrixIndex;
-			currentlyMovingTile.MoveTileToNewPosition(tileToSwapWithMovingTile.MatrixIndex.Item1, tileToSwapWithMovingTile.MatrixIndex.Item2);
-			tileToSwapWithMovingTile.MoveTileToNewPosition(currentlyMovingTileMatrixIndex.Item1, currentlyMovingTileMatrixIndex.Item2);
+			var tile1MatrixIndex = tile1.MatrixIndex;
+			tile1.MoveTileToNewPosition(tile2.MatrixIndex.Item1, tile2.MatrixIndex.Item2);
+			tile2.MoveTileToNewPosition(tile1MatrixIndex.Item1, tile1MatrixIndex.Item2);
 		}
 
 		private SingleTileManager TileToBeSwappedWithCurrentlyMovingTile()

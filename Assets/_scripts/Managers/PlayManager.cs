@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
@@ -22,6 +20,9 @@ namespace WordSlide
 
 		private IDictionaryManager _dictionaryManager;
 
+		[SerializeField]
+		private TileSwappedEventHandler _tileSwappedEventHandler;
+
 		[Inject]
 		public async Task Construct(IDictionaryManager dictionaryManager)
 		{
@@ -36,9 +37,18 @@ namespace WordSlide
 
 			await _dictionaryManager.LoadDictionary("english");
 			await _dictionaryManager.LoadCharacterSet("english");
+
+			_tileSwappedEventHandler.AddTileSwappedListener(TileWasSwapped);
 		}
 
-		public List<SingleTileManagersRepresentingAString> CheckForWords(List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
+		public void TileWasSwapped(List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
+		{
+			var validWords = GetListOfValidWordsFromGivenRowsAndColumns(rowsAndColumnsToCheck);
+
+			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
+		}
+
+		public List<SingleTileManagersRepresentingAString> GetListOfValidWordsFromGivenRowsAndColumns(List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
 		{
 			var foundWordsInAllRowsAndColumns = new List<SingleTileManagersRepresentingAString>();
 

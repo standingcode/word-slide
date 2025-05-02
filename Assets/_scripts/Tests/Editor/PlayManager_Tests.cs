@@ -30,7 +30,7 @@ public class PlayManager_Tests
 		// Act
 		var sw = System.Diagnostics.Stopwatch.StartNew();
 
-		List<SingleTileManagersRepresentingAString> foundWords = playManager.CheckForWords(InputRowsOrColumns);
+		List<SingleTileManagersRepresentingAString> foundWords = playManager.GetListOfValidWordsFromGivenRowsAndColumns(InputRowsOrColumns);
 
 		sw.Stop();
 		Debug.Log(sw.ElapsedMilliseconds);

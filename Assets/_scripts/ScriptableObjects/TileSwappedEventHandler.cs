@@ -13,12 +13,12 @@ public class TileSwappedEventHandler : ScriptableObject
 		tileSwapped?.Invoke(rowsAndColumnsAffected);
 	}
 
-	public void AddClickDownListener(Action<List<SingleTileManagersRepresentingAString>> listener)
+	public void AddTileSwappedListener(Action<List<SingleTileManagersRepresentingAString>> listener)
 	{
 		tileSwapped += listener;
 	}
 
-	public void RemoveClickDownListener(Action<List<SingleTileManagersRepresentingAString>> listener)
+	public void RemoveTileSwappedListener(Action<List<SingleTileManagersRepresentingAString>> listener)
 	{
 		tileSwapped -= listener;
 	}
@@ -27,5 +27,4 @@ public class TileSwappedEventHandler : ScriptableObject
 	{
 		tileSwapped = null;
 	}
-
 }
