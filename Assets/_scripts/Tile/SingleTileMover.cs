@@ -90,6 +90,11 @@ namespace WordSlide
 		private float yDistanceFromStartingPosition;
 		private Vector3 newPosition;
 		private Vector2 vectorToMove;
+		private float xMinToEdgeOfTile => _movementRestrictions.xMin - (SizeManager.Instance.TileSize.x / 2f);
+		private float xMaxToEdgeOfTile => _movementRestrictions.xMax + (SizeManager.Instance.TileSize.x / 2f);
+		private float yMinToEdgeOfTile => _movementRestrictions.yMin - (SizeManager.Instance.TileSize.y / 2f);
+		private float yMaxToEdgeOfTile => _movementRestrictions.yMax + (SizeManager.Instance.TileSize.y / 2f);
+
 		private void MoveTile()
 		{
 			pointerWorldPositionThisFrame = Camera.main.ScreenToWorldPoint(PointerMethods.GetMouseOrPointerPosition());
@@ -119,16 +124,16 @@ namespace WordSlide
 
 
 			// If we are moving in the x axis, restrict the movement.
-			// (It's not enough to just clampThe position as if finger moves quicklt the tile can get stuck not at the max position)			
+			// (It's not enough to just clamp the position as if the pointer moves quickly the tile can get stuck not at the max position)			
 			if (planeOfMovement == PlaneOfMovement.XAxis)
 			{
 				// Clamp to xMin
-				if (pointerWorldPositionThisFrame.x < _movementRestrictions.xMin)
+				if (pointerWorldPositionThisFrame.x < xMinToEdgeOfTile)
 				{
 					newPosition.x = _movementRestrictions.xMin;
 				}
 				// Clamp to xMax
-				else if (pointerWorldPositionThisFrame.x > _movementRestrictions.xMax)
+				else if (pointerWorldPositionThisFrame.x > xMaxToEdgeOfTile)
 				{
 					newPosition.x = _movementRestrictions.xMax;
 				}
@@ -145,12 +150,12 @@ namespace WordSlide
 			else
 			{
 				// Clamp to yMin
-				if (pointerWorldPositionThisFrame.y < _movementRestrictions.yMin)
+				if (pointerWorldPositionThisFrame.y < yMinToEdgeOfTile)
 				{
 					newPosition.y = _movementRestrictions.yMin;
 				}
 				// Clamp to yMax
-				else if (pointerWorldPositionThisFrame.y > _movementRestrictions.yMax)
+				else if (pointerWorldPositionThisFrame.y > yMaxToEdgeOfTile)
 				{
 					newPosition.y = _movementRestrictions.yMax;
 				}
