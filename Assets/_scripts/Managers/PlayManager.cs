@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -53,7 +54,7 @@ namespace WordSlide
 
 			bool SlidingWindowContainsForbiddenIndexes(int startIndex, int endIndex)
 			{
-				for (int i = startIndex; i < startIndex + endIndex; i++)
+				for (int i = startIndex; i <= endIndex; i++)
 				{
 					//Debug.Log($"Checking string from {j} for length {i}");
 
@@ -70,12 +71,11 @@ namespace WordSlide
 			{
 				// Each loop is a sliding window size
 
-				Debug.Log($"Sliding window size....{slidingWindowLength}");
 
 				// Slide the window
 				for (int slidingWindowStartIndex = 0; slidingWindowStartIndex < inputString.Length - (slidingWindowLength - 1); slidingWindowStartIndex++)
 				{
-					if (SlidingWindowContainsForbiddenIndexes(slidingWindowStartIndex, (slidingWindowStartIndex + slidingWindowLength) - 1))
+					if (SlidingWindowContainsForbiddenIndexes(slidingWindowStartIndex, slidingWindowStartIndex + slidingWindowLength - 1))
 					{
 						continue;
 					}
@@ -92,7 +92,7 @@ namespace WordSlide
 					{
 						Debug.Log($"Found word {inputString.Substring(slidingWindowStartIndex, slidingWindowLength)} at {slidingWindowStartIndex} to {slidingWindowStartIndex + (slidingWindowLength - 1)}");
 						foundWords.Add(inputString.Substring(slidingWindowStartIndex, slidingWindowLength));
-						Enumerable.Range(slidingWindowStartIndex, (slidingWindowStartIndex + slidingWindowLength) - 1).ToList().ForEach(x => forbiddenIndexes.Add(x));
+						Enumerable.Range(slidingWindowStartIndex, slidingWindowLength).ToList().ForEach(x => forbiddenIndexes.Add(x));
 					}
 				}
 			}

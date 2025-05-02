@@ -20,7 +20,7 @@ public class PlayManager_Tests
 
 		await playManager.Construct(new DictionaryManager(new DictionaryImporter()));
 
-		string inputString = "antexample";
+		string inputString = "exampleant";
 		List<string> expectedWords = new List<string> { "example", "ant" }; // Adjust based on your dictionary
 
 
