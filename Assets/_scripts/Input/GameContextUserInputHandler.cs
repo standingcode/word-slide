@@ -18,7 +18,7 @@ namespace WordSlide
 			else
 			{
 				// Mouse was released
-				ClickEventHandler.RaiseMouseReleased();
+				ClickEventHandler.RaiseInputClickReleased();
 			}
 		}
 	}

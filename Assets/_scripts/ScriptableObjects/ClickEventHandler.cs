@@ -12,7 +12,7 @@ public class ClickEventHandler : ScriptableObject
 		InputClicked?.Invoke(position);
 	}
 
-	public void RaiseMouseReleased()
+	public void RaiseInputClickReleased()
 	{
 		InputClickReleased?.Invoke();
 	}

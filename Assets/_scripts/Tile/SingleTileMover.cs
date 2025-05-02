@@ -122,7 +122,6 @@ namespace WordSlide
 				planeOfMovement = xDistanceFromStartingPosition >= yDistanceFromStartingPosition ? PlaneOfMovement.XAxis : PlaneOfMovement.YAxis;
 			}
 
-
 			// If we are moving in the x axis, restrict the movement.
 			// (It's not enough to just clamp the position as if the pointer moves quickly the tile can get stuck not at the max position)			
 			if (planeOfMovement == PlaneOfMovement.XAxis)
