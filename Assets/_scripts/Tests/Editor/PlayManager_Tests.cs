@@ -10,7 +10,8 @@ public class PlayManager_Tests
 	[Test]
 	public async Task TestCheckStringForWords()
 	{
-		// Arrange, create a new Monobehavior test object
+		// Arrange
+		// Create a new Monobehavior test object
 		var gameObject = new GameObject();
 		var playManager = gameObject.AddComponent<PlayManager>();
 
@@ -18,14 +19,19 @@ public class PlayManager_Tests
 		var settings = gameObject.AddComponent<Settings>();
 		settings.Awake();
 
+		// Trigger the constructor to get a working dictionary 
 		await playManager.Construct(new DictionaryManager(new DictionaryImporter()));
 
-		string inputString = "exampleant";
+		string inputString = "antexample";
 		List<string> expectedWords = new List<string> { "example", "ant" }; // Adjust based on your dictionary
 
-
 		// Act
-		List<string> foundWords = playManager.CheckStringForWords(inputString);
+		var sw = System.Diagnostics.Stopwatch.StartNew();
+
+		List<string> foundWords = playManager.CheckWordString(inputString);
+
+		sw.Stop();
+		Debug.Log(sw.ElapsedMilliseconds);
 
 
 		// Assert

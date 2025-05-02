@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 namespace WordSlide
 {
-	public class PointerMethods : MonoBehaviour
+	public static class PointerMethods
 	{
 		public static Vector2 GetMouseOrPointerPosition()
 		{
