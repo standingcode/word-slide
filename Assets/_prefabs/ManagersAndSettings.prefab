@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1474588497695224604}
   - component: {fileID: 6937791153671749607}
-  - component: {fileID: 6319885573358546760}
   - component: {fileID: 5109221444007559037}
+  - component: {fileID: 6319885573358546760}
   m_Layer: 0
   m_Name: ManagersAndSettings
   m_TagString: Untagged
@@ -47,6 +47,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settingsScriptable: {fileID: 11400000, guid: f0afdf0f404687a48b9337ea8ffe5488, type: 2}
+--- !u!114 &5109221444007559037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453899481120337467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ef2b1c8468fef6459b0807826d3ca66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settingsScriptable: {fileID: 11400000, guid: f0afdf0f404687a48b9337ea8ffe5488, type: 2}
 --- !u!114 &6319885573358546760
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,17 +76,3 @@ MonoBehaviour:
     _keys:
     - _key: tile
       _value: {fileID: 0}
---- !u!114 &5109221444007559037
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 453899481120337467}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ef2b1c8468fef6459b0807826d3ca66, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tilePaddingRatio: 0.1
-  minimumMarginFromBoardAsRatio: 0.05
