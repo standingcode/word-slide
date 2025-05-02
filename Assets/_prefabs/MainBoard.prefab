@@ -44,7 +44,6 @@ GameObject:
   - component: {fileID: 8390247585327511750}
   - component: {fileID: 1971055762343976071}
   - component: {fileID: 7855413313656994955}
-  - component: {fileID: 2997827054252696078}
   m_Layer: 0
   m_Name: MainBoard
   m_TagString: Untagged
@@ -84,6 +83,7 @@ MonoBehaviour:
   boardTilesRoot: {fileID: 5671399881637228800}
   waitingTilesRoot: {fileID: 3506854143857560487}
   ClickEventHandler: {fileID: 11400000, guid: f6cbd98fe27ff2242a9a84bc08cc5e55, type: 2}
+  ratioToSwapTiles: 0.7
 --- !u!114 &8390247585327511750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,7 +187,19 @@ MonoBehaviour:
     m_ActionId: 32b35790-4ed0-4e9a-aa41-69ac6d629449
     m_ActionName: 'UI/Point[/Mouse/position]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7057381554428220599}
+        m_TargetAssemblyTypeName: WordSlide.TilesManager, MainProject
+        m_MethodName: SetTiles
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 44b200b1-1557-4083-816c-b22cbdf77ddf
     m_ActionName: 'UI/RightClick[/Mouse/rightButton]'
   - m_PersistentCalls:
@@ -227,20 +239,6 @@ MonoBehaviour:
   m_DefaultActionMap: UI
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &2997827054252696078
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5198193986179874856}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d58d141b4977e4a4a801a8f4ed8c3181, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  zMovementWhenSliding: -1
-  distanceToConsiderCloseToCentre: 0.1
 --- !u!1 &8610899238817674750
 GameObject:
   m_ObjectHideFlags: 0

@@ -38,9 +38,27 @@ namespace WordSlide
 			await _dictionaryManager.LoadCharacterSet("english");
 		}
 
-		public List<string> CheckWordString(string stringToCheck)
+		public List<SingleTileManagersRepresentingAString> CheckForWords(List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
 		{
-			return WordFinder.CheckStringForWords(_dictionaryManager, stringToCheck);
+			var foundWordsInAllRowsAndColumns = new List<SingleTileManagersRepresentingAString>();
+
+			// For each of the rows/columns to check, check the string for words
+			foreach (var rowOrColumn in rowsAndColumnsToCheck)
+			{
+				var foundWordsInThisRowOrColumn = CheckWordsInSingleTileManager(rowOrColumn);
+
+				if (foundWordsInThisRowOrColumn.Count > 0)
+				{
+					foundWordsInAllRowsAndColumns.AddRange(foundWordsInThisRowOrColumn);
+				}
+			}
+
+			return foundWordsInAllRowsAndColumns;
+		}
+
+		private List<SingleTileManagersRepresentingAString> CheckWordsInSingleTileManager(SingleTileManagersRepresentingAString tileManagerStringToCheck)
+		{
+			return WordFinderHelperMethods.CheckRowOrColumnForWords(_dictionaryManager, tileManagerStringToCheck);
 		}
 	}
 }

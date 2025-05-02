@@ -89,6 +89,13 @@ public class SingleTileManager : MonoBehaviour
 	public void SetTileShownCharacter(char character)
 	{
 		tileCharacter = character;
+
+		if (textMesh == null)
+		{
+			Debug.Log("TextMesh is not assigned in the inspector.");
+			return;
+		}
+
 		textMesh.text = tileCharacter.ToString().ToUpper();
 	}
 
