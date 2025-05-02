@@ -6,16 +6,11 @@ namespace WordSlide
 	public class Settings : MonoBehaviour
 	{
 		[SerializeField]
-		private int columns = 10;
-		public int Columns => columns;
+		private SettingsScriptable settingsScriptable;
 
-		[SerializeField]
-		private int rows = 10;
-		public int Rows => rows;
-
-		[SerializeField]
-		private int minimumWordLength = 3;
-		public int MinimumWordLength => minimumWordLength;
+		public int Columns => settingsScriptable.Columns;
+		public int Rows => settingsScriptable.Rows;
+		public int MinimumWordLength => settingsScriptable.MinimumWordLength;
 
 		public static Settings Instance { get; private set; }
 
