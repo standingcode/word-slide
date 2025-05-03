@@ -22,7 +22,6 @@ namespace WordSlide
 				Debug.LogError("Settings instance already exists. Destroying the new instance.");
 				return;
 			}
-
 			Instance = this;
 		}
 

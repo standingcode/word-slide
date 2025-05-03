@@ -1,6 +1,5 @@
 using Pooling;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -31,31 +30,30 @@ namespace WordSlide
 
 		private SingleTileManager currentlyMovingTile = null;
 
-		public TilesManager Instance { get; private set; }
+		public static TilesManager Instance { get; private set; }
+
+		private Settings settings => Settings.Instance;
 
 		private void Awake()
 		{
 			if (Instance != null && Instance != this)
 			{
 				Destroy(this);
-				Debug.LogError("TilesManager instance already exists. Destroying the new instance.");
 				return;
 			}
+			Instance = this;
 		}
 
 		private void Start()
 		{
 			ClickEventHandler.AddClickDownListener(CheckIfTileWasClicked);
 			ClickEventHandler.AddClickUpListener(CheckIfTileNeedsToBeDropped);
-
-			//sizeManager = SizeManager.Instance;
-			settings = Settings.Instance;
-
-			// Set the tiles		
-			SetTiles();
 		}
 
-		private Settings settings;
+		public void OnDestroy()
+		{
+			Instance = null;
+		}
 
 		/// <summary>
 		/// Sets the tiles which will be seen initially on the screen.

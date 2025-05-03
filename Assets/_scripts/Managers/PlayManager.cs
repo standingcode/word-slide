@@ -28,17 +28,27 @@ namespace WordSlide
 		{
 			if (Instance != null && Instance != this)
 			{
-				Debug.LogError("PlayManager instance already exists. Destroying the new instance.");
 				Destroy(this);
 				return;
 			}
+			Instance = this;
 
 			_dictionaryManager = dictionaryManager;
 
 			await _dictionaryManager.LoadDictionary("english");
 			await _dictionaryManager.LoadCharacterSet("english");
 
+		}
+
+		public void Start()
+		{
+			TilesManager.Instance.SetTiles();
 			_tileSwappedEventHandler.AddTileSwappedListener(TileWasSwapped);
+		}
+
+		public void OnDestroy()
+		{
+			Instance = null;
 		}
 
 		public void TileWasSwapped(List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
