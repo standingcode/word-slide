@@ -27,9 +27,9 @@ namespace WordSlide
 		}
 	}
 
-	public static class WordFinderHelperMethods
+	public class WordFinderService : IWordFinderService
 	{
-		public static List<SingleTileManagersRepresentingAString> GetListOfValidWordsFromGivenRowsAndOrColumns(IDictionaryService _dictionaryManager, List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
+		public List<SingleTileManagersRepresentingAString> GetListOfValidWordsFromGivenRowsAndOrColumns(IDictionaryService _dictionaryManager, List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
 		{
 			var foundWordsInAllRowsAndColumns = new List<SingleTileManagersRepresentingAString>();
 
@@ -47,7 +47,7 @@ namespace WordSlide
 			return foundWordsInAllRowsAndColumns;
 		}
 
-		private static List<SingleTileManagersRepresentingAString> CheckRowOrColumnForWords(IDictionaryService _dictionaryManager, SingleTileManagersRepresentingAString singleTileManagerStringToCheck)
+		private List<SingleTileManagersRepresentingAString> CheckRowOrColumnForWords(IDictionaryService _dictionaryManager, SingleTileManagersRepresentingAString singleTileManagerStringToCheck)
 		{
 			string listOfSingleTileManagersToCheckAsString = singleTileManagerStringToCheck.ToString();
 

@@ -10,7 +10,7 @@ public class DictionaryImporter_Tests
 	[Test]
 	public async Task GetDictionary_ValidLanguage_ReturnsDictionary()
 	{
-		var dictionaryImporter = new DictionaryImporter();
+		var dictionaryImporter = new DictionaryImporterService();
 		string language = "english";
 
 		var result = await dictionaryImporter.GetDictionary(language);
@@ -25,7 +25,7 @@ public class DictionaryImporter_Tests
 	[Test]
 	public async Task GetCharacterSetForDictionary_ValidLanguage_ReturnsCharacterSet()
 	{
-		var dictionaryImporter = new DictionaryImporter();
+		var dictionaryImporter = new DictionaryImporterService();
 		string language = "english";
 
 		var result = await dictionaryImporter.GetCharacterSetForDictionary(language);
@@ -44,7 +44,7 @@ public class DictionaryImporter_Tests
 	//[Test]
 	public async Task GetAppearanceNumbersForCharacters()
 	{
-		var dictionaryImporter = new DictionaryImporter();
+		var dictionaryImporter = new DictionaryImporterService();
 		string language = "english";
 
 		var dictionary = await dictionaryImporter.GetDictionary(language);

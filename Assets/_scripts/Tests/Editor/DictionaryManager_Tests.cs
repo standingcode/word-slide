@@ -5,11 +5,11 @@ using WordSlide;
 
 public class DictionaryManager_Tests
 {
-	private DictionaryManager sut;
+	private DictionaryService sut;
 
-	public async Task<DictionaryManager> GetDictionaryManagerWithDictionaryLoaded(string dictionaryToLoad)
+	public async Task<DictionaryService> GetDictionaryManagerWithDictionaryLoaded(string dictionaryToLoad)
 	{
-		sut = new DictionaryManager(new DictionaryImporter());
+		sut = new DictionaryService(new DictionaryImporterService());
 		await sut.LoadDictionary(dictionaryToLoad);
 
 		return sut;

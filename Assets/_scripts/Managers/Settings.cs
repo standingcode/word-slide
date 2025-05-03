@@ -1,4 +1,3 @@
-using Pooling;
 using UnityEngine;
 
 namespace WordSlide

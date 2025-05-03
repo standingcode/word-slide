@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace WordSlide
 {
-	public interface IDictionaryImporter
+	public interface IDictionaryImporterService
 	{
 		public Task<Dictionary<string, Word>> GetDictionary(string language);
 

@@ -6,12 +6,16 @@ public class GameInstaller : MonoInstaller
 {
 	public override void InstallBindings()
 	{
-		Container.Bind<IDictionaryManager>().
-		To<DictionaryManager>()
+		Container.Bind<IDictionaryService>().
+		To<DictionaryService>()
 		.AsSingle();
 
-		Container.Bind<IDictionaryImporter>().
-		To<DictionaryImporter>()
+		Container.Bind<IDictionaryImporterService>().
+		To<DictionaryImporterService>()
+		.AsSingle();
+
+		Container.Bind<IWordFinderService>().
+		To<WordFinderService>()
 		.AsSingle();
 	}
 }

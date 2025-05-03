@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace WordSlide
 {
-	public class DictionaryImporter : IDictionaryImporter
+	public class DictionaryImporterService : IDictionaryImporterService
 	{
 		public async Task<List<char>> GetCharacterSetForDictionary(string language)
 		{

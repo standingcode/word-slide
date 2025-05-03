@@ -1,5 +1,6 @@
 using Pooling;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Zenject;
 
@@ -8,16 +9,13 @@ namespace WordSlide
 	public class TilesManager : MonoBehaviour
 	{
 		[Inject]
-		private IDictionaryManager dictionaryManager;
+		private IDictionaryService dictionaryManager;
 
 		[SerializeField]
 		private SingleTileManager[,] boardTiles;
 
 		[SerializeField]
-		private SingleTileManager[,] waitingTiles;
-
-		[SerializeField]
-		private Transform boardTilesRoot, waitingTilesRoot;
+		private Transform boardTilesRoot;
 
 		[SerializeField]
 		private ClickEventHandler ClickEventHandler;
@@ -58,31 +56,49 @@ namespace WordSlide
 		/// <summary>
 		/// Sets the tiles which will be seen initially on the screen.
 		/// </summary>
-		public void SetTiles()
+		public SingleTileManager[,] GenerateFullTileBoard()
 		{
 			DestroyExistingTiles();
 
 			boardTiles = new SingleTileManager[settings.Rows, settings.Columns];
-			waitingTiles = new SingleTileManager[settings.Rows, settings.Columns];
 
-			for (int i = 0; i < settings.Rows; i++)
+			for (int i = 0; i < boardTiles.GetLength(0); i++)
 			{
-				for (int j = 0; j < settings.Columns; j++)
+				for (int j = 0; j < boardTiles.GetLength(1); j++)
 				{
-					// Create 2 new tiles from the object pool
+					// Create new tile from the object pool
 					PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile", boardTilesRoot);
-					PoolObject waitingTile = PoolManager.Instance.GetObjectFromPool("tile", waitingTilesRoot);
 
-					SingleTileManager boardSingleTile = boardTile.GetComponent<SingleTileManager>();
-					SingleTileManager waitingSingleTile = waitingTile.GetComponent<SingleTileManager>();
+					SingleTileManager singletile = boardTile.GetComponent<SingleTileManager>();
 
-					boardSingleTile.InitializeTile(dictionaryManager.GetRandomChar(), i, j);
-					boardSingleTile.ActivateTile();
-					boardTiles[i, j] = boardSingleTile;
-
-					waitingSingleTile.InitializeTile(dictionaryManager.GetRandomChar(), i, j);
-					waitingTiles[i, j] = waitingSingleTile;
+					singletile.InitializeTile(dictionaryManager.GetRandomChar(), i, j);
+					singletile.ActivateTile();
+					boardTiles[i, j] = singletile;
 				}
+			}
+
+			return boardTiles;
+		}
+
+		public void ShowBoard()
+		{
+			for (int i = 0; i < boardTiles.GetLength(0); i++)
+			{
+				for (int j = 0; j < boardTiles.GetLength(1); j++)
+				{
+					boardTiles[i, j].ActivateTile();
+				}
+			}
+		}
+
+		/// <summary>
+		/// This is used to remove words until we get a board without existing words.
+		/// </summary>
+		public void ChangeCharactersForTiles(List<SingleTileManager> listOfTilesToChangeCharacter)
+		{
+			foreach (var singleTileManager in listOfTilesToChangeCharacter)
+			{
+				singleTileManager.SetTileCharacter(dictionaryManager.GetRandomChar());
 			}
 		}
 
@@ -95,17 +111,6 @@ namespace WordSlide
 					if (tile != null)
 					{
 						tile.DeactivateTile();
-						PoolManager.Instance.ReturnObjectToPool(tile.GetComponent<PoolObject>());
-					}
-				}
-			}
-
-			if (waitingTiles != null)
-			{
-				foreach (SingleTileManager tile in waitingTiles)
-				{
-					if (tile != null)
-					{
 						PoolManager.Instance.ReturnObjectToPool(tile.GetComponent<PoolObject>());
 					}
 				}
@@ -150,7 +155,7 @@ namespace WordSlide
 				}
 				else
 				{
-					SwapMovingTileWithThisTile(currentlyMovingTile, tileToSwapWith);
+					SwapTiles(currentlyMovingTile, tileToSwapWith);
 					DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent(currentlyMovingTile, tileToSwapWith);
 				}
 				currentlyMovingTile = null;
@@ -184,7 +189,7 @@ namespace WordSlide
 			TileSwappedEventHandler.RaiseTileSwapped(listOfRowsAndColumnsToCheck);
 		}
 
-		private SingleTileManager[] GetFullRow(int index)
+		public SingleTileManager[] GetFullRow(int index)
 		{
 			var row = new List<SingleTileManager>();
 
@@ -196,7 +201,7 @@ namespace WordSlide
 			return row.ToArray();
 		}
 
-		private SingleTileManager[] GetFullColumn(int index)
+		public SingleTileManager[] GetFullColumn(int index)
 		{
 			var column = new List<SingleTileManager>();
 
@@ -208,7 +213,7 @@ namespace WordSlide
 			return column.ToArray();
 		}
 
-		private void SwapMovingTileWithThisTile(SingleTileManager tile1, SingleTileManager tile2)
+		private void SwapTiles(SingleTileManager tile1, SingleTileManager tile2)
 		{
 			// Swap in the matrix
 			boardTiles[tile1.MatrixIndex.Item1, tile1.MatrixIndex.Item2] = tile2;

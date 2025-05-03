@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace WordSlide
 {
-	public interface IDictionaryManager
+	public interface IDictionaryService
 	{
 		public bool DictionaryLoaded { get; }
 
