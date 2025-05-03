@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
@@ -18,13 +17,13 @@ namespace WordSlide
 	{
 		public static PlayManager Instance { get; private set; }
 
-		private IDictionaryManager _dictionaryManager;
+		private IDictionaryService _dictionaryManager;
 
 		[SerializeField]
 		private TileSwappedEventHandler _tileSwappedEventHandler;
 
 		[Inject]
-		public async Task Construct(IDictionaryManager dictionaryManager)
+		public async Task Construct(IDictionaryService dictionaryManager)
 		{
 			if (Instance != null && Instance != this)
 			{
@@ -42,8 +41,17 @@ namespace WordSlide
 
 		public void Start()
 		{
-			TilesManager.Instance.SetTiles();
 			_tileSwappedEventHandler.AddTileSwappedListener(TileWasSwapped);
+		}
+
+		public void GeneratetileBoardUntilNoWordsPresent()
+		{
+			SingleTileManager[,] initialBoard;
+			do
+			{
+				initialBoard = TilesManager.Instance.GenerateFullTileBoard();
+
+			} while (initialBoard != null);
 		}
 
 		public void OnDestroy()
@@ -54,31 +62,8 @@ namespace WordSlide
 		public void TileWasSwapped(List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
 		{
 			var validWords = GetListOfValidWordsFromGivenRowsAndColumns(rowsAndColumnsToCheck);
-
 			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
 		}
 
-		public List<SingleTileManagersRepresentingAString> GetListOfValidWordsFromGivenRowsAndColumns(List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
-		{
-			var foundWordsInAllRowsAndColumns = new List<SingleTileManagersRepresentingAString>();
-
-			// For each of the rows/columns to check, check the string for words
-			foreach (var rowOrColumn in rowsAndColumnsToCheck)
-			{
-				var foundWordsInThisRowOrColumn = CheckWordsInSingleTileManager(rowOrColumn);
-
-				if (foundWordsInThisRowOrColumn.Count > 0)
-				{
-					foundWordsInAllRowsAndColumns.AddRange(foundWordsInThisRowOrColumn);
-				}
-			}
-
-			return foundWordsInAllRowsAndColumns;
-		}
-
-		private List<SingleTileManagersRepresentingAString> CheckWordsInSingleTileManager(SingleTileManagersRepresentingAString tileManagerStringToCheck)
-		{
-			return WordFinderHelperMethods.CheckRowOrColumnForWords(_dictionaryManager, tileManagerStringToCheck);
-		}
 	}
 }

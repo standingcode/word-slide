@@ -40,7 +40,7 @@ public class SingleTileManager : MonoBehaviour
 
 	public void InitializeTile(char character, int row, int column)
 	{
-		SetTileShownCharacter(character);
+		SetTileCharacter(character);
 		SetTileMatrixIndex(row, column);
 		SetTileScale();
 		SetTileDefaultPosition();
@@ -86,7 +86,7 @@ public class SingleTileManager : MonoBehaviour
 		transform.position = tileRestingPosition;
 	}
 
-	public void SetTileShownCharacter(char character)
+	public void SetTileCharacter(char character)
 	{
 		tileCharacter = character;
 

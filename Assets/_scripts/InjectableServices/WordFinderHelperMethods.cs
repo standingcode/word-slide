@@ -29,7 +29,25 @@ namespace WordSlide
 
 	public static class WordFinderHelperMethods
 	{
-		public static List<SingleTileManagersRepresentingAString> CheckRowOrColumnForWords(IDictionaryManager _dictionaryManager, SingleTileManagersRepresentingAString singleTileManagerStringToCheck)
+		public static List<SingleTileManagersRepresentingAString> GetListOfValidWordsFromGivenRowsAndOrColumns(IDictionaryService _dictionaryManager, List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
+		{
+			var foundWordsInAllRowsAndColumns = new List<SingleTileManagersRepresentingAString>();
+
+			// For each of the rows/columns to check, check the string for words
+			foreach (var rowOrColumn in rowsAndColumnsToCheck)
+			{
+				var foundWordsInThisRowOrColumn = CheckRowOrColumnForWords(_dictionaryManager, rowOrColumn);
+
+				if (foundWordsInThisRowOrColumn.Count > 0)
+				{
+					foundWordsInAllRowsAndColumns.AddRange(foundWordsInThisRowOrColumn);
+				}
+			}
+
+			return foundWordsInAllRowsAndColumns;
+		}
+
+		private static List<SingleTileManagersRepresentingAString> CheckRowOrColumnForWords(IDictionaryService _dictionaryManager, SingleTileManagersRepresentingAString singleTileManagerStringToCheck)
 		{
 			string listOfSingleTileManagersToCheckAsString = singleTileManagerStringToCheck.ToString();
 
