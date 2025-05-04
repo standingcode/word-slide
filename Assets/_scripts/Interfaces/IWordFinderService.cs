@@ -4,7 +4,7 @@ namespace WordSlide
 {
 	public interface IWordFinderService
 	{
-		public List<SingleTileManagersRepresentingAString> GetListOfValidWordsFromGivenRowsAndOrColumns(
-		IDictionaryService _dictionaryManager, List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck);
+		public List<SingleTileManagerSequence> GetListOfValidWordsFromGivenRowsAndOrColumns(
+		IDictionaryService _dictionaryService, List<SingleTileManagerSequence> rowsAndColumnsToCheck);
 	}
 }

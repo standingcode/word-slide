@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 using UnityEngine;
 using WordSlide;
 
-public class DictionaryManager_Tests
+public class DictionaryService_Tests
 {
 	private DictionaryService sut;
 
-	public async Task<DictionaryService> GetDictionaryManagerWithDictionaryLoaded(string dictionaryToLoad)
+	public async Task<DictionaryService> GetDictionaryServiceWithDictionaryLoaded(string dictionaryToLoad)
 	{
 		sut = new DictionaryService(new DictionaryImporterService());
 		await sut.LoadDictionary(dictionaryToLoad);
@@ -18,7 +18,7 @@ public class DictionaryManager_Tests
 	[Test]
 	public async Task CheckWord_WordDoesntExist_MethodReturnsFalse()
 	{
-		var sut = await GetDictionaryManagerWithDictionaryLoaded("english");
+		var sut = await GetDictionaryServiceWithDictionaryLoaded("english");
 
 		var result = sut.CheckWord("heello");
 
@@ -28,7 +28,7 @@ public class DictionaryManager_Tests
 	[Test]
 	public async Task CheckWord_WordDoesExist_MethodReturnsTrue()
 	{
-		var sut = await GetDictionaryManagerWithDictionaryLoaded("english");
+		var sut = await GetDictionaryServiceWithDictionaryLoaded("english");
 
 		var result = sut.CheckWord("hello");
 
@@ -38,7 +38,7 @@ public class DictionaryManager_Tests
 	[Test]
 	public async Task CheckWord_EmptyString_MethodReturnsFalse()
 	{
-		var sut = await GetDictionaryManagerWithDictionaryLoaded("english");
+		var sut = await GetDictionaryServiceWithDictionaryLoaded("english");
 
 		var result = sut.CheckWord("");
 
@@ -50,7 +50,7 @@ public class DictionaryManager_Tests
 	{
 		int acceptableMilliseconds = 2;
 
-		var sut = await GetDictionaryManagerWithDictionaryLoaded("english");
+		var sut = await GetDictionaryServiceWithDictionaryLoaded("english");
 		var sw = System.Diagnostics.Stopwatch.StartNew();
 
 		sut.CheckWord("hello");

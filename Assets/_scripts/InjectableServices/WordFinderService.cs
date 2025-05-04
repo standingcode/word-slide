@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace WordSlide
 {
-	public struct SingleTileManagersRepresentingAString
+	public struct SingleTileManagerSequence
 	{
 		SingleTileManager[] singleTileManagers;
 
 		public SingleTileManager[] SingleTileManagers => singleTileManagers;
 
-		public SingleTileManagersRepresentingAString(SingleTileManager[] singleTileManagers)
+		public SingleTileManagerSequence(SingleTileManager[] singleTileManagers)
 		{
 			this.singleTileManagers = singleTileManagers;
 		}
@@ -21,22 +21,22 @@ namespace WordSlide
 
 		public int Length => singleTileManagers.Length;
 
-		public SingleTileManagersRepresentingAString GetSubsetOfSingleTileManagers(int startIndex, int length)
+		public SingleTileManagerSequence GetSubsetOfSingleTileManagers(int startIndex, int length)
 		{
-			return new SingleTileManagersRepresentingAString(singleTileManagers.Skip(startIndex).Take(length).ToArray());
+			return new SingleTileManagerSequence(singleTileManagers.Skip(startIndex).Take(length).ToArray());
 		}
 	}
 
 	public class WordFinderService : IWordFinderService
 	{
-		public List<SingleTileManagersRepresentingAString> GetListOfValidWordsFromGivenRowsAndOrColumns(IDictionaryService _dictionaryManager, List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
+		public List<SingleTileManagerSequence> GetListOfValidWordsFromGivenRowsAndOrColumns(IDictionaryService _dictionaryService, List<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
-			var foundWordsInAllRowsAndColumns = new List<SingleTileManagersRepresentingAString>();
+			var foundWordsInAllRowsAndColumns = new List<SingleTileManagerSequence>();
 
 			// For each of the rows/columns to check, check the string for words
 			foreach (var rowOrColumn in rowsAndColumnsToCheck)
 			{
-				var foundWordsInThisRowOrColumn = CheckRowOrColumnForWords(_dictionaryManager, rowOrColumn);
+				var foundWordsInThisRowOrColumn = CheckRowOrColumnForWords(_dictionaryService, rowOrColumn);
 
 				if (foundWordsInThisRowOrColumn.Count > 0)
 				{
@@ -47,17 +47,17 @@ namespace WordSlide
 			return foundWordsInAllRowsAndColumns;
 		}
 
-		private List<SingleTileManagersRepresentingAString> CheckRowOrColumnForWords(IDictionaryService _dictionaryManager, SingleTileManagersRepresentingAString singleTileManagerStringToCheck)
+		private List<SingleTileManagerSequence> CheckRowOrColumnForWords(IDictionaryService _dictionaryService, SingleTileManagerSequence singleTileManagerStringToCheck)
 		{
 			string listOfSingleTileManagersToCheckAsString = singleTileManagerStringToCheck.ToString();
 
 			// The entire string is a word
-			if (_dictionaryManager.CheckWord(listOfSingleTileManagersToCheckAsString))
+			if (_dictionaryService.CheckWord(listOfSingleTileManagersToCheckAsString))
 			{
-				return new List<SingleTileManagersRepresentingAString>() { singleTileManagerStringToCheck };
+				return new List<SingleTileManagerSequence>() { singleTileManagerStringToCheck };
 			}
 
-			List<SingleTileManagersRepresentingAString> foundWords = new();
+			List<SingleTileManagerSequence> foundWords = new();
 			List<int> forbiddenIndexes = new List<int>();
 			string subString;
 
@@ -91,10 +91,10 @@ namespace WordSlide
 					subString = listOfSingleTileManagersToCheckAsString.Substring(slidingWindowStartIndex, slidingWindowLength);
 
 					// Check if the substring is a word
-					if (_dictionaryManager.CheckWord(subString))
+					if (_dictionaryService.CheckWord(subString))
 					{
 						// Add the correct word as a list of tile managers to the list of found words
-						SingleTileManagersRepresentingAString singleTileManagerString = singleTileManagerStringToCheck.GetSubsetOfSingleTileManagers(slidingWindowStartIndex, slidingWindowLength);
+						SingleTileManagerSequence singleTileManagerString = singleTileManagerStringToCheck.GetSubsetOfSingleTileManagers(slidingWindowStartIndex, slidingWindowLength);
 						foundWords.Add(singleTileManagerString);
 
 						// Add the range of forbidden indexes to the list

@@ -6,19 +6,19 @@ using WordSlide;
 [CreateAssetMenu(fileName = "TileSwappedEvent", menuName = "Scriptable WordSlide/TileSwappedEvent")]
 public class TileSwappedEventHandler : ScriptableObject
 {
-	public Action<List<SingleTileManagersRepresentingAString>> tileSwapped;
+	public Action<List<SingleTileManagerSequence>> tileSwapped;
 
-	public void RaiseTileSwapped(List<SingleTileManagersRepresentingAString> rowsAndColumnsAffected)
+	public void RaiseTileSwapped(List<SingleTileManagerSequence> rowsAndColumnsAffected)
 	{
 		tileSwapped?.Invoke(rowsAndColumnsAffected);
 	}
 
-	public void AddTileSwappedListener(Action<List<SingleTileManagersRepresentingAString>> listener)
+	public void AddTileSwappedListener(Action<List<SingleTileManagerSequence>> listener)
 	{
 		tileSwapped += listener;
 	}
 
-	public void RemoveTileSwappedListener(Action<List<SingleTileManagersRepresentingAString>> listener)
+	public void RemoveTileSwappedListener(Action<List<SingleTileManagerSequence>> listener)
 	{
 		tileSwapped -= listener;
 	}
