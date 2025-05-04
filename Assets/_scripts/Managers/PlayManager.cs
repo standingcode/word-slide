@@ -17,14 +17,14 @@ namespace WordSlide
 	{
 		public static PlayManager Instance { get; private set; }
 
-		private IDictionaryService _dictionaryManager;
+		private IDictionaryService _dictionaryService;
 		private IWordFinderService _wordFinderService;
 
 		[SerializeField]
 		private TileSwappedEventHandler _tileSwappedEventHandler;
 
 		[Inject]
-		public async Task Construct(IDictionaryService dictionaryManager, IWordFinderService wordFinderService)
+		public async Task Construct(IDictionaryService dictionaryService, IWordFinderService wordFinderService)
 		{
 			if (Instance != null && Instance != this)
 			{
@@ -33,45 +33,71 @@ namespace WordSlide
 			}
 			Instance = this;
 
-			_dictionaryManager = dictionaryManager;
+			_dictionaryService = dictionaryService;
 			_wordFinderService = wordFinderService;
 
-			await _dictionaryManager.LoadDictionary("english");
-			await _dictionaryManager.LoadCharacterSet("english");
+			await _dictionaryService.LoadDictionary("english");
+			await _dictionaryService.LoadCharacterSet("english");
 		}
 
 		public void Start()
 		{
 			_tileSwappedEventHandler.AddTileSwappedListener(TileWasSwapped);
+			GenerateTileBoardUntilNoWordsPresent();
 		}
 
-		public void GeneratetileBoardUntilNoWordsPresent()
+		public void GenerateTileBoardUntilNoWordsPresent()
 		{
-			SingleTileManager[,] board;
-			int foundWords = 0;
+			var sw = System.Diagnostics.Stopwatch.StartNew();
+
+			List<SingleTileManagerSequence> foundWords = new();
+			TilesManager.Instance.GenerateFullTileBoard();
 
 			do
 			{
-				board = TilesManager.Instance.GenerateFullTileBoard();
+				List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
 
-				// Get the rows and columns to check for words
-				// TODO: We now need to get the entire board as list of SingleTileManagersRepresentingAString
-				// We probably need to add a new method to the TilesManager to get the rows and columns as a list of SingleTileManagersRepresentingAString
+				// Get all rows
+				for (int i = 0; i < TilesManager.Instance.BoardTiles.GetLength(0); i++)
+				{
+					rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullRow(i)));
+				}
 
+				// Get all columns
+				for (int i = 0; i < TilesManager.Instance.BoardTiles.GetLength(1); i++)
+				{
+					rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullColumn(i)));
+				}
 
-			} while (foundWords > 0);
+				foundWords = _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
+
+				if (foundWords.Count > 0)
+				{
+					Debug.Log($"Found words: {foundWords.Count}, attempting to remove them.....");
+
+					foreach (var singleTileManagerSequence in foundWords)
+					{
+						TilesManager.Instance.ChangeCharactersForTiles(singleTileManagerSequence.SingleTileManagers);
+					}
+				}
+
+			} while (foundWords.Count > 0);
+
+			sw.Stop();
+			Debug.Log($"Generating the board witout words took {sw.ElapsedMilliseconds} milliseconds.");
+
+			TilesManager.Instance.ShowBoard();
+		}
+
+		public void TileWasSwapped(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
+		{
+			var validWords = _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
+			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
 		}
 
 		public void OnDestroy()
 		{
 			Instance = null;
 		}
-
-		public void TileWasSwapped(List<SingleTileManagersRepresentingAString> rowsAndColumnsToCheck)
-		{
-			var validWords = _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryManager, rowsAndColumnsToCheck);
-			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
-		}
-
 	}
 }

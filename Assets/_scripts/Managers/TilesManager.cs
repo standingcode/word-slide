@@ -9,10 +9,11 @@ namespace WordSlide
 	public class TilesManager : MonoBehaviour
 	{
 		[Inject]
-		private IDictionaryService dictionaryManager;
+		private IDictionaryService dictionaryService;
 
 		[SerializeField]
 		private SingleTileManager[,] boardTiles;
+		public SingleTileManager[,] BoardTiles => boardTiles;
 
 		[SerializeField]
 		private Transform boardTilesRoot;
@@ -32,7 +33,7 @@ namespace WordSlide
 
 		private Settings settings => Settings.Instance;
 
-		private void Awake()
+		public void Awake()
 		{
 			if (Instance != null && Instance != this)
 			{
@@ -71,8 +72,7 @@ namespace WordSlide
 
 					SingleTileManager singletile = boardTile.GetComponent<SingleTileManager>();
 
-					singletile.InitializeTile(dictionaryManager.GetRandomChar(), i, j);
-					singletile.ActivateTile();
+					singletile.InitializeTile(dictionaryService.GetRandomChar(), i, j);
 					boardTiles[i, j] = singletile;
 				}
 			}
@@ -94,11 +94,11 @@ namespace WordSlide
 		/// <summary>
 		/// This is used to remove words until we get a board without existing words.
 		/// </summary>
-		public void ChangeCharactersForTiles(List<SingleTileManager> listOfTilesToChangeCharacter)
+		public void ChangeCharactersForTiles(SingleTileManager[] listOfTilesToChangeCharacter)
 		{
 			foreach (var singleTileManager in listOfTilesToChangeCharacter)
 			{
-				singleTileManager.SetTileCharacter(dictionaryManager.GetRandomChar());
+				singleTileManager.SetTileCharacter(dictionaryService.GetRandomChar());
 			}
 		}
 
@@ -164,25 +164,25 @@ namespace WordSlide
 
 		private void DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent(SingleTileManager tile1, SingleTileManager tile2)
 		{
-			List<SingleTileManagersRepresentingAString> listOfRowsAndColumnsToCheck = new();
+			List<SingleTileManagerSequence> listOfRowsAndColumnsToCheck = new();
 
 			// Determine which rows and columns were affected by the swap	
 			if (tile1.MatrixIndex.Item1 == tile2.MatrixIndex.Item1)
 			{
-				listOfRowsAndColumnsToCheck = new List<SingleTileManagersRepresentingAString>
+				listOfRowsAndColumnsToCheck = new List<SingleTileManagerSequence>
 				{
-					new SingleTileManagersRepresentingAString(GetFullRow(tile1.MatrixIndex.Item1)),
-					new SingleTileManagersRepresentingAString(GetFullColumn(tile1.MatrixIndex.Item2)),
-					new SingleTileManagersRepresentingAString(GetFullColumn(tile2.MatrixIndex.Item2))
+					new SingleTileManagerSequence(GetFullRow(tile1.MatrixIndex.Item1)),
+					new SingleTileManagerSequence(GetFullColumn(tile1.MatrixIndex.Item2)),
+					new SingleTileManagerSequence(GetFullColumn(tile2.MatrixIndex.Item2))
 				};
 			}
 			else
 			{
-				listOfRowsAndColumnsToCheck = new List<SingleTileManagersRepresentingAString>
+				listOfRowsAndColumnsToCheck = new List<SingleTileManagerSequence>
 				{
-					new SingleTileManagersRepresentingAString(GetFullRow(tile1.MatrixIndex.Item1)),
-					new SingleTileManagersRepresentingAString(GetFullRow(tile2.MatrixIndex.Item1)),
-					new SingleTileManagersRepresentingAString(GetFullColumn(tile1.MatrixIndex.Item2))
+					new SingleTileManagerSequence(GetFullRow(tile1.MatrixIndex.Item1)),
+					new SingleTileManagerSequence(GetFullRow(tile2.MatrixIndex.Item1)),
+					new SingleTileManagerSequence(GetFullColumn(tile1.MatrixIndex.Item2))
 				};
 			}
 
