@@ -8,12 +8,6 @@ using Zenject;
 
 namespace WordSlide
 {
-	public struct TileWaitingForSpawning
-	{
-		public SingleTileManager singletileManager;
-		public Vector2 spawningPosition;
-	}
-
 	public class TilesManager : MonoBehaviour
 	{
 		[Inject]

@@ -18,13 +18,13 @@ public class SingleTileManager : MonoBehaviour
 	private TextMeshProUGUI textMesh;
 
 	[SerializeField]
-	private Renderer meshRenderer;
+	private GameObject visualCube;
 
 	[SerializeField]
 	private Animator animator;
 
 	[SerializeField]
-	private float gravitySpeed = 9.87f;
+	private float gravitySpeed => SettingsScriptable.GravitySpeed;
 
 	[SerializeField]
 	private BoxCollider boxCollider;
@@ -155,7 +155,7 @@ public class SingleTileManager : MonoBehaviour
 
 		tileIsActive = true;
 		boxCollider.enabled = true;
-		meshRenderer.enabled = true;
+		visualCube.SetActive(true);
 		textMesh.enabled = true;
 	}
 
@@ -163,7 +163,7 @@ public class SingleTileManager : MonoBehaviour
 	{
 		tileIsActive = false;
 		boxCollider.enabled = false;
-		meshRenderer.enabled = false;
+		visualCube.SetActive(false);
 		textMesh.enabled = false;
 		transform.rotation = tileRestingRotation;
 
