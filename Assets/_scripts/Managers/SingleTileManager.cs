@@ -45,6 +45,8 @@ public class SingleTileManager : MonoBehaviour
 	[SerializeField]
 	private SingleTileMover singleTileMover;
 
+	public bool tileIsBeingMovedIntoPosition { get; private set; }
+
 	public MovementRestrictions MovementRestrictions => singleTileMover.MovementRestrictions;
 
 	private void Awake()
@@ -99,11 +101,15 @@ public class SingleTileManager : MonoBehaviour
 
 	public IEnumerator AnimateTileToNewPositionCoroutine()
 	{
+		tileIsBeingMovedIntoPosition = true;
+
 		while (transform.position != TileRestingPosition)
 		{
 			transform.position = Vector3.MoveTowards(transform.position, TileRestingPosition, Time.deltaTime * gravitySpeed);
 			yield return null;
 		}
+
+		tileIsBeingMovedIntoPosition = false;
 	}
 
 	public void SetTileScale()
@@ -166,7 +172,7 @@ public class SingleTileManager : MonoBehaviour
 
 	public void StartDestroySequence()
 	{
-		Debug.Log($"Destroy: {TileCharacter}");
+		//Debug.Log($"Destroy: {TileCharacter}");
 		TilesManager.Instance.RemoveTileFromBoard(this);
 		animator.SetTrigger(destroyMovementAnimationString);
 	}

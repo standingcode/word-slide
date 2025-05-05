@@ -55,11 +55,25 @@ namespace WordSlide
 
 		private void TileWasSwapped(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
+			if (rowsAndColumnsToCheck.Count == 0)
+			{
+				//Debug.Log("No rows or columns to check for words");
+				PlayerCanInteractWithTiles = true;
+				return;
+			}
+
 			// TODO: We have to block user input here, and only enable it again after all animations, tile drops, check for new words etc. etc.
-			//PlayerCanInteractWithTiles = false;
+			PlayerCanInteractWithTiles = false;
 
 			var validWords = _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
 			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
+
+			if (validWords.Count == 0)
+			{
+				//Debug.Log("No valid words found in the rows and columns checked");
+				PlayerCanInteractWithTiles = true;
+				return;
+			}
 
 			foreach (var word in validWords)
 			{
@@ -72,6 +86,7 @@ namespace WordSlide
 
 		public void OnDestroy()
 		{
+			_tileSwappedEventHandler.RemoveTileSwappedListener(TileWasSwapped);
 			Instance = null;
 		}
 	}

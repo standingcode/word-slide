@@ -1,4 +1,5 @@
 using Pooling;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -59,6 +60,7 @@ namespace WordSlide
 
 		public void OnDestroy()
 		{
+			StopAllCoroutines();
 			Instance = null;
 		}
 
@@ -207,12 +209,15 @@ namespace WordSlide
 
 			singleTileManagerCaller = null;
 
-			Debug.Log("New tiles needed called");
+			Dictionary<int, int> rowsAffected = new();
+			Dictionary<int, int> columnsAffected = new();
+
+			//Debug.Log("New tiles needed called");
 
 			// For each column
 			for (int column = 0; column < BoardTiles.GetLength(1); column++)
 			{
-				SingleTileManager singleTileManagerSpawnedOutSideHighest = null;
+				SingleTileManager singleTileManagerSpawnedOutsideHighest = null;
 
 				// For each row (each element in the column)
 				for (int row = BoardTiles.GetLength(0) - 1; row >= 0; row--)
@@ -220,6 +225,10 @@ namespace WordSlide
 					// If a null is found, work up from the index above and find a tile to move down.
 					if (BoardTiles[row, column] == null)
 					{
+						// This column and row is affected
+						columnsAffected[column] = column;
+						rowsAffected[row] = row;
+
 						// For each of the rows above this null tile
 						for (int rowAbove = row - 1; rowAbove >= -1; rowAbove--)
 						{
@@ -237,7 +246,7 @@ namespace WordSlide
 
 								float requiredXPosition = xTopLeftPoint;
 
-								float requiredYPosition = singleTileManagerSpawnedOutSideHighest != null ? singleTileManagerSpawnedOutSideHighest.transform.position.y + (SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y) :
+								float requiredYPosition = singleTileManagerSpawnedOutsideHighest != null ? singleTileManagerSpawnedOutsideHighest.transform.position.y + (SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y) :
 									yTopLeftPoint + (SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y);
 
 								var generatedTile = GenerateTile(row, column);
@@ -246,7 +255,7 @@ namespace WordSlide
 
 								generatedTile.ActivateTile();
 
-								singleTileManagerSpawnedOutSideHighest = generatedTile;
+								singleTileManagerSpawnedOutsideHighest = generatedTile;
 
 								boardTiles[row, column] = generatedTile;
 							}
@@ -270,17 +279,54 @@ namespace WordSlide
 				}
 			}
 
-			foreach (var singleTileManager in tilesWaitingToBeRemoved)
+			tilesWaitingToBeRemoved.Clear();
+
+			var RowsAndColumnsToCheck = new List<SingleTileManagerSequence>();
+
+			foreach (var row in rowsAffected)
 			{
-				for (int i = singleTileManager.MatrixIndex.Item1; i >= 0; i--)
+				RowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullRow(row.Value)));
+			}
+
+			foreach (var column in columnsAffected)
+			{
+				RowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullColumn(column.Value)));
+			}
+
+			//TileSwappedEventHandler.RaiseTileSwapped(RowsAndColumnsToCheck);
+			StartCoroutine(WaitForAllTilesToStopMovingAndThenEnablePlayerInput(RowsAndColumnsToCheck));
+		}
+
+		private IEnumerator WaitForAllTilesToStopMovingAndThenEnablePlayerInput(List<SingleTileManagerSequence> RowsAndColumnsToCheck)
+		{
+			while (true)
+			{
+				if (!AnyTileIsMoving())
 				{
-					Debug.Log($"{i}");
+					TileSwappedEventHandler.RaiseTileSwapped(RowsAndColumnsToCheck);
+					break;
+				}
+
+				yield return null;
+			}
+		}
+
+		private bool AnyTileIsMoving()
+		{
+			for (int i = 0; i < boardTiles.GetLength(0); i++)
+			{
+				for (int j = 0; j < boardTiles.GetLength(1); j++)
+				{
+					//Debug.Log($"Checking {i},{j}");
+
+					if (boardTiles[i, j] == null || boardTiles[i, j].tileIsBeingMovedIntoPosition)
+					{
+						return true;
+					}
 				}
 			}
 
-			tilesWaitingToBeRemoved.Clear();
-
-			// TODO: We need to call word finder on the affected rows and columns after the tile drops.			
+			return false;
 		}
 
 		/// <summary>
