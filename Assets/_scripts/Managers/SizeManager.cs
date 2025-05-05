@@ -90,12 +90,6 @@ namespace WordSlide
 			Instance = null;
 		}
 
-		//[SerializeField]
-		//private float tilePaddingRatio = 0.1f, minimumMarginFromBoardAsRatio = 0.05f;
-
-		[SerializeField]
-		SettingsScriptable settingsScriptable;
-
 		/// <summary>
 		/// Determine the board size, based on the screen's narrowest side and minus the exterior margin required.
 		/// </summary>
@@ -108,7 +102,7 @@ namespace WordSlide
 			if (ScreenIsLandscape())
 			{
 				// The camera orphograpic size is vertical, so we can use that as the max size of the board
-				sizeForWidthAndHeight = orthographicVertical - (orthographicVertical * (settingsScriptable.MinimumMarginFromBoardAsRatio * 2));
+				sizeForWidthAndHeight = orthographicVertical - (orthographicVertical * (SettingsScriptable.MinimumMarginFromBoardAsRatio * 2));
 			}
 			else
 			{
@@ -117,7 +111,7 @@ namespace WordSlide
 				Debug.Log(Screen.height);
 				float ratio = (float)Screen.width / (float)Screen.height;
 				float orthographicSize = ratio * orthographicVertical;
-				sizeForWidthAndHeight = orthographicSize - (orthographicSize * (settingsScriptable.MinimumMarginFromBoardAsRatio * 2));
+				sizeForWidthAndHeight = orthographicSize - (orthographicSize * (SettingsScriptable.MinimumMarginFromBoardAsRatio * 2));
 			}
 
 			return new Vector2(sizeForWidthAndHeight, sizeForWidthAndHeight);
@@ -131,16 +125,16 @@ namespace WordSlide
 		private (Vector2, Vector2) GetTileSizeAndInteriorPaddingSize(Vector2 boardSize)
 		{
 			// Step 1: Calculate the initial tile size based on board dimensions and grid layout  
-			float initialTileSizeX = boardSize.x / Settings.Instance.Columns;
-			float initialTileSizeY = boardSize.y / Settings.Instance.Rows;
+			float initialTileSizeX = boardSize.x / SettingsScriptable.Columns;
+			float initialTileSizeY = boardSize.y / SettingsScriptable.Rows;
 
 			// Step 2: Calculate the interior padding as a ratio of the initial tile size  
-			float xInteriorPadding = initialTileSizeX * settingsScriptable.TilePaddingRatio;
-			float yInteriorPadding = initialTileSizeY * settingsScriptable.TilePaddingRatio;
+			float xInteriorPadding = initialTileSizeX * SettingsScriptable.TilePaddingRatio;
+			float yInteriorPadding = initialTileSizeY * SettingsScriptable.TilePaddingRatio;
 
 			// Step 3: Adjust the tile size to account for the interior padding  
-			float adjustedTileSizeX = initialTileSizeX - (xInteriorPadding * (Settings.Instance.Columns - 1) / Settings.Instance.Columns);
-			float adjustedTileSizeY = initialTileSizeY - (yInteriorPadding * (Settings.Instance.Rows - 1) / Settings.Instance.Rows);
+			float adjustedTileSizeX = initialTileSizeX - (xInteriorPadding * (SettingsScriptable.Columns - 1) / SettingsScriptable.Columns);
+			float adjustedTileSizeY = initialTileSizeY - (yInteriorPadding * (SettingsScriptable.Rows - 1) / SettingsScriptable.Rows);
 
 			return (new Vector2(adjustedTileSizeX, adjustedTileSizeY), new Vector2(xInteriorPadding, yInteriorPadding));
 		}

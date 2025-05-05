@@ -1,6 +1,6 @@
 using Pooling;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Zenject;
 
@@ -31,7 +31,8 @@ namespace WordSlide
 
 		public static TilesManager Instance { get; private set; }
 
-		private Settings settings => Settings.Instance;
+		[SerializeField]
+		private SettingsScriptable settings;
 
 		public void Awake()
 		{
@@ -106,7 +107,7 @@ namespace WordSlide
 		{
 			DestroyExistingTiles();
 
-			boardTiles = new SingleTileManager[settings.Rows, settings.Columns];
+			boardTiles = new SingleTileManager[SettingsScriptable.Rows, SettingsScriptable.Columns];
 
 			for (int i = 0; i < boardTiles.GetLength(0); i++)
 			{

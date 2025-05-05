@@ -58,8 +58,8 @@ public class SingleTileManager : MonoBehaviour
 
 	private void SetTileDefaultPosition()
 	{
-		int columnMultiplier = matrixIndex.Item2 % Settings.Instance.Columns;
-		int rowMultiplier = matrixIndex.Item1 % Settings.Instance.Rows;
+		int columnMultiplier = matrixIndex.Item2 % SettingsScriptable.Columns;
+		int rowMultiplier = matrixIndex.Item1 % SettingsScriptable.Rows;
 
 		float requiredXPosition =
 			SizeManager.Instance.TileSpawnTopLeftStartingPoint.x + (columnMultiplier * (SizeManager.Instance.TileSize.x + SizeManager.Instance.InteriorPaddingSizes.x));
@@ -145,7 +145,7 @@ public class SingleTileManager : MonoBehaviour
 
 
 		// if the tile is on the right-hand side of the board, it can only move to the left
-		if (matrixIndex.Item2 == Settings.Instance.Columns - 1)
+		if (matrixIndex.Item2 == SettingsScriptable.Columns - 1)
 		{
 			movementRestrictions.xMax = transform.position.x;
 		}
@@ -170,7 +170,7 @@ public class SingleTileManager : MonoBehaviour
 
 
 		// if the tile is on the bottom of the board, it can only move up
-		if (matrixIndex.Item1 == Settings.Instance.Rows - 1)
+		if (matrixIndex.Item1 == SettingsScriptable.Rows - 1)
 		{
 			movementRestrictions.yMin = transform.position.y;
 		}

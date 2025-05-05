@@ -76,7 +76,7 @@ namespace WordSlide
 			}
 
 			// Main loop starts with stringLength -1 size of sliding window, down to minimum word length
-			for (int slidingWindowLength = singleTileManagerStringToCheck.Length - 1; slidingWindowLength >= Settings.Instance.MinimumWordLength; slidingWindowLength--)
+			for (int slidingWindowLength = singleTileManagerStringToCheck.Length - 1; slidingWindowLength >= SettingsScriptable.MinimumWordLength; slidingWindowLength--)
 			{
 				// Each iteration of the loop is a sliding window size, reducing from 1 below the length, down to minimum word length
 

@@ -4,24 +4,19 @@ using UnityEngine;
 public class SettingsScriptable : ScriptableObject
 {
 	[Header("Main Settings")]
-	[SerializeField]
-	private int columns = 10;
-	public int Columns => columns;
+	private static int columns = 8;
+	public static int Columns => columns;
 
-	[SerializeField]
-	private int rows = 10;
-	public int Rows => rows;
+	private static int rows = 8;
+	public static int Rows => rows;
 
-	[SerializeField]
-	private int minimumWordLength = 3;
-	public int MinimumWordLength => minimumWordLength;
+	private static int minimumWordLength = 4;
+	public static int MinimumWordLength => minimumWordLength;
 
 	[Header("Sizing")]
-	[SerializeField]
-	private float tilePaddingRatio = 0.1f;
-	public float TilePaddingRatio => tilePaddingRatio;
+	private static float tilePaddingRatio = 0.1f;
+	public static float TilePaddingRatio => tilePaddingRatio;
 
-	[SerializeField]
-	private float minimumMarginFromBoardAsRatio = 0.05f;
-	public float MinimumMarginFromBoardAsRatio => minimumMarginFromBoardAsRatio;
+	private static float minimumMarginFromBoardAsRatio = 0.05f;
+	public static float MinimumMarginFromBoardAsRatio => minimumMarginFromBoardAsRatio;
 }
