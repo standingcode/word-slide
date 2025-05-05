@@ -2,10 +2,17 @@ using Pooling;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.Android;
 using Zenject;
 
 namespace WordSlide
 {
+	public struct TileWaitingForSpawning
+	{
+		public SingleTileManager singletileManager;
+		public Vector2 spawningPosition;
+	}
+
 	public class TilesManager : MonoBehaviour
 	{
 		[Inject]
@@ -63,7 +70,18 @@ namespace WordSlide
 		public void GenerateTileBoardAndRemoveAnyExistingValidWords(IWordFinderService wordFinderService, IDictionaryService dictionaryService)
 		{
 			List<SingleTileManagerSequence> foundWords = new();
-			GenerateFullTileBoard();
+
+			DestroyExistingTiles();
+
+			boardTiles = new SingleTileManager[SettingsScriptable.Rows, SettingsScriptable.Columns];
+
+			for (int i = 0; i < boardTiles.GetLength(0); i++)
+			{
+				for (int j = 0; j < boardTiles.GetLength(1); j++)
+				{
+					boardTiles[i, j] = GenerateTile(i, j);
+				}
+			}
 
 			var sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -100,28 +118,16 @@ namespace WordSlide
 			ShowBoard();
 		}
 
-		/// <summary>
-		/// Sets the tiles which will be seen initially on the screen.
-		/// </summary>
-		private void GenerateFullTileBoard()
+		private SingleTileManager GenerateTile(int i, int j)
 		{
-			DestroyExistingTiles();
+			// Create new tile from the object pool
+			PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile", boardTilesRoot);
 
-			boardTiles = new SingleTileManager[SettingsScriptable.Rows, SettingsScriptable.Columns];
+			SingleTileManager singletile = boardTile.GetComponent<SingleTileManager>();
 
-			for (int i = 0; i < boardTiles.GetLength(0); i++)
-			{
-				for (int j = 0; j < boardTiles.GetLength(1); j++)
-				{
-					// Create new tile from the object pool
-					PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile", boardTilesRoot);
+			singletile.InitializeTile(dictionaryService.GetRandomChar(), i, j);
 
-					SingleTileManager singletile = boardTile.GetComponent<SingleTileManager>();
-
-					singletile.InitializeTile(dictionaryService.GetRandomChar(), i, j);
-					boardTiles[i, j] = singletile;
-				}
-			}
+			return singletile;
 		}
 
 		/// <summary>
@@ -183,6 +189,100 @@ namespace WordSlide
 			return column.ToArray();
 		}
 
+		List<SingleTileManager> tilesWaitingToBeRemoved = new();
+		public void RemoveTileFromBoard(SingleTileManager singleTileManager)
+		{
+			tilesWaitingToBeRemoved.Add(singleTileManager);
+			BoardTiles[singleTileManager.MatrixIndex.Item1, singleTileManager.MatrixIndex.Item2] = null;
+		}
+
+		public void NewTilesNeeded(SingleTileManager singleTileManagerCaller)
+		{
+			// We want this to be triggered by animation end, but we only want it called once
+			// All SingleTileManagers will call this method, so just use index 0
+			if (tilesWaitingToBeRemoved.Count == 0 || singleTileManagerCaller != tilesWaitingToBeRemoved[0])
+			{
+				return;
+			}
+
+			singleTileManagerCaller = null;
+
+			Debug.Log("New tiles needed called");
+
+			// For each column
+			for (int column = 0; column < BoardTiles.GetLength(1); column++)
+			{
+				SingleTileManager singleTileManagerSpawnedOutSideHighest = null;
+
+				// For each row (each element in the column)
+				for (int row = BoardTiles.GetLength(0) - 1; row >= 0; row--)
+				{
+					// If a null is found, work up from the index above and find a tile to move down.
+					if (BoardTiles[row, column] == null)
+					{
+						// For each of the rows above this null tile
+						for (int rowAbove = row - 1; rowAbove >= -1; rowAbove--)
+						{
+							// If row above is -1 we need to spawn a tile
+							if (rowAbove == -1)
+							{
+								int columnMultiplier = column % SettingsScriptable.Columns;
+								int rowMultiplier = 0 % SettingsScriptable.Rows;
+
+								var yTopLeftPoint
+									= SizeManager.Instance.TileSpawnTopLeftStartingPoint.y - (rowMultiplier * (SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y));
+
+								var xTopLeftPoint
+									= SizeManager.Instance.TileSpawnTopLeftStartingPoint.x + (columnMultiplier * (SizeManager.Instance.TileSize.x + SizeManager.Instance.InteriorPaddingSizes.x));
+
+								float requiredXPosition = xTopLeftPoint;
+
+								float requiredYPosition = singleTileManagerSpawnedOutSideHighest != null ? singleTileManagerSpawnedOutSideHighest.transform.position.y + (SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y) :
+									yTopLeftPoint + (SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y);
+
+								var generatedTile = GenerateTile(row, column);
+
+								generatedTile.SetTilePosition(new Vector3(requiredXPosition, requiredYPosition, 0f));
+
+								generatedTile.ActivateTile();
+
+								singleTileManagerSpawnedOutSideHighest = generatedTile;
+
+								boardTiles[row, column] = generatedTile;
+							}
+							else
+							{
+								// If we find a tile
+								if (boardTiles[rowAbove, column] != null)
+								{
+									// Swap in the matrix
+									boardTiles[row, column] = BoardTiles[rowAbove, column];
+									boardTiles[rowAbove, column] = null;
+
+									boardTiles[row, column].InitializeTile(boardTiles[row, column].TileCharacter, row, column);
+									boardTiles[row, column].ActivateTile();
+
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			foreach (var singleTileManager in tilesWaitingToBeRemoved)
+			{
+				for (int i = singleTileManager.MatrixIndex.Item1; i >= 0; i--)
+				{
+					Debug.Log($"{i}");
+				}
+			}
+
+			tilesWaitingToBeRemoved.Clear();
+
+			// TODO: We need to call word finder on the affected rows and columns after the tile drops.			
+		}
+
 		/// <summary>
 		/// Destroy the existing tiles before generating a new board.
 		/// </summary>
@@ -207,6 +307,12 @@ namespace WordSlide
 		/// <param name="mousePosition"></param>
 		private void CheckIfTileWasClicked(Vector2 mousePosition)
 		{
+			//If the player is not allowed to interact, return
+			if (!PlayManager.Instance.PlayerCanInteractWithTiles)
+			{
+				return;
+			}
+
 			// If a tile is alerady in motion, it needs dropping first
 			CheckIfTileNeedsToBeDropped();
 
@@ -291,8 +397,8 @@ namespace WordSlide
 
 			// Now set the SingleTileManage settings correctly
 			var tile1MatrixIndex = tile1.MatrixIndex;
-			tile1.MoveTileToNewPosition(tile2.MatrixIndex.Item1, tile2.MatrixIndex.Item2);
-			tile2.MoveTileToNewPosition(tile1MatrixIndex.Item1, tile1MatrixIndex.Item2);
+			tile1.SwapTileToNewPosition(tile2.MatrixIndex.Item1, tile2.MatrixIndex.Item2);
+			tile2.SwapTileToNewPosition(tile1MatrixIndex.Item1, tile1MatrixIndex.Item2);
 		}
 
 		/// <summary>

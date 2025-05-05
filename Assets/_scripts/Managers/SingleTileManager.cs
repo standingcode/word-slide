@@ -1,3 +1,5 @@
+using Pooling;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using WordSlide;
@@ -19,14 +21,26 @@ public class SingleTileManager : MonoBehaviour
 	private Renderer meshRenderer;
 
 	[SerializeField]
+	private Animator animator;
+
+	[SerializeField]
+	private float gravitySpeed = 9.87f;
+
+	[SerializeField]
 	private BoxCollider boxCollider;
 
 	[SerializeField]
 	private bool tileIsActive = false;
 	public bool TileIsActive => tileIsActive;
 
+	[SerializeField]
+	private string destroyMovementAnimationString;
+
 	private Vector3 tileRestingPosition;
 	public Vector3 TileRestingPosition => tileRestingPosition;
+
+	private Quaternion tileRestingRotation;
+	public Quaternion TileRestingRotation => tileRestingRotation;
 
 	[SerializeField]
 	private SingleTileMover singleTileMover;
@@ -35,7 +49,13 @@ public class SingleTileManager : MonoBehaviour
 
 	private void Awake()
 	{
+		tileRestingRotation = transform.rotation;
 		DeactivateTile();
+	}
+
+	private void OnDestroy()
+	{
+		StopAllCoroutines();
 	}
 
 	public void InitializeTile(char character, int row, int column)
@@ -47,16 +67,17 @@ public class SingleTileManager : MonoBehaviour
 		SetMovementRestrictions();
 	}
 
-	public void SetTileScale()
+	public void SwapTileToNewPosition(int i, int j)
 	{
-		// Set the scales based on the tile size
-		transform.localScale = new Vector3(
-		SizeManager.Instance.TileSize.x,
-		SizeManager.Instance.TileSize.y,
-		1f);
+		singleTileMover.StopMoving();
+		SetTileMatrixIndex(i, j);
+		SetTileDefaultPosition();
+
+		SetTilePosition(tileRestingPosition);
+		SetMovementRestrictions();
 	}
 
-	private void SetTileDefaultPosition()
+	public void SetTileDefaultPosition()
 	{
 		int columnMultiplier = matrixIndex.Item2 % SettingsScriptable.Columns;
 		int rowMultiplier = matrixIndex.Item1 % SettingsScriptable.Rows;
@@ -69,15 +90,29 @@ public class SingleTileManager : MonoBehaviour
 
 
 		tileRestingPosition = new Vector3(requiredXPosition, requiredYPosition, 0f);
-		transform.position = tileRestingPosition;
 	}
 
-	public void MoveTileToNewPosition(int i, int j)
+	public void SetTilePosition(Vector3 position)
 	{
-		singleTileMover.StopMoving();
-		SetTileMatrixIndex(i, j);
-		SetTileDefaultPosition();
-		SetMovementRestrictions();
+		transform.position = position;
+	}
+
+	public IEnumerator AnimateTileToNewPositionCoroutine()
+	{
+		while (transform.position != TileRestingPosition)
+		{
+			transform.position = Vector3.MoveTowards(transform.position, TileRestingPosition, Time.deltaTime * gravitySpeed);
+			yield return null;
+		}
+	}
+
+	public void SetTileScale()
+	{
+		// Set the scales based on the tile size
+		transform.localScale = new Vector3(
+		SizeManager.Instance.TileSize.x,
+		SizeManager.Instance.TileSize.y,
+		1f);
 	}
 
 	public void ResetTileToOriginalPosition()
@@ -107,6 +142,11 @@ public class SingleTileManager : MonoBehaviour
 
 	public void ActivateTile()
 	{
+		if (transform.position != TileRestingPosition)
+		{
+			StartCoroutine(AnimateTileToNewPositionCoroutine());
+		}
+
 		tileIsActive = true;
 		boxCollider.enabled = true;
 		meshRenderer.enabled = true;
@@ -119,6 +159,23 @@ public class SingleTileManager : MonoBehaviour
 		boxCollider.enabled = false;
 		meshRenderer.enabled = false;
 		textMesh.enabled = false;
+		transform.rotation = tileRestingRotation;
+
+		StopAllCoroutines();
+	}
+
+	public void StartDestroySequence()
+	{
+		Debug.Log($"Destroy: {TileCharacter}");
+		TilesManager.Instance.RemoveTileFromBoard(this);
+		animator.SetTrigger(destroyMovementAnimationString);
+	}
+
+	public void HighlightAnimationFinished()
+	{
+		DeactivateTile();
+		PoolManager.Instance.ReturnObjectToPool(GetComponent<PoolObject>());
+		TilesManager.Instance.NewTilesNeeded(this);
 	}
 
 	private void SetTileMatrixIndex(int row, int column)
@@ -135,24 +192,24 @@ public class SingleTileManager : MonoBehaviour
 		// If the tile is on the left-hand side of the board, it can only move to the right
 		if (matrixIndex.Item2 == 0)
 		{
-			movementRestrictions.xMin = transform.position.x;
+			movementRestrictions.xMin = tileRestingPosition.x;
 		}
 		// Otherwise the tile can move left one tile size plus padding		
 		else
 		{
-			movementRestrictions.xMin = transform.position.x - SizeManager.Instance.TileSize.x - SizeManager.Instance.InteriorPaddingSizes.x;
+			movementRestrictions.xMin = tileRestingPosition.x - SizeManager.Instance.TileSize.x - SizeManager.Instance.InteriorPaddingSizes.x;
 		}
 
 
 		// if the tile is on the right-hand side of the board, it can only move to the left
 		if (matrixIndex.Item2 == SettingsScriptable.Columns - 1)
 		{
-			movementRestrictions.xMax = transform.position.x;
+			movementRestrictions.xMax = tileRestingPosition.x;
 		}
 		// Otherwise the tile can move right one tile size plus padding
 		else
 		{
-			movementRestrictions.xMax = transform.position.x + SizeManager.Instance.TileSize.x + SizeManager.Instance.InteriorPaddingSizes.x;
+			movementRestrictions.xMax = tileRestingPosition.x + SizeManager.Instance.TileSize.x + SizeManager.Instance.InteriorPaddingSizes.x;
 		}
 
 		// Y PLAIN
@@ -160,24 +217,24 @@ public class SingleTileManager : MonoBehaviour
 		// if the tile is on the top of the board, it can only move down
 		if (matrixIndex.Item1 == 0)
 		{
-			movementRestrictions.yMax = transform.position.y;
+			movementRestrictions.yMax = tileRestingPosition.y;
 		}
 		// Otherwise the tile can move up one tile size plus padding
 		else
 		{
-			movementRestrictions.yMax = transform.position.y + SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y;
+			movementRestrictions.yMax = tileRestingPosition.y + SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y;
 		}
 
 
 		// if the tile is on the bottom of the board, it can only move up
 		if (matrixIndex.Item1 == SettingsScriptable.Rows - 1)
 		{
-			movementRestrictions.yMin = transform.position.y;
+			movementRestrictions.yMin = tileRestingPosition.y;
 		}
 		// Otherwise the tile can move down one tile size plus padding
 		else
 		{
-			movementRestrictions.yMin = transform.position.y - SizeManager.Instance.TileSize.y - SizeManager.Instance.InteriorPaddingSizes.y;
+			movementRestrictions.yMin = tileRestingPosition.y - SizeManager.Instance.TileSize.y - SizeManager.Instance.InteriorPaddingSizes.y;
 		}
 
 		singleTileMover.SetMovementRestrictions(movementRestrictions);

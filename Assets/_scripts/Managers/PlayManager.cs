@@ -17,6 +17,8 @@ namespace WordSlide
 	{
 		public static PlayManager Instance { get; private set; }
 
+		public bool PlayerCanInteractWithTiles { get; private set; } = false;
+
 		private IDictionaryService _dictionaryService;
 		private IWordFinderService _wordFinderService;
 
@@ -48,12 +50,24 @@ namespace WordSlide
 			_tileSwappedEventHandler.AddTileSwappedListener(TileWasSwapped);
 			TilesManager.Instance.GenerateTileBoardAndRemoveAnyExistingValidWords(_wordFinderService, _dictionaryService);
 			LoadingPanelRoot.SetActive(false);
+			PlayerCanInteractWithTiles = true;
 		}
 
 		private void TileWasSwapped(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
+			// TODO: We have to block user input here, and only enable it again after all animations, tile drops, check for new words etc. etc.
+			//PlayerCanInteractWithTiles = false;
+
 			var validWords = _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
 			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
+
+			foreach (var word in validWords)
+			{
+				foreach (var singleTileManager in word.SingleTileManagers)
+				{
+					singleTileManager.StartDestroySequence();
+				}
+			}
 		}
 
 		public void OnDestroy()

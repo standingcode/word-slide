@@ -274,8 +274,10 @@ MonoBehaviour:
   tileCharacter: 0
   textMesh: {fileID: 7744930552171424848}
   meshRenderer: {fileID: 3210051625092539890}
+  animator: {fileID: 2938429162728358114}
   boxCollider: {fileID: 1435310567558780645}
   tileIsActive: 0
+  destroyMovementAnimationString: MovementBeforeDestroyAnimation
   singleTileMover: {fileID: 240128338872377688}
 --- !u!114 &240128338872377688
 MonoBehaviour:
