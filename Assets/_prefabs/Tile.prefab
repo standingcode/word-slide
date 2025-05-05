@@ -235,6 +235,7 @@ GameObject:
   - component: {fileID: 3210051625092539890}
   - component: {fileID: 1435310567558780645}
   - component: {fileID: -1667713944468916382}
+  - component: {fileID: 2938429162728358114}
   m_Layer: 0
   m_Name: Tile
   m_TagString: Untagged
@@ -250,14 +251,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4629240430293829437}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.043577887, y: -0.043577887, z: -0.0019026523, w: 0.99809736}
+  m_LocalRotation: {x: -0.04354773, y: -0.05724808, z: -0.002499506, w: 0.99740666}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7078230789654957540}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -5, y: -5, z: 0}
+  m_LocalEulerAnglesHint: {x: -5, y: -6.57, z: 0}
 --- !u!114 &810480648988876237
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,6 +271,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e9884647a0ed004e915659a779d5239, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tileCharacter: 0
   textMesh: {fileID: 7744930552171424848}
   meshRenderer: {fileID: 3210051625092539890}
   boxCollider: {fileID: 1435310567558780645}
@@ -288,6 +290,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   zMovementWhenSliding: -1
+  distanceToConsiderCloseToCentre: 0.1
 --- !u!33 &4455411631575713389
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -375,3 +378,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   poolObjectIdentifier: tile
+--- !u!95 &2938429162728358114
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4629240430293829437}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a6fa3f6b9599e75488a64e17f089f995, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
