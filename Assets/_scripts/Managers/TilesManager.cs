@@ -1,6 +1,6 @@
 using Pooling;
 using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel.Design;
 using UnityEngine;
 using Zenject;
 
@@ -55,9 +55,54 @@ namespace WordSlide
 		}
 
 		/// <summary>
+		/// Initial call to generate the board with no words present. Calls GenerateFullTileBoard()
+		/// </summary>
+		/// <param name="wordFinderService"></param>
+		/// <param name="dictionaryService"></param>
+		public void GenerateTileBoardAndRemoveAnyExistingValidWords(IWordFinderService wordFinderService, IDictionaryService dictionaryService)
+		{
+			List<SingleTileManagerSequence> foundWords = new();
+			GenerateFullTileBoard();
+
+			var sw = System.Diagnostics.Stopwatch.StartNew();
+
+			do
+			{
+				List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
+
+				// Get all rows
+				for (int i = 0; i < BoardTiles.GetLength(0); i++)
+				{
+					rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullRow(i)));
+				}
+
+				// Get all columns
+				for (int i = 0; i < BoardTiles.GetLength(1); i++)
+				{
+					rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullColumn(i)));
+				}
+
+				foundWords = wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(dictionaryService, rowsAndColumnsToCheck);
+
+				if (foundWords.Count > 0)
+				{
+					foreach (var singleTileManagerSequence in foundWords)
+					{
+						ChangeCharactersForTiles(singleTileManagerSequence.SingleTileManagers);
+					}
+				}
+
+			} while (foundWords.Count > 0);
+
+			sw.Stop();
+			Debug.Log($"Generating the board witout words took {sw.ElapsedMilliseconds} milliseconds.");
+			ShowBoard();
+		}
+
+		/// <summary>
 		/// Sets the tiles which will be seen initially on the screen.
 		/// </summary>
-		public SingleTileManager[,] GenerateFullTileBoard()
+		private void GenerateFullTileBoard()
 		{
 			DestroyExistingTiles();
 
@@ -76,10 +121,11 @@ namespace WordSlide
 					boardTiles[i, j] = singletile;
 				}
 			}
-
-			return boardTiles;
 		}
 
+		/// <summary>
+		/// Allows the board to be shown after we are generating and making sure there are no words present.
+		/// </summary>
 		public void ShowBoard()
 		{
 			for (int i = 0; i < boardTiles.GetLength(0); i++)
@@ -92,7 +138,7 @@ namespace WordSlide
 		}
 
 		/// <summary>
-		/// This is used to remove words until we get a board without existing words.
+		/// This is used as part of the process to remove words until we get a board without existing words.
 		/// </summary>
 		public void ChangeCharactersForTiles(SingleTileManager[] listOfTilesToChangeCharacter)
 		{
@@ -102,6 +148,43 @@ namespace WordSlide
 			}
 		}
 
+		/// <summary>
+		/// Get a full row of tiles from the board by index number
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		public SingleTileManager[] GetFullRow(int index)
+		{
+			var row = new List<SingleTileManager>();
+
+			for (int i = 0; i < boardTiles.GetLength(1); i++)
+			{
+				row.Add(boardTiles[index, i]);
+			}
+
+			return row.ToArray();
+		}
+
+		/// <summary>
+		/// Get a full column of tiles from the board by index number
+		/// </summary>
+		/// <param name="index"></param>
+		/// <returns></returns>
+		public SingleTileManager[] GetFullColumn(int index)
+		{
+			var column = new List<SingleTileManager>();
+
+			for (int i = 0; i < boardTiles.GetLength(0); i++)
+			{
+				column.Add(boardTiles[i, index]);
+			}
+
+			return column.ToArray();
+		}
+
+		/// <summary>
+		/// Destroy the existing tiles before generating a new board.
+		/// </summary>
 		private void DestroyExistingTiles()
 		{
 			if (boardTiles != null)
@@ -162,6 +245,11 @@ namespace WordSlide
 			}
 		}
 
+		/// <summary>
+		/// Returns the rows and columns affected by two tiles, which will be ones that have just been swapped.
+		/// </summary>
+		/// <param name="tile1"></param>
+		/// <param name="tile2"></param>
 		private void DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent(SingleTileManager tile1, SingleTileManager tile2)
 		{
 			List<SingleTileManagerSequence> listOfRowsAndColumnsToCheck = new();
@@ -189,30 +277,11 @@ namespace WordSlide
 			TileSwappedEventHandler.RaiseTileSwapped(listOfRowsAndColumnsToCheck);
 		}
 
-		public SingleTileManager[] GetFullRow(int index)
-		{
-			var row = new List<SingleTileManager>();
-
-			for (int i = 0; i < boardTiles.GetLength(1); i++)
-			{
-				row.Add(boardTiles[index, i]);
-			}
-
-			return row.ToArray();
-		}
-
-		public SingleTileManager[] GetFullColumn(int index)
-		{
-			var column = new List<SingleTileManager>();
-
-			for (int i = 0; i < boardTiles.GetLength(0); i++)
-			{
-				column.Add(boardTiles[i, index]);
-			}
-
-			return column.ToArray();
-		}
-
+		/// <summary>
+		/// Do the actual swap of 2 tiles, this is done by swapping the references in the matrix and then setting the correct positions for each tile.
+		/// </summary>
+		/// <param name="tile1"></param>
+		/// <param name="tile2"></param>
 		private void SwapTiles(SingleTileManager tile1, SingleTileManager tile2)
 		{
 			// Swap in the matrix
@@ -225,6 +294,10 @@ namespace WordSlide
 			tile2.MoveTileToNewPosition(tile1MatrixIndex.Item1, tile1MatrixIndex.Item2);
 		}
 
+		/// <summary>
+		/// Check which tile, if any is due to be swapped with the currently moving tile.
+		/// </summary>
+		/// <returns></returns>
 		private SingleTileManager TileToBeSwappedWithCurrentlyMovingTile()
 		{
 			var vectorFromOriginalPosition = currentlyMovingTile.transform.position - currentlyMovingTile.TileRestingPosition;

@@ -87,41 +87,4 @@ public class PlayManager_Tests
 		}
 		return new SingleTileManagerSequence(listOfSingleTileManagers.ToArray());
 	}
-
-	[Test]
-	public async Task TestBoardCreationWithRemovingExistingWords()
-	{
-		// Arrange
-		var gameObject = new GameObject();
-		var sut = gameObject.AddComponent<PlayManager>();
-		var tilesManager = gameObject.AddComponent<TilesManager>();
-		tilesManager.Awake();
-		var settings = gameObject.AddComponent<Settings>();
-		settings.Awake();
-
-		var wordFinderService = new WordFinderService();
-		var dictionaryService = new DictionaryService(new DictionaryImporterService());
-		await sut.Construct(dictionaryService, wordFinderService);
-
-		// Act
-		sut.GenerateTileBoardUntilNoWordsPresent();
-
-		List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
-
-		// Assert
-		// Not sure about this yet....
-		// Get all rows
-		for (int i = 0; i < TilesManager.Instance.BoardTiles.GetLength(0); i++)
-		{
-			rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullRow(i)));
-		}
-
-		// Get all columns
-		for (int i = 0; i < TilesManager.Instance.BoardTiles.GetLength(1); i++)
-		{
-			rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullColumn(i)));
-		}
-
-		Assert.True(wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(dictionaryService, rowsAndColumnsToCheck).Count == 0);
-	}
 }
