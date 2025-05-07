@@ -7,10 +7,10 @@ namespace WordSlide
 	{
 		public static Vector2 GetMouseOrPointerPosition()
 		{
-#if UNITY_EDITOR
-			return Mouse.current.position.ReadValue();
-#else
+#if ANDROID || IOS
 			return Touchscreen.current.primaryTouch.position.ReadValue();
+#else
+			return Mouse.current.position.ReadValue();
 #endif
 		}
 	}
