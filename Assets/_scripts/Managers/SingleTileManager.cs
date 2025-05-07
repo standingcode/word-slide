@@ -81,17 +81,7 @@ public class SingleTileManager : MonoBehaviour
 
 	public void SetTileDefaultPosition()
 	{
-		int columnMultiplier = matrixIndex.Item2 % SettingsScriptable.Columns;
-		int rowMultiplier = matrixIndex.Item1 % SettingsScriptable.Rows;
-
-		float requiredXPosition =
-			SizeManager.Instance.TileSpawnTopLeftStartingPoint.x + (columnMultiplier * (SizeManager.Instance.TileSize.x + SizeManager.Instance.InteriorPaddingSizes.x));
-
-		float requiredYPosition =
-			SizeManager.Instance.TileSpawnTopLeftStartingPoint.y - (rowMultiplier * (SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y));
-
-
-		tileRestingPosition = new Vector3(requiredXPosition, requiredYPosition, 0f);
+		tileRestingPosition = SizeManager.Instance.TileSpawnPositions[MatrixIndex.Item1, MatrixIndex.Item2];
 	}
 
 	public void SetTilePosition(Vector3 position)

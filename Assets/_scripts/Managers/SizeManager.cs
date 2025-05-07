@@ -4,73 +4,20 @@ namespace WordSlide
 {
 	public class SizeManager : MonoBehaviour
 	{
-		private Vector2? boardSize = null;
-		public Vector2 BoardSize
-		{
-			get
-			{
-				if (boardSize == null)
-				{
-					boardSize = GetBoardSize();
-					return boardSize.Value;
-				}
-				else
-				{
-					return boardSize.Value;
-				}
-			}
-		}
+		private Vector2 boardSize;
+		public Vector2 BoardSize => boardSize;
 
-		private Vector2? tileSize = null;
-		public Vector2 TileSize
-		{
-			get
-			{
-				if (tileSize == null)
-				{
-					(tileSize, interiorPaddingSizes) = GetTileSizeAndInteriorPaddingSize(BoardSize);
-					return tileSize.Value;
-				}
-				else
-				{
-					return tileSize.Value;
-				}
-			}
-		}
+		private Vector2 tileSize;
+		public Vector2 TileSize => tileSize;
 
-		private Vector2? interiorPaddingSizes = null;
-		public Vector2 InteriorPaddingSizes
-		{
-			get
-			{
-				if (interiorPaddingSizes == null)
-				{
-					(tileSize, interiorPaddingSizes) = GetTileSizeAndInteriorPaddingSize(BoardSize);
-					return interiorPaddingSizes.Value;
-				}
-				else
-				{
-					return interiorPaddingSizes.Value;
-				}
-			}
-		}
+		private Vector2 interiorPaddingSizes;
+		public Vector2 InteriorPaddingSizes => interiorPaddingSizes;
 
-		private Vector2? tileSpawnTopLeftStartingPoint = null;
-		public Vector2 TileSpawnTopLeftStartingPoint
-		{
-			get
-			{
-				if (tileSpawnTopLeftStartingPoint == null)
-				{
-					tileSpawnTopLeftStartingPoint = GetTileSpawnTopLeftStartingPoint(TileSize, BoardSize);
-					return tileSpawnTopLeftStartingPoint.Value;
-				}
-				else
-				{
-					return tileSpawnTopLeftStartingPoint.Value;
-				}
-			}
-		}
+		private Vector2 tileSpawnTopLeftStartingPoint;
+		public Vector2 TileSpawnTopLeftStartingPoint => tileSpawnTopLeftStartingPoint;
+
+		private Vector3[,] tileSpawnPositions;
+		public Vector3[,] TileSpawnPositions => tileSpawnPositions;
 
 		public static SizeManager Instance { get; private set; }
 
@@ -83,6 +30,8 @@ namespace WordSlide
 			}
 
 			Instance = this;
+
+			SetSizes();
 		}
 
 		private void OnDestroy()
@@ -90,11 +39,18 @@ namespace WordSlide
 			Instance = null;
 		}
 
+		private void SetSizes()
+		{
+			SetBoardSize();
+			SetTileSizeAndInteriorPaddingSize(boardSize);
+			SetTileSpawnTopLeftStartingPoint(tileSize, boardSize);
+			SetTileSpawnPositions();
+		}
+
 		/// <summary>
 		/// Determine the board size, based on the screen's narrowest side and minus the exterior margin required.
 		/// </summary>
-		/// <returns>Vector2 of the board size x and y. Currently just using a square.</returns>
-		private Vector2 GetBoardSize()
+		private void SetBoardSize()
 		{
 			float sizeForWidthAndHeight;
 			float orthographicVertical = Camera.main.orthographicSize * 2;
@@ -114,15 +70,14 @@ namespace WordSlide
 				sizeForWidthAndHeight = orthographicSize - (orthographicSize * (SettingsScriptable.MinimumMarginFromBoardAsRatio * 2));
 			}
 
-			return new Vector2(sizeForWidthAndHeight, sizeForWidthAndHeight);
+			boardSize = new Vector2(sizeForWidthAndHeight, sizeForWidthAndHeight);
 		}
 
 		/// <summary>
 		/// The method calculates the tile sizes and and interior padding sizes
 		/// </summary>
-		/// <param name="boardSize"></param>
-		/// <returns>The tile sizes x and y and the interior margin sizes x and y</returns>
-		private (Vector2, Vector2) GetTileSizeAndInteriorPaddingSize(Vector2 boardSize)
+		/// <param name="boardSize"></param>		
+		private void SetTileSizeAndInteriorPaddingSize(Vector2 boardSize)
 		{
 			// Step 1: Calculate the initial tile size based on board dimensions and grid layout  
 			float initialTileSizeX = boardSize.x / SettingsScriptable.Columns;
@@ -136,7 +91,8 @@ namespace WordSlide
 			float adjustedTileSizeX = initialTileSizeX - (xInteriorPadding * (SettingsScriptable.Columns - 1) / SettingsScriptable.Columns);
 			float adjustedTileSizeY = initialTileSizeY - (yInteriorPadding * (SettingsScriptable.Rows - 1) / SettingsScriptable.Rows);
 
-			return (new Vector2(adjustedTileSizeX, adjustedTileSizeY), new Vector2(xInteriorPadding, yInteriorPadding));
+			tileSize = new Vector2(adjustedTileSizeX, adjustedTileSizeY);
+			interiorPaddingSizes = new Vector2(xInteriorPadding, yInteriorPadding);
 		}
 
 		/// <summary>
@@ -144,8 +100,7 @@ namespace WordSlide
 		/// </summary>
 		/// <param name="tileSize"></param>
 		/// <param name="boardSize"></param>
-		/// <returns>Vector2 representing the starting point in 2D of the top left tile</returns>
-		private Vector2 GetTileSpawnTopLeftStartingPoint(Vector2 tileSize, Vector2 boardSize)
+		private void SetTileSpawnTopLeftStartingPoint(Vector2 tileSize, Vector2 boardSize)
 		{
 			// 0 position - (0.5 * the width) + (0.5 * one tile width) should be the x position
 			float startingPointX = 0 - (0.5f * boardSize.x) + (0.5f * tileSize.x);
@@ -153,7 +108,29 @@ namespace WordSlide
 			// 0 position - (0.5 * the height) + (0.5 * one tile height)  should be the y position
 			float startingPointY = 0 + (0.5f * boardSize.y) - (0.5f * tileSize.y);
 
-			return new Vector2(startingPointX, startingPointY);
+			tileSpawnTopLeftStartingPoint = new Vector2(startingPointX, startingPointY);
+		}
+
+		private void SetTileSpawnPositions()
+		{
+			tileSpawnPositions = new Vector3[SettingsScriptable.Rows, SettingsScriptable.Columns];
+
+			for (int i = 0; i < SettingsScriptable.Rows; i++)
+			{
+				for (int j = 0; j < SettingsScriptable.Columns; j++)
+				{
+					int rowMultiplier = i % SettingsScriptable.Rows;
+					int columnMultiplier = j % SettingsScriptable.Columns;
+
+					float requiredXPosition =
+						tileSpawnTopLeftStartingPoint.x + (columnMultiplier * (tileSize.x + interiorPaddingSizes.x));
+
+					float requiredYPosition =
+						tileSpawnTopLeftStartingPoint.y - (rowMultiplier * (tileSize.y + interiorPaddingSizes.y));
+
+					tileSpawnPositions[i, j] = new Vector3(requiredXPosition, requiredYPosition, 0f);
+				}
+			}
 		}
 
 		/// <summary>
