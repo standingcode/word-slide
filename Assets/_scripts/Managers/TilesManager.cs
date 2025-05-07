@@ -75,7 +75,7 @@ namespace WordSlide
 			{
 				for (int j = 0; j < boardTiles.GetLength(1); j++)
 				{
-					boardTiles[i, j] = GenerateTile(i, j);
+					boardTiles[i, j] = GenerateAndInitializeTile(i, j);
 				}
 			}
 
@@ -114,14 +114,14 @@ namespace WordSlide
 			ShowBoard();
 		}
 
-		private SingleTileManager GenerateTile(int i, int j)
+		private SingleTileManager GenerateAndInitializeTile(int i, int j, Vector3? overrideStartPosition = null)
 		{
 			// Create new tile from the object pool
 			PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile", boardTilesRoot);
 
 			SingleTileManager singletile = boardTile.GetComponent<SingleTileManager>();
 
-			singletile.InitializeTileAndMoveToPositionNow(dictionaryService.GetRandomChar(), i, j);
+			singletile.InitializeTile(dictionaryService.GetRandomChar(), i, j, overrideStartPosition);
 
 			return singletile;
 		}
@@ -185,27 +185,38 @@ namespace WordSlide
 			return column.ToArray();
 		}
 
+
 		List<SingleTileManager> tilesWaitingToBeRemoved = new();
-		public void RemoveTileFromBoard(SingleTileManager singleTileManager)
+		public void DestroyTiles(List<SingleTileManager> tilesToRemove)
 		{
-			tilesWaitingToBeRemoved.Add(singleTileManager);
-			BoardTiles[singleTileManager.MatrixIndex.Item1, singleTileManager.MatrixIndex.Item2] = null;
+			Debug.Log($"Destroying {tilesToRemove.Count} tiles.");
+
+			foreach (var tile in tilesToRemove)
+			{
+				BoardTiles[tile.MatrixIndex.Item1, tile.MatrixIndex.Item2] = null;
+				tilesWaitingToBeRemoved.Add(tile);
+				tile.StartDestroySequence();
+			}
 		}
 
 		private int tilesFalling = 0;
 		private List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
-		public void NewTilesNeeded(SingleTileManager singleTileManagerCaller)
+		/// <summary>
+		/// Triggered at the end of tile self-destruct sequence
+		/// </summary>
+		/// <param name="singleTileManagerCaller"></param>
+		public void TileHasFinishedSelfDestructSequence(SingleTileManager singleTileManagerCaller)
 		{
 			tilesWaitingToBeRemoved.RemoveAt(0);
+			singleTileManagerCaller.DeactivateTile();
+			PoolManager.Instance.ReturnObjectToPool(singleTileManagerCaller.GetComponent<PoolObject>());
 
-			if (tilesWaitingToBeRemoved.Count != 0)
+			Debug.Log($"Tiles waiting to be removed: {tilesWaitingToBeRemoved.Count}");
+
+			if (tilesWaitingToBeRemoved.Count > 0)
 			{
 				return;
 			}
-
-			tilesFalling = 0;
-
-			singleTileManagerCaller = null;
 
 			Dictionary<int, int> rowsAffected = new();
 			Dictionary<int, int> columnsAffected = new();
@@ -215,10 +226,10 @@ namespace WordSlide
 			{
 				int indexForTileAbove = 0;
 
-				// For each row (each element in the column)
+				// For each row (each element in the column starting from the bottom)
 				for (int rowIndex = BoardTiles.GetLength(0) - 1; rowIndex >= 0; rowIndex--)
 				{
-					// If a null is found, work up from the index above and find a tile to move down.
+					// If a null is found, the tile is destroyed, work up from the index above and find a tile to move down.
 					if (BoardTiles[rowIndex, columnIndex] == null)
 					{
 						// This column and row is affected
@@ -234,13 +245,10 @@ namespace WordSlide
 								// Add to number of tiles being dropped in
 								tilesFalling++;
 
-								var generatedTile = GenerateTile(rowIndex, columnIndex);
+								boardTiles[rowIndex, columnIndex]
+									= GenerateAndInitializeTile(rowIndex, columnIndex, SizeManager.Instance.GetAboveColumnStartingPosition(columnIndex, indexForTileAbove));
 
-								generatedTile.SetTilePositionNow(SizeManager.Instance.AboveColumnStartingPosition(columnIndex, indexForTileAbove));
-
-								generatedTile.ActivateTile();
-
-								boardTiles[rowIndex, columnIndex] = generatedTile;
+								boardTiles[rowIndex, columnIndex].ActivateTile();
 
 								indexForTileAbove++;
 							}
@@ -256,8 +264,7 @@ namespace WordSlide
 									boardTiles[rowIndex, columnIndex] = BoardTiles[rowAbove, columnIndex];
 									boardTiles[rowAbove, columnIndex] = null;
 
-									boardTiles[rowIndex, columnIndex].InitializeTileAndLetDropToPosition(boardTiles[rowIndex, columnIndex].TileCharacter, rowIndex, columnIndex);
-									boardTiles[rowIndex, columnIndex].ActivateTile();
+									boardTiles[rowIndex, columnIndex].MakeExistingTileDropToNewPosition(rowIndex, columnIndex);
 
 									break;
 								}
@@ -266,8 +273,6 @@ namespace WordSlide
 					}
 				}
 			}
-
-			tilesWaitingToBeRemoved.Clear();
 
 			foreach (var row in rowsAffected)
 			{
@@ -280,6 +285,9 @@ namespace WordSlide
 			}
 		}
 
+		/// <summary>
+		/// Called from a single tile when it has finished dropping
+		/// </summary>
 		public void TileFinishedDropIn()
 		{
 			tilesFalling--;
@@ -348,7 +356,7 @@ namespace WordSlide
 
 				if (tileToSwapWith == null)
 				{
-					currentlyMovingTile.ResetTileToOriginalPosition();
+					currentlyMovingTile.ResetTileToItsRestingPosition();
 				}
 				else
 				{
@@ -404,8 +412,8 @@ namespace WordSlide
 
 			// Now set the SingleTileManage settings correctly
 			var tile1MatrixIndex = tile1.MatrixIndex;
-			tile1.SwapTileToNewPosition(tile2.MatrixIndex.Item1, tile2.MatrixIndex.Item2);
-			tile2.SwapTileToNewPosition(tile1MatrixIndex.Item1, tile1MatrixIndex.Item2);
+			tile1.MoveToNewPositionInGrid(tile2.MatrixIndex.Item1, tile2.MatrixIndex.Item2);
+			tile2.MoveToNewPositionInGrid(tile1MatrixIndex.Item1, tile1MatrixIndex.Item2);
 		}
 
 		/// <summary>

@@ -58,72 +58,61 @@ public class SingleTileManager : MonoBehaviour
 		StopAllCoroutines();
 	}
 
-	private void InitializeTile(char character, int row, int column)
+	/// <summary>
+	/// Initialize the tile, setting character, matrix location, scale, resting position and the movement restrictions
+	/// </summary>
+	/// <param name="character"></param>
+	/// <param name="row"></param>
+	/// <param name="column"></param>
+	/// <param name="overrideStartPosition">Override the start position, used for spawning above the board</param>
+	public void InitializeTile(char character, int row, int column, Vector3? overrideStartPosition = null)
 	{
 		SetTileCharacter(character);
 		SetTileMatrixIndex(row, column);
 		SetTileScale();
 		SetTileRestingPosition();
-		SetMovementRestrictions();
-	}
 
-	public void InitializeTileAndMoveToPositionNow(char character, int row, int column)
-	{
-		InitializeTile(character, row, column);
-		SetTilePositionNow(tileRestingPosition);
-	}
-
-	public void InitializeTileAndLetDropToPosition(char character, int row, int column)
-	{
-		InitializeTile(character, row, column);
-	}
-
-	public void SwapTileToNewPosition(int i, int j)
-	{
-		singleTileMover.StopMoving();
-		SetTileMatrixIndex(i, j);
-		SetTileRestingPosition();
-
-		SetTilePositionNow(tileRestingPosition);
-		SetMovementRestrictions();
-	}
-
-	public void SetTileRestingPosition()
-	{
-		tileRestingPosition = SizeManager.Instance.TileSpawnPositions[MatrixIndex.Item1, MatrixIndex.Item2];
-	}
-
-	public void SetTilePositionNow(Vector3 position)
-	{
-		transform.position = position;
-	}
-
-	public IEnumerator AnimateTileFallingToNewPositionCoroutine()
-	{
-		while (transform.position != TileRestingPosition)
+		if (overrideStartPosition != null)
 		{
-			transform.position = Vector3.MoveTowards(transform.position, TileRestingPosition, Time.deltaTime * gravitySpeed);
-			yield return null;
+			transform.position = overrideStartPosition.Value;
+			StartTileDrop();
 		}
-
-		TilesManager.Instance.TileFinishedDropIn();
+		else
+		{
+			transform.position = tileRestingPosition;
+		}
 	}
 
-	public void SetTileScale()
-	{
-		// Set the scales based on the tile size
-		transform.localScale = new Vector3(
-		SizeManager.Instance.TileSize.x,
-		SizeManager.Instance.TileSize.y,
-		1f);
-	}
-
-	public void ResetTileToOriginalPosition()
+	/// <summary>
+	/// Used for tile swaps
+	/// </summary>
+	/// <param name="row"></param>
+	/// <param name="column"></param>
+	public void MoveToNewPositionInGrid(int row, int column)
 	{
 		singleTileMover.StopMoving();
+
+		SetTileMatrixIndex(row, column);
+		SetTileRestingPosition();
 		transform.position = tileRestingPosition;
 	}
 
+	/// <summary>
+	/// This drops this already existing tile to a new position in the grid.
+	/// </summary>
+	/// <param name="row"></param>
+	/// <param name="column"></param>
+	public void MakeExistingTileDropToNewPosition(int row, int column)
+	{
+		SetTileMatrixIndex(row, column);
+		SetTileRestingPosition();
+		StartTileDrop();
+	}
+
+	/// <summary>
+	/// Set the character of the tile, needs to be public to allow the generation of board without existing words.
+	/// </summary>
+	/// <param name="character"></param>
 	public void SetTileCharacter(char character)
 	{
 		tileCharacter = character;
@@ -137,25 +126,42 @@ public class SingleTileManager : MonoBehaviour
 		textMesh.text = tileCharacter.ToString().ToUpper();
 	}
 
-	// When the tile is first selected, this can be called from the tile manager which should get a reference via a ray	
+	/// <summary>
+	/// When the tile is first selected, this can be called from the tile manager which should get a reference via a ray
+	/// </summary>
+	/// <param name="mousePosition"></param>
 	public void TileWasClickedOn(Vector2 mousePosition)
 	{
 		singleTileMover.StartMoving(mousePosition);
 	}
 
-	public void ActivateTile()
+	/// <summary>
+	/// Start the dropping of the tile
+	/// </summary>
+	public void StartTileDrop()
 	{
 		if (transform.position != TileRestingPosition)
 		{
 			StartCoroutine(AnimateTileFallingToNewPositionCoroutine());
 		}
+	}
 
+	/// <summary>
+	/// Activate the tile to make it visible and interactable
+	/// </summary>
+	public void ActivateTile()
+	{
 		tileIsActive = true;
 		boxCollider.enabled = true;
 		visualCube.SetActive(true);
 		textMesh.enabled = true;
+
+
 	}
 
+	/// <summary>
+	/// Deactivate the tile, will be invisible and not interactable
+	/// </summary>
 	public void DeactivateTile()
 	{
 		tileIsActive = false;
@@ -167,18 +173,40 @@ public class SingleTileManager : MonoBehaviour
 		StopAllCoroutines();
 	}
 
+	/// <summary>
+	/// Called from the PlayManager when this tile is part of a detected word
+	/// The animation is triggered, which will then call HighlightAnimationFinished
+	/// </summary>
 	public void StartDestroySequence()
 	{
-		//Debug.Log($"Destroy: {TileCharacter}");
-		TilesManager.Instance.RemoveTileFromBoard(this);
 		animator.SetTrigger(destroyMovementAnimationString);
 	}
 
+	/// <summary>
+	/// Called as an event from the animation
+	/// </summary>
 	public void HighlightAnimationFinished()
 	{
-		DeactivateTile();
-		PoolManager.Instance.ReturnObjectToPool(GetComponent<PoolObject>());
-		TilesManager.Instance.NewTilesNeeded(this);
+		TilesManager.Instance.TileHasFinishedSelfDestructSequence(this);
+	}
+
+	public void ResetTileToItsRestingPosition()
+	{
+		singleTileMover.StopMoving();
+		transform.position = tileRestingPosition;
+	}
+
+	// Private methods
+
+	private IEnumerator AnimateTileFallingToNewPositionCoroutine()
+	{
+		while (transform.position != TileRestingPosition)
+		{
+			transform.position = Vector3.MoveTowards(transform.position, TileRestingPosition, Time.deltaTime * gravitySpeed);
+			yield return null;
+		}
+
+		TilesManager.Instance.TileFinishedDropIn();
 	}
 
 	private void SetTileMatrixIndex(int row, int column)
@@ -241,5 +269,20 @@ public class SingleTileManager : MonoBehaviour
 		}
 
 		singleTileMover.SetMovementRestrictions(movementRestrictions);
+	}
+
+	private void SetTileRestingPosition()
+	{
+		tileRestingPosition = SizeManager.Instance.TileSpawnPositions[MatrixIndex.Item1, MatrixIndex.Item2];
+		SetMovementRestrictions();
+	}
+
+	private void SetTileScale()
+	{
+		// Set the scales based on the tile size
+		transform.localScale = new Vector3(
+		SizeManager.Instance.TileSize.x,
+		SizeManager.Instance.TileSize.y,
+		1f);
 	}
 }

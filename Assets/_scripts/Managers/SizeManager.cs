@@ -39,7 +39,7 @@ namespace WordSlide
 			Instance = null;
 		}
 
-		public Vector3 AboveColumnStartingPosition(int columnIndex, int heightIndex)
+		public Vector3 GetAboveColumnStartingPosition(int columnIndex, int heightIndex)
 		{
 			float xPos = tileSpawnTopLeftStartingPoint.x + (columnIndex * (tileSize.x + interiorPaddingSizes.x));
 			float yPos = tileSpawnTopLeftStartingPoint.y + tileSize.y + interiorPaddingSizes.y + (heightIndex * (tileSize.y + interiorPaddingSizes.y));

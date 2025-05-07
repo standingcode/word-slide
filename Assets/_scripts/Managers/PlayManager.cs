@@ -28,6 +28,8 @@ namespace WordSlide
 		[SerializeField]
 		GameObject LoadingPanelRoot;
 
+		public int TilesEnteringDestructSequenceCount { get; set; } = 0;
+
 		[Inject]
 		public async Task Construct(IDictionaryService dictionaryService, IWordFinderService wordFinderService)
 		{
@@ -55,33 +57,39 @@ namespace WordSlide
 
 		private void TileWasSwapped(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
+			PlayerCanInteractWithTiles = false;
+
 			if (rowsAndColumnsToCheck.Count == 0)
 			{
-				//Debug.Log("No rows or columns to check for words");
 				PlayerCanInteractWithTiles = true;
 				return;
 			}
-
-			// TODO: We have to block user input here, and only enable it again after all animations, tile drops, check for new words etc. etc.
-			PlayerCanInteractWithTiles = false;
 
 			var validWords = _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
 			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
 
 			if (validWords.Count == 0)
 			{
-				//Debug.Log("No valid words found in the rows and columns checked");
 				PlayerCanInteractWithTiles = true;
 				return;
 			}
+
+			List<SingleTileManager> tilesToDestroy = new();
 
 			foreach (var word in validWords)
 			{
 				foreach (var singleTileManager in word.SingleTileManagers)
 				{
-					singleTileManager.StartDestroySequence();
+					if (tilesToDestroy.Contains(singleTileManager))
+					{
+						continue;
+					}
+
+					tilesToDestroy.Add(singleTileManager);
 				}
 			}
+
+			TilesManager.Instance.DestroyTiles(tilesToDestroy);
 		}
 
 		public void OnDestroy()
