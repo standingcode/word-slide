@@ -121,7 +121,7 @@ namespace WordSlide
 
 			SingleTileManager singletile = boardTile.GetComponent<SingleTileManager>();
 
-			singletile.InitializeTile(dictionaryService.GetRandomChar(), i, j);
+			singletile.InitializeTileAndMoveToPositionNow(dictionaryService.GetRandomChar(), i, j);
 
 			return singletile;
 		}
@@ -192,78 +192,72 @@ namespace WordSlide
 			BoardTiles[singleTileManager.MatrixIndex.Item1, singleTileManager.MatrixIndex.Item2] = null;
 		}
 
+		private int tilesFalling = 0;
+		private List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
 		public void NewTilesNeeded(SingleTileManager singleTileManagerCaller)
 		{
-			// We want this to be triggered by animation end, but we only want it called once
-			// All SingleTileManagers will call this method, so just use index 0
-			if (tilesWaitingToBeRemoved.Count == 0 || singleTileManagerCaller != tilesWaitingToBeRemoved[0])
+			tilesWaitingToBeRemoved.RemoveAt(0);
+
+			if (tilesWaitingToBeRemoved.Count != 0)
 			{
 				return;
 			}
+
+			tilesFalling = 0;
 
 			singleTileManagerCaller = null;
 
 			Dictionary<int, int> rowsAffected = new();
 			Dictionary<int, int> columnsAffected = new();
 
-			//Debug.Log("New tiles needed called");
-
 			// For each column
-			for (int column = 0; column < BoardTiles.GetLength(1); column++)
+			for (int columnIndex = 0; columnIndex < BoardTiles.GetLength(1); columnIndex++)
 			{
-				SingleTileManager singleTileManagerSpawnedOutsideHighest = null;
+				int indexForTileAbove = 0;
 
 				// For each row (each element in the column)
-				for (int row = BoardTiles.GetLength(0) - 1; row >= 0; row--)
+				for (int rowIndex = BoardTiles.GetLength(0) - 1; rowIndex >= 0; rowIndex--)
 				{
 					// If a null is found, work up from the index above and find a tile to move down.
-					if (BoardTiles[row, column] == null)
+					if (BoardTiles[rowIndex, columnIndex] == null)
 					{
 						// This column and row is affected
-						columnsAffected[column] = column;
-						rowsAffected[row] = row;
+						columnsAffected[columnIndex] = columnIndex;
+						rowsAffected[rowIndex] = rowIndex;
 
 						// For each of the rows above this null tile
-						for (int rowAbove = row - 1; rowAbove >= -1; rowAbove--)
+						for (int rowAbove = rowIndex - 1; rowAbove >= -1; rowAbove--)
 						{
 							// If row above is -1 we need to spawn a tile
 							if (rowAbove == -1)
 							{
-								int columnMultiplier = column % SettingsScriptable.Columns;
-								int rowMultiplier = 0 % SettingsScriptable.Rows;
+								// Add to number of tiles being dropped in
+								tilesFalling++;
 
-								var yTopLeftPoint
-									= SizeManager.Instance.TileSpawnTopLeftStartingPoint.y - (rowMultiplier * (SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y));
+								var generatedTile = GenerateTile(rowIndex, columnIndex);
 
-								var xTopLeftPoint
-									= SizeManager.Instance.TileSpawnTopLeftStartingPoint.x + (columnMultiplier * (SizeManager.Instance.TileSize.x + SizeManager.Instance.InteriorPaddingSizes.x));
-
-								float requiredXPosition = xTopLeftPoint;
-
-								float requiredYPosition = singleTileManagerSpawnedOutsideHighest != null ? singleTileManagerSpawnedOutsideHighest.transform.position.y + (SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y) :
-									yTopLeftPoint + (SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y);
-
-								var generatedTile = GenerateTile(row, column);
-
-								generatedTile.SetTilePosition(new Vector3(requiredXPosition, requiredYPosition, 0f));
+								generatedTile.SetTilePositionNow(SizeManager.Instance.AboveColumnStartingPosition(columnIndex, indexForTileAbove));
 
 								generatedTile.ActivateTile();
 
-								singleTileManagerSpawnedOutsideHighest = generatedTile;
+								boardTiles[rowIndex, columnIndex] = generatedTile;
 
-								boardTiles[row, column] = generatedTile;
+								indexForTileAbove++;
 							}
 							else
 							{
 								// If we find a tile
-								if (boardTiles[rowAbove, column] != null)
+								if (boardTiles[rowAbove, columnIndex] != null)
 								{
-									// Swap in the matrix
-									boardTiles[row, column] = BoardTiles[rowAbove, column];
-									boardTiles[rowAbove, column] = null;
+									// Add to number of tiles being dropped in
+									tilesFalling++;
 
-									boardTiles[row, column].InitializeTile(boardTiles[row, column].TileCharacter, row, column);
-									boardTiles[row, column].ActivateTile();
+									// Swap in the matrix
+									boardTiles[rowIndex, columnIndex] = BoardTiles[rowAbove, columnIndex];
+									boardTiles[rowAbove, columnIndex] = null;
+
+									boardTiles[rowIndex, columnIndex].InitializeTileAndLetDropToPosition(boardTiles[rowIndex, columnIndex].TileCharacter, rowIndex, columnIndex);
+									boardTiles[rowIndex, columnIndex].ActivateTile();
 
 									break;
 								}
@@ -275,52 +269,25 @@ namespace WordSlide
 
 			tilesWaitingToBeRemoved.Clear();
 
-			var RowsAndColumnsToCheck = new List<SingleTileManagerSequence>();
-
 			foreach (var row in rowsAffected)
 			{
-				RowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullRow(row.Value)));
+				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullRow(row.Value)));
 			}
 
 			foreach (var column in columnsAffected)
 			{
-				RowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullColumn(column.Value)));
-			}
-
-			//TileSwappedEventHandler.RaiseTileSwapped(RowsAndColumnsToCheck);
-			StartCoroutine(WaitForAllTilesToStopMovingAndThenEnablePlayerInput(RowsAndColumnsToCheck));
-		}
-
-		private IEnumerator WaitForAllTilesToStopMovingAndThenEnablePlayerInput(List<SingleTileManagerSequence> RowsAndColumnsToCheck)
-		{
-			while (true)
-			{
-				if (!AnyTileIsMoving())
-				{
-					TileSwappedEventHandler.RaiseTileSwapped(RowsAndColumnsToCheck);
-					break;
-				}
-
-				yield return null;
+				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullColumn(column.Value)));
 			}
 		}
 
-		private bool AnyTileIsMoving()
+		public void TileFinishedDropIn()
 		{
-			for (int i = 0; i < boardTiles.GetLength(0); i++)
+			tilesFalling--;
+
+			if (tilesFalling == 0)
 			{
-				for (int j = 0; j < boardTiles.GetLength(1); j++)
-				{
-					//Debug.Log($"Checking {i},{j}");
-
-					if (boardTiles[i, j] == null || boardTiles[i, j].tileIsBeingMovedIntoPosition)
-					{
-						return true;
-					}
-				}
+				TileSwappedEventHandler.RaiseTileSwapped(rowsAndColumnsToCheck);
 			}
-
-			return false;
 		}
 
 		/// <summary>

@@ -45,8 +45,6 @@ public class SingleTileManager : MonoBehaviour
 	[SerializeField]
 	private SingleTileMover singleTileMover;
 
-	public bool tileIsBeingMovedIntoPosition { get; private set; }
-
 	public MovementRestrictions MovementRestrictions => singleTileMover.MovementRestrictions;
 
 	private void Awake()
@@ -60,46 +58,55 @@ public class SingleTileManager : MonoBehaviour
 		StopAllCoroutines();
 	}
 
-	public void InitializeTile(char character, int row, int column)
+	private void InitializeTile(char character, int row, int column)
 	{
 		SetTileCharacter(character);
 		SetTileMatrixIndex(row, column);
 		SetTileScale();
-		SetTileDefaultPosition();
+		SetTileRestingPosition();
 		SetMovementRestrictions();
+	}
+
+	public void InitializeTileAndMoveToPositionNow(char character, int row, int column)
+	{
+		InitializeTile(character, row, column);
+		SetTilePositionNow(tileRestingPosition);
+	}
+
+	public void InitializeTileAndLetDropToPosition(char character, int row, int column)
+	{
+		InitializeTile(character, row, column);
 	}
 
 	public void SwapTileToNewPosition(int i, int j)
 	{
 		singleTileMover.StopMoving();
 		SetTileMatrixIndex(i, j);
-		SetTileDefaultPosition();
+		SetTileRestingPosition();
 
-		SetTilePosition(tileRestingPosition);
+		SetTilePositionNow(tileRestingPosition);
 		SetMovementRestrictions();
 	}
 
-	public void SetTileDefaultPosition()
+	public void SetTileRestingPosition()
 	{
 		tileRestingPosition = SizeManager.Instance.TileSpawnPositions[MatrixIndex.Item1, MatrixIndex.Item2];
 	}
 
-	public void SetTilePosition(Vector3 position)
+	public void SetTilePositionNow(Vector3 position)
 	{
 		transform.position = position;
 	}
 
-	public IEnumerator AnimateTileToNewPositionCoroutine()
+	public IEnumerator AnimateTileFallingToNewPositionCoroutine()
 	{
-		tileIsBeingMovedIntoPosition = true;
-
 		while (transform.position != TileRestingPosition)
 		{
 			transform.position = Vector3.MoveTowards(transform.position, TileRestingPosition, Time.deltaTime * gravitySpeed);
 			yield return null;
 		}
 
-		tileIsBeingMovedIntoPosition = false;
+		TilesManager.Instance.TileFinishedDropIn();
 	}
 
 	public void SetTileScale()
@@ -140,7 +147,7 @@ public class SingleTileManager : MonoBehaviour
 	{
 		if (transform.position != TileRestingPosition)
 		{
-			StartCoroutine(AnimateTileToNewPositionCoroutine());
+			StartCoroutine(AnimateTileFallingToNewPositionCoroutine());
 		}
 
 		tileIsActive = true;

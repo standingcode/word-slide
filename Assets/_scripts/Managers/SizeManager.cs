@@ -13,8 +13,8 @@ namespace WordSlide
 		private Vector2 interiorPaddingSizes;
 		public Vector2 InteriorPaddingSizes => interiorPaddingSizes;
 
-		private Vector2 tileSpawnTopLeftStartingPoint;
-		public Vector2 TileSpawnTopLeftStartingPoint => tileSpawnTopLeftStartingPoint;
+		private Vector3 tileSpawnTopLeftStartingPoint;
+		public Vector3 TileSpawnTopLeftStartingPoint => tileSpawnTopLeftStartingPoint;
 
 		private Vector3[,] tileSpawnPositions;
 		public Vector3[,] TileSpawnPositions => tileSpawnPositions;
@@ -37,6 +37,14 @@ namespace WordSlide
 		private void OnDestroy()
 		{
 			Instance = null;
+		}
+
+		public Vector3 AboveColumnStartingPosition(int columnIndex, int heightIndex)
+		{
+			float xPos = tileSpawnTopLeftStartingPoint.x + (columnIndex * (tileSize.x + interiorPaddingSizes.x));
+			float yPos = tileSpawnTopLeftStartingPoint.y + tileSize.y + interiorPaddingSizes.y + (heightIndex * (tileSize.y + interiorPaddingSizes.y));
+
+			return new Vector3(xPos, yPos, 0f);
 		}
 
 		private void SetSizes()
@@ -108,7 +116,7 @@ namespace WordSlide
 			// 0 position - (0.5 * the height) + (0.5 * one tile height)  should be the y position
 			float startingPointY = 0 + (0.5f * boardSize.y) - (0.5f * tileSize.y);
 
-			tileSpawnTopLeftStartingPoint = new Vector2(startingPointX, startingPointY);
+			tileSpawnTopLeftStartingPoint = new Vector3(startingPointX, startingPointY, 0f);
 		}
 
 		private void SetTileSpawnPositions()
