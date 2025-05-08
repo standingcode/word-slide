@@ -203,7 +203,10 @@ public class SingleTileManager : MonoBehaviour
 	{
 		while (transform.position != TileRestingPosition)
 		{
-			transform.position = Vector3.MoveTowards(transform.position, TileRestingPosition, Time.deltaTime * gravitySpeed);
+			transform.position = Vector3.MoveTowards(
+			transform.position,
+			TileRestingPosition,
+			Time.deltaTime * gravitySpeed);
 			yield return null;
 		}
 

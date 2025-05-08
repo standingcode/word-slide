@@ -21,7 +21,7 @@ public class SettingsScriptable : ScriptableObject
 	public static float MinimumMarginFromBoardAsRatio => minimumMarginFromBoardAsRatio;
 
 	[Header("Other")]
-	private static float gravitySpeed = 9.87f;
+	private static float gravitySpeed = 5f;
 	public static float GravitySpeed => gravitySpeed;
 
 }
