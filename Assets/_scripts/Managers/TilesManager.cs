@@ -173,8 +173,10 @@ namespace WordSlide
 			return column.ToArray();
 		}
 
-
 		List<SingleTileManager> tilesWaitingToBeRemoved = new();
+		private int tilesFalling = 0;
+		private List<(int, int)> tilesAffected = new();
+
 		public void DestroyTiles(List<SingleTileManager> tilesToRemove)
 		{
 			foreach (var tile in tilesToRemove)
@@ -185,8 +187,6 @@ namespace WordSlide
 			}
 		}
 
-		private int tilesFalling = 0;
-		private List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
 		/// <summary>
 		/// Triggered at the end of tile self-destruct sequence
 		/// </summary>
@@ -202,9 +202,6 @@ namespace WordSlide
 				return;
 			}
 
-			Dictionary<int, int> rowsAffected = new();
-			Dictionary<int, int> columnsAffected = new();
-
 			// For each column
 			for (int columnIndex = 0; columnIndex < BoardTiles.GetLength(1); columnIndex++)
 			{
@@ -216,9 +213,8 @@ namespace WordSlide
 					// If a null is found, the tile is destroyed, work up from the index above and find a tile to move down.
 					if (BoardTiles[rowIndex, columnIndex] == null)
 					{
-						// This column and row is affected
-						columnsAffected[columnIndex] = columnIndex;
-						rowsAffected[rowIndex] = rowIndex;
+						// This tile is affected
+						tilesAffected.Add((rowIndex, columnIndex));
 
 						// For each of the rows above this null tile
 						for (int rowAbove = rowIndex - 1; rowAbove >= -1; rowAbove--)
@@ -257,16 +253,6 @@ namespace WordSlide
 					}
 				}
 			}
-
-			foreach (var row in rowsAffected)
-			{
-				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullRow(row.Value)));
-			}
-
-			foreach (var column in columnsAffected)
-			{
-				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullColumn(column.Value)));
-			}
 		}
 
 		/// <summary>
@@ -278,7 +264,7 @@ namespace WordSlide
 
 			if (tilesFalling == 0)
 			{
-				TileSwappedEventHandler.RaiseTileSwapped(rowsAndColumnsToCheck);
+				DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent();
 			}
 		}
 
@@ -356,7 +342,10 @@ namespace WordSlide
 				else
 				{
 					SwapTiles(currentlyMovingTile, tileToSwapWith);
-					DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent(currentlyMovingTile, tileToSwapWith);
+
+					tilesAffected.Add((currentlyMovingTile.Row, currentlyMovingTile.Column));
+					tilesAffected.Add((tileToSwapWith.Row, tileToSwapWith.Column));
+					DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent();
 				}
 				currentlyMovingTile = null;
 			}
@@ -367,28 +356,28 @@ namespace WordSlide
 		/// </summary>
 		/// <param name="tile1"></param>
 		/// <param name="tile2"></param>
-		private void DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent(SingleTileManager tile1, SingleTileManager tile2)
+		private void DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent()
 		{
 			List<SingleTileManagerSequence> listOfRowsAndColumnsToCheck = new();
 
-			// Determine which rows and columns were affected by the swap	
-			if (tile1.Row == tile2.Row)
+			HashSet<int> rows = new();
+			HashSet<int> columns = new();
+
+			foreach (var index in tilesAffected)
 			{
-				listOfRowsAndColumnsToCheck = new List<SingleTileManagerSequence>
-				{
-					new SingleTileManagerSequence(GetFullRow(tile1.Row)),
-					new SingleTileManagerSequence(GetFullColumn(tile1.Column)),
-					new SingleTileManagerSequence(GetFullColumn(tile2.Column))
-				};
+				rows.Add(index.Item1);
+				columns.Add(index.Item2);
 			}
-			else
+
+			tilesAffected.Clear();
+
+			foreach (var row in rows)
 			{
-				listOfRowsAndColumnsToCheck = new List<SingleTileManagerSequence>
-				{
-					new SingleTileManagerSequence(GetFullRow(tile1.Row)),
-					new SingleTileManagerSequence(GetFullRow(tile2.Row)),
-					new SingleTileManagerSequence(GetFullColumn(tile1.Column))
-				};
+				listOfRowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullRow(row)));
+			}
+			foreach (var column in columns)
+			{
+				listOfRowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullColumn(column)));
 			}
 
 			TileSwappedEventHandler.RaiseTileSwapped(listOfRowsAndColumnsToCheck);

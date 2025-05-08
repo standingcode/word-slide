@@ -68,9 +68,6 @@ namespace WordSlide
 			var validWords = _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
 			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
 
-			// We can now clear rowsAndColumnsToCheck 
-			rowsAndColumnsToCheck.Clear();
-
 			if (validWords.Count == 0)
 			{
 				PlayerCanInteractWithTiles = true;
