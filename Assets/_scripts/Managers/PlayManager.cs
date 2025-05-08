@@ -49,13 +49,13 @@ namespace WordSlide
 
 		public void Start()
 		{
-			_tileSwappedEventHandler.AddTileSwappedListener(TileWasSwapped);
+			_tileSwappedEventHandler.AddTileSwappedListener(CheckForWords);
 			TilesManager.Instance.GenerateTileBoardAndRemoveAnyExistingValidWords(_wordFinderService, _dictionaryService);
 			LoadingPanelRoot.SetActive(false);
 			PlayerCanInteractWithTiles = true;
 		}
 
-		private void TileWasSwapped(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
+		private void CheckForWords(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
 			PlayerCanInteractWithTiles = false;
 
@@ -67,6 +67,9 @@ namespace WordSlide
 
 			var validWords = _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
 			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
+
+			// We can now clear rowsAndColumnsToCheck 
+			rowsAndColumnsToCheck.Clear();
 
 			if (validWords.Count == 0)
 			{
@@ -80,6 +83,8 @@ namespace WordSlide
 			{
 				foreach (var singleTileManager in word.SingleTileManagers)
 				{
+					// TODO: Need to make sure that we still count this when working out points,
+					// we just don't want to try and double destroy the same tile.
 					if (tilesToDestroy.Contains(singleTileManager))
 					{
 						continue;
@@ -94,7 +99,7 @@ namespace WordSlide
 
 		public void OnDestroy()
 		{
-			_tileSwappedEventHandler.RemoveTileSwappedListener(TileWasSwapped);
+			_tileSwappedEventHandler.RemoveTileSwappedListener(CheckForWords);
 			Instance = null;
 		}
 	}

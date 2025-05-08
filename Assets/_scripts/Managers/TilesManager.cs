@@ -114,18 +114,6 @@ namespace WordSlide
 			ShowBoard();
 		}
 
-		private SingleTileManager GenerateAndInitializeTile(int i, int j, Vector3? overrideStartPosition = null)
-		{
-			// Create new tile from the object pool
-			PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile", boardTilesRoot);
-
-			SingleTileManager singletile = boardTile.GetComponent<SingleTileManager>();
-
-			singletile.InitializeTile(dictionaryService.GetRandomChar(), i, j, overrideStartPosition);
-
-			return singletile;
-		}
-
 		/// <summary>
 		/// Allows the board to be shown after we are generating and making sure there are no words present.
 		/// </summary>
@@ -189,11 +177,9 @@ namespace WordSlide
 		List<SingleTileManager> tilesWaitingToBeRemoved = new();
 		public void DestroyTiles(List<SingleTileManager> tilesToRemove)
 		{
-			Debug.Log($"Destroying {tilesToRemove.Count} tiles.");
-
 			foreach (var tile in tilesToRemove)
 			{
-				BoardTiles[tile.MatrixIndex.Item1, tile.MatrixIndex.Item2] = null;
+				BoardTiles[tile.Row, tile.Column] = null;
 				tilesWaitingToBeRemoved.Add(tile);
 				tile.StartDestroySequence();
 			}
@@ -210,8 +196,6 @@ namespace WordSlide
 			tilesWaitingToBeRemoved.RemoveAt(0);
 			singleTileManagerCaller.DeactivateTile();
 			PoolManager.Instance.ReturnObjectToPool(singleTileManagerCaller.GetComponent<PoolObject>());
-
-			Debug.Log($"Tiles waiting to be removed: {tilesWaitingToBeRemoved.Count}");
 
 			if (tilesWaitingToBeRemoved.Count > 0)
 			{
@@ -298,6 +282,18 @@ namespace WordSlide
 			}
 		}
 
+		private SingleTileManager GenerateAndInitializeTile(int i, int j, Vector3? overrideStartPosition = null)
+		{
+			// Create new tile from the object pool
+			PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile", boardTilesRoot);
+
+			SingleTileManager singletile = boardTile.GetComponent<SingleTileManager>();
+
+			singletile.InitializeTile(dictionaryService.GetRandomChar(), i, j, overrideStartPosition);
+
+			return singletile;
+		}
+
 		/// <summary>
 		/// Destroy the existing tiles before generating a new board.
 		/// </summary>
@@ -337,7 +333,6 @@ namespace WordSlide
 			{
 				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
 				{
-					//Debug.Log($"{singleTileManager.MatrixIndex}");
 					currentlyMovingTile = singleTileManager;
 					currentlyMovingTile.TileWasClickedOn(mousePosition);
 				}
@@ -377,22 +372,22 @@ namespace WordSlide
 			List<SingleTileManagerSequence> listOfRowsAndColumnsToCheck = new();
 
 			// Determine which rows and columns were affected by the swap	
-			if (tile1.MatrixIndex.Item1 == tile2.MatrixIndex.Item1)
+			if (tile1.Row == tile2.Row)
 			{
 				listOfRowsAndColumnsToCheck = new List<SingleTileManagerSequence>
 				{
-					new SingleTileManagerSequence(GetFullRow(tile1.MatrixIndex.Item1)),
-					new SingleTileManagerSequence(GetFullColumn(tile1.MatrixIndex.Item2)),
-					new SingleTileManagerSequence(GetFullColumn(tile2.MatrixIndex.Item2))
+					new SingleTileManagerSequence(GetFullRow(tile1.Row)),
+					new SingleTileManagerSequence(GetFullColumn(tile1.Column)),
+					new SingleTileManagerSequence(GetFullColumn(tile2.Column))
 				};
 			}
 			else
 			{
 				listOfRowsAndColumnsToCheck = new List<SingleTileManagerSequence>
 				{
-					new SingleTileManagerSequence(GetFullRow(tile1.MatrixIndex.Item1)),
-					new SingleTileManagerSequence(GetFullRow(tile2.MatrixIndex.Item1)),
-					new SingleTileManagerSequence(GetFullColumn(tile1.MatrixIndex.Item2))
+					new SingleTileManagerSequence(GetFullRow(tile1.Row)),
+					new SingleTileManagerSequence(GetFullRow(tile2.Row)),
+					new SingleTileManagerSequence(GetFullColumn(tile1.Column))
 				};
 			}
 
@@ -407,13 +402,15 @@ namespace WordSlide
 		private void SwapTiles(SingleTileManager tile1, SingleTileManager tile2)
 		{
 			// Swap in the matrix
-			boardTiles[tile1.MatrixIndex.Item1, tile1.MatrixIndex.Item2] = tile2;
-			boardTiles[tile2.MatrixIndex.Item1, tile2.MatrixIndex.Item2] = tile1;
+			boardTiles[tile1.Row, tile1.Column] = tile2;
+			boardTiles[tile2.Row, tile2.Column] = tile1;
 
 			// Now set the SingleTileManage settings correctly
-			var tile1MatrixIndex = tile1.MatrixIndex;
-			tile1.MoveToNewPositionInGrid(tile2.MatrixIndex.Item1, tile2.MatrixIndex.Item2);
-			tile2.MoveToNewPositionInGrid(tile1MatrixIndex.Item1, tile1MatrixIndex.Item2);
+			var tile1Row = tile1.Row;
+			var tile1Column = tile1.Column;
+
+			tile1.MoveToNewPositionInGrid(tile2.Row, tile2.Column);
+			tile2.MoveToNewPositionInGrid(tile1Row, tile1Column);
 		}
 
 		/// <summary>
@@ -427,49 +424,49 @@ namespace WordSlide
 			// tile went up
 			if (vectorFromOriginalPosition.y > 0)
 			{
-				int indexOfRowAbove = currentlyMovingTile.MatrixIndex.Item1 - 1;
+				int indexOfRowAbove = currentlyMovingTile.Row - 1;
 
 				var ratioOfLimit =
 					(currentlyMovingTile.transform.position.y - currentlyMovingTile.TileRestingPosition.y)
 					/ (currentlyMovingTile.MovementRestrictions.yMax - currentlyMovingTile.TileRestingPosition.y);
 
-				return ratioOfLimit > ratioToSwapTiles ? boardTiles[indexOfRowAbove, currentlyMovingTile.MatrixIndex.Item2] : null;
+				return ratioOfLimit > ratioToSwapTiles ? boardTiles[indexOfRowAbove, currentlyMovingTile.Column] : null;
 			}
 
 			// tile went right
 			if (vectorFromOriginalPosition.x > 0)
 			{
-				int indexOfColumnRight = currentlyMovingTile.MatrixIndex.Item2 + 1;
+				int indexOfColumnRight = currentlyMovingTile.Column + 1;
 
 				var ratioOfLimit =
 				(currentlyMovingTile.transform.position.x - currentlyMovingTile.TileRestingPosition.x)
 				/ (currentlyMovingTile.MovementRestrictions.xMax - currentlyMovingTile.TileRestingPosition.x);
 
-				return ratioOfLimit > ratioToSwapTiles ? boardTiles[currentlyMovingTile.MatrixIndex.Item1, indexOfColumnRight] : null;
+				return ratioOfLimit > ratioToSwapTiles ? boardTiles[currentlyMovingTile.Row, indexOfColumnRight] : null;
 			}
 
 			// tile went down
 			if (vectorFromOriginalPosition.y < 0)
 			{
-				int indexOfRowBelow = currentlyMovingTile.MatrixIndex.Item1 + 1;
+				int indexOfRowBelow = currentlyMovingTile.Row + 1;
 
 				var ratioOfLimit =
 				(currentlyMovingTile.TileRestingPosition.y - currentlyMovingTile.transform.position.y)
 				/ (currentlyMovingTile.TileRestingPosition.y - currentlyMovingTile.MovementRestrictions.yMin);
 
-				return ratioOfLimit > ratioToSwapTiles ? boardTiles[indexOfRowBelow, currentlyMovingTile.MatrixIndex.Item2] : null;
+				return ratioOfLimit > ratioToSwapTiles ? boardTiles[indexOfRowBelow, currentlyMovingTile.Column] : null;
 			}
 
 			// tile went left	
 			if (vectorFromOriginalPosition.x < 0)
 			{
-				int indexOfColumnLeft = currentlyMovingTile.MatrixIndex.Item2 - 1;
+				int indexOfColumnLeft = currentlyMovingTile.Column - 1;
 
 				var ratioOfLimit =
 				(currentlyMovingTile.TileRestingPosition.x - currentlyMovingTile.transform.position.x)
 				/ (currentlyMovingTile.TileRestingPosition.x - currentlyMovingTile.MovementRestrictions.xMin);
 
-				return ratioOfLimit > ratioToSwapTiles ? boardTiles[currentlyMovingTile.MatrixIndex.Item1, indexOfColumnLeft] : null;
+				return ratioOfLimit > ratioToSwapTiles ? boardTiles[currentlyMovingTile.Row, indexOfColumnLeft] : null;
 			}
 
 			return null;

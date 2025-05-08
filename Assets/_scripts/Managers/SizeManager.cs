@@ -70,9 +70,7 @@ namespace WordSlide
 			}
 			else
 			{
-				// The camera orphographic size is vertical, we need to determine the width first using ratios
-				Debug.Log(Screen.width);
-				Debug.Log(Screen.height);
+				// The camera orphographic size is vertical, we need to determine the width first using ratios				
 				float ratio = (float)Screen.width / (float)Screen.height;
 				float orthographicSize = ratio * orthographicVertical;
 				sizeForWidthAndHeight = orthographicSize - (orthographicSize * (SettingsScriptable.MinimumMarginFromBoardAsRatio * 2));

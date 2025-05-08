@@ -11,8 +11,9 @@ public class SingleTileManager : MonoBehaviour
 	public char TileCharacter => tileCharacter;
 
 	[SerializeField]
-	private (int, int) matrixIndex;
-	public (int, int) MatrixIndex => matrixIndex;
+	private int _row, _column;
+	public int Row => _row;
+	public int Column => _column;
 
 	[SerializeField]
 	private TextMeshProUGUI textMesh;
@@ -211,7 +212,8 @@ public class SingleTileManager : MonoBehaviour
 
 	private void SetTileMatrixIndex(int row, int column)
 	{
-		matrixIndex = (row, column);
+		_row = row;
+		_column = column;
 	}
 
 	private void SetMovementRestrictions()
@@ -221,7 +223,7 @@ public class SingleTileManager : MonoBehaviour
 		// X PLAIN
 
 		// If the tile is on the left-hand side of the board, it can only move to the right
-		if (matrixIndex.Item2 == 0)
+		if (_column == 0)
 		{
 			movementRestrictions.xMin = tileRestingPosition.x;
 		}
@@ -233,7 +235,7 @@ public class SingleTileManager : MonoBehaviour
 
 
 		// if the tile is on the right-hand side of the board, it can only move to the left
-		if (matrixIndex.Item2 == SettingsScriptable.Columns - 1)
+		if (_column == SettingsScriptable.Columns - 1)
 		{
 			movementRestrictions.xMax = tileRestingPosition.x;
 		}
@@ -246,7 +248,7 @@ public class SingleTileManager : MonoBehaviour
 		// Y PLAIN
 
 		// if the tile is on the top of the board, it can only move down
-		if (matrixIndex.Item1 == 0)
+		if (_row == 0)
 		{
 			movementRestrictions.yMax = tileRestingPosition.y;
 		}
@@ -256,9 +258,8 @@ public class SingleTileManager : MonoBehaviour
 			movementRestrictions.yMax = tileRestingPosition.y + SizeManager.Instance.TileSize.y + SizeManager.Instance.InteriorPaddingSizes.y;
 		}
 
-
 		// if the tile is on the bottom of the board, it can only move up
-		if (matrixIndex.Item1 == SettingsScriptable.Rows - 1)
+		if (_row == SettingsScriptable.Rows - 1)
 		{
 			movementRestrictions.yMin = tileRestingPosition.y;
 		}
@@ -273,7 +274,7 @@ public class SingleTileManager : MonoBehaviour
 
 	private void SetTileRestingPosition()
 	{
-		tileRestingPosition = SizeManager.Instance.TileSpawnPositions[MatrixIndex.Item1, MatrixIndex.Item2];
+		tileRestingPosition = SizeManager.Instance.TileSpawnPositions[_row, _column];
 		SetMovementRestrictions();
 	}
 
