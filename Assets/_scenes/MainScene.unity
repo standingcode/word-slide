@@ -752,6 +752,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 8339277577340910792, guid: fe76331fde376214b89df784ce2527c0, type: 3}
+      propertyPath: m_Name
+      value: LoadingPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 8339277577340910792, guid: fe76331fde376214b89df784ce2527c0, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -825,6 +833,10 @@ PrefabInstance:
     - target: {fileID: 5198193986179874856, guid: c238cdf483a1a3740a18e11158d532f1, type: 3}
       propertyPath: m_Name
       value: MainBoard
+      objectReference: {fileID: 0}
+    - target: {fileID: 6974603242371729669, guid: c238cdf483a1a3740a18e11158d532f1, type: 3}
+      propertyPath: textMesh
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7855413313656994955, guid: c238cdf483a1a3740a18e11158d532f1, type: 3}
       propertyPath: m_Camera
