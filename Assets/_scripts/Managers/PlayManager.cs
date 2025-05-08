@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Zenject;
 
 namespace WordSlide
@@ -53,6 +54,8 @@ namespace WordSlide
 			TilesManager.Instance.GenerateTileBoardAndRemoveAnyExistingValidWords(_wordFinderService, _dictionaryService);
 			LoadingPanelRoot.SetActive(false);
 			PlayerCanInteractWithTiles = true;
+
+			InputSystem.pollingFrequency = 240.0f;
 		}
 
 		private void CheckForWords(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
