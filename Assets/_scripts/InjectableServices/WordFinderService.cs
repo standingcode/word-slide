@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace WordSlide
@@ -17,7 +18,8 @@ namespace WordSlide
 
 		public override string ToString()
 		{
-			// TODO: Find out what is calling this after tile destruct
+			Debug.WriteLine(new StackFrame(1).GetMethod().Name);
+
 			if (singleTileManagers.Length == 0 || singleTileManagers == null)
 			{
 				Console.WriteLine("Tried to call ToString() on a SingleTileManagerSequence with no tiles");

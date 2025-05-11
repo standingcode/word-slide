@@ -9,18 +9,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7402491173482262409}
-  - component: {fileID: 6974603242371729669}
-  - component: {fileID: 1668000579200838522}
-  - component: {fileID: 5670277747924182435}
-  - component: {fileID: 478111244132486833}
-  - component: {fileID: 9018180916344999545}
   m_Layer: 0
   m_Name: TestGrid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7402491173482262409
 Transform:
   m_ObjectHideFlags: 0
@@ -37,98 +32,6 @@ Transform:
   - {fileID: 3204746493700704388}
   m_Father: {fileID: 8088045910334494970}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6974603242371729669
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4721527694077566969}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e9884647a0ed004e915659a779d5239, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tileCharacter: 0
-  _row: 0
-  _column: 0
-  textMesh: {fileID: 0}
-  visualCube: {fileID: 4935642501244888076}
-  animator: {fileID: 9018180916344999545}
-  boxCollider: {fileID: 5670277747924182435}
-  tileIsActive: 0
-  destroyMovementAnimationString: MovementBeforeDestroyAnimation
-  singleTileMover: {fileID: 1668000579200838522}
---- !u!114 &1668000579200838522
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4721527694077566969}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d58d141b4977e4a4a801a8f4ed8c3181, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  zMovementWhenSliding: -1
-  distanceToConsiderCloseToCentre: 0.1
---- !u!65 &5670277747924182435
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4721527694077566969}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &478111244132486833
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4721527694077566969}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0a09ff0430a13d1438c94ff39bbfddec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  poolObjectIdentifier: tile
---- !u!95 &9018180916344999545
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4721527694077566969}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: a6fa3f6b9599e75488a64e17f089f995, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &4935642501244888076
 GameObject:
   m_ObjectHideFlags: 0

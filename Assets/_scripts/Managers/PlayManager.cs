@@ -18,7 +18,9 @@ namespace WordSlide
 	{
 		public static PlayManager Instance { get; private set; }
 
-		public bool PlayerCanInteractWithTiles { get; private set; } = false;
+		[SerializeField]
+		private bool playerCanInteractWithTiles;
+		public bool PlayerCanInteractWithTiles => playerCanInteractWithTiles;
 
 		private IDictionaryService _dictionaryService;
 		private IWordFinderService _wordFinderService;
@@ -28,6 +30,7 @@ namespace WordSlide
 
 		[SerializeField]
 		GameObject LoadingPanelRoot;
+
 
 		public int TilesEnteringDestructSequenceCount { get; set; } = 0;
 
@@ -53,18 +56,19 @@ namespace WordSlide
 			_tileSwappedEventHandler.AddTileSwappedListener(CheckForWords);
 			TilesManager.Instance.GenerateTileBoardAndRemoveAnyExistingValidWords(_wordFinderService, _dictionaryService);
 			LoadingPanelRoot.SetActive(false);
-			PlayerCanInteractWithTiles = true;
+			playerCanInteractWithTiles = true;
 
-			InputSystem.pollingFrequency = 240.0f;
+			InputSystem.pollingFrequency = 120;
+			Application.targetFrameRate = 120;
 		}
 
 		private void CheckForWords(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
-			PlayerCanInteractWithTiles = false;
+			playerCanInteractWithTiles = false;
 
 			if (rowsAndColumnsToCheck.Count == 0)
 			{
-				PlayerCanInteractWithTiles = true;
+				playerCanInteractWithTiles = true;
 				return;
 			}
 
@@ -73,7 +77,7 @@ namespace WordSlide
 
 			if (validWords.Count == 0)
 			{
-				PlayerCanInteractWithTiles = true;
+				playerCanInteractWithTiles = true;
 				return;
 			}
 

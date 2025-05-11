@@ -834,10 +834,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: MainBoard
       objectReference: {fileID: 0}
-    - target: {fileID: 6974603242371729669, guid: c238cdf483a1a3740a18e11158d532f1, type: 3}
-      propertyPath: textMesh
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 7855413313656994955, guid: c238cdf483a1a3740a18e11158d532f1, type: 3}
       propertyPath: m_Camera
       value: 

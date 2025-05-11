@@ -150,7 +150,12 @@ namespace WordSlide
 
 			for (int i = 0; i < boardTiles.GetLength(1); i++)
 			{
-				row.Add(boardTiles[index, i]);
+				var tile = boardTiles[index, i];
+
+				if (tile != null)
+				{
+					row.Add(tile);
+				}
 			}
 
 			return row.ToArray();
@@ -167,7 +172,12 @@ namespace WordSlide
 
 			for (int i = 0; i < boardTiles.GetLength(0); i++)
 			{
-				column.Add(boardTiles[i, index]);
+				var tile = boardTiles[i, index];
+
+				if (tile != null)
+				{
+					column.Add(boardTiles[i, index]);
+				}
 			}
 
 			return column.ToArray();
@@ -222,15 +232,15 @@ namespace WordSlide
 							// If row above is -1 we need to spawn a tile
 							if (rowAbove == -1)
 							{
-								// Add to number of tiles being dropped in
-								tilesFalling++;
+								//// Add to number of tiles being dropped in
+								//tilesFalling++;
 
-								boardTiles[rowIndex, columnIndex]
-									= GenerateAndInitializeTile(rowIndex, columnIndex, SizeManager.Instance.GetAboveColumnStartingPosition(columnIndex, indexForTileAbove));
+								//boardTiles[rowIndex, columnIndex]
+								//	= GenerateAndInitializeTile(rowIndex, columnIndex, SizeManager.Instance.GetAboveColumnStartingPosition(columnIndex, indexForTileAbove));
 
-								boardTiles[rowIndex, columnIndex].ActivateTile();
+								//boardTiles[rowIndex, columnIndex].ActivateTile();
 
-								indexForTileAbove++;
+								//indexForTileAbove++;
 							}
 							else
 							{
