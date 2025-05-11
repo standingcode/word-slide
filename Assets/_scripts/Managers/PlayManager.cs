@@ -55,7 +55,8 @@ namespace WordSlide
 			LoadingPanelRoot.SetActive(false);
 			PlayerCanInteractWithTiles = true;
 
-			InputSystem.pollingFrequency = 240.0f;
+			InputSystem.pollingFrequency = 120;
+			Application.targetFrameRate = 120;
 		}
 
 		private void CheckForWords(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
