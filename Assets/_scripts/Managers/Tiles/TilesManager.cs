@@ -35,14 +35,13 @@ namespace WordSlide
 
 		private bool playerCanInteractWithTiles = false;
 
-		private List<SingleTileManager> tilesWaitingToBeRemoved = new();
+		private HashSet<SingleTileManager> tilesWaitingToBeRemoved = new();
+		private HashSet<int> rowsAffected = new();
+		private HashSet<int> columnsAffected = new();
 
 		private int tilesFalling = 0;
 
-		private List<(int, int)> tilesAffected = new();
-
 		private IDictionaryService _dictionaryService;
-
 		public void Awake()
 		{
 			if (Instance != null && Instance != this)
@@ -52,22 +51,45 @@ namespace WordSlide
 			}
 			Instance = this;
 
+			SubscribeToEvents();
+		}
 
+		public void OnDestroy()
+		{
+			RemoveEventSubscriptions();
+			StopAllCoroutines();
+			Instance = null;
+		}
+
+		/// <summary>
+		/// Self evident but this will handle all the event subscriptions
+		/// </summary>
+		private void SubscribeToEvents()
+		{
 			clickEventHandler.AddClickDownListener(CheckIfTileWasClicked);
 			clickEventHandler.AddClickUpListener(CheckIfTileNeedsToBeDropped);
 			gameStateEventHandler.AddNewGameStartedListener(GenerateTileBoard);
 			gameStateEventHandler.AddPlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
 		}
 
+		/// <summary>
+		/// SElf evident but this removes all the event subscriptions
+		/// </summary>
+		private void RemoveEventSubscriptions()
+		{
+			clickEventHandler.RemoveClickDownListener(CheckIfTileWasClicked);
+			clickEventHandler.RemoveClickUpListener(CheckIfTileNeedsToBeDropped);
+			gameStateEventHandler.RemoveNewGameStartedListener(GenerateTileBoard);
+			gameStateEventHandler.RemovePlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
+		}
+
+		/// <summary>
+		/// Method sets the boolean from the event handler to allow or disallow player interaction with the tiles.
+		/// </summary>
+		/// <param name="value"></param>
 		private void PlayerCanInteractWithTiles(bool value)
 		{
 			playerCanInteractWithTiles = value;
-		}
-
-		public void OnDestroy()
-		{
-			StopAllCoroutines();
-			//Instance = null;
 		}
 
 		/// <summary>
@@ -203,7 +225,7 @@ namespace WordSlide
 		/// <param name="singleTileManagerCaller"></param>
 		public void TileHasFinishedSelfDestructSequence(SingleTileManager singleTileManagerCaller)
 		{
-			tilesWaitingToBeRemoved.RemoveAt(0);
+			tilesWaitingToBeRemoved.Remove(singleTileManagerCaller);
 			singleTileManagerCaller.DeactivateTile();
 			PoolManager.Instance.ReturnObjectToPool(singleTileManagerCaller.GetComponent<PoolObject>());
 
@@ -223,8 +245,9 @@ namespace WordSlide
 					// If a null is found, the tile is destroyed, work up from the index above and find a tile to move down.
 					if (BoardTiles[rowIndex, columnIndex] == null)
 					{
-						// This tile is affected
-						tilesAffected.Add((rowIndex, columnIndex));
+						// This row and column is affected
+						rowsAffected.Add(rowIndex);
+						columnsAffected.Add(columnIndex);
 
 						// For each of the rows above this null tile
 						for (int rowAbove = rowIndex - 1; rowAbove >= -1; rowAbove--)
@@ -278,6 +301,13 @@ namespace WordSlide
 			}
 		}
 
+		/// <summary>
+		/// Generate and initialize a tile, optonally set position
+		/// </summary>
+		/// <param name="i"></param>
+		/// <param name="j"></param>
+		/// <param name="overrideStartPosition"></param>
+		/// <returns></returns>
 		private SingleTileManager GenerateAndInitializeTile(int i, int j, Vector3? overrideStartPosition = null)
 		{
 			// Create new tile from the object pool
@@ -354,8 +384,12 @@ namespace WordSlide
 				{
 					SwapTiles(currentlyMovingTile, tileToSwapWith);
 
-					tilesAffected.Add((currentlyMovingTile.Row, currentlyMovingTile.Column));
-					tilesAffected.Add((tileToSwapWith.Row, tileToSwapWith.Column));
+					rowsAffected.Add(currentlyMovingTile.Row);
+					columnsAffected.Add(currentlyMovingTile.Column);
+
+					rowsAffected.Add(tileToSwapWith.Row);
+					columnsAffected.Add(tileToSwapWith.Column);
+
 					DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent();
 				}
 				currentlyMovingTile = null;
@@ -369,25 +403,17 @@ namespace WordSlide
 		{
 			List<SingleTileManagerSequence> listOfRowsAndColumnsToCheck = new();
 
-			HashSet<int> rows = new();
-			HashSet<int> columns = new();
-
-			foreach (var index in tilesAffected)
-			{
-				rows.Add(index.Item1);
-				columns.Add(index.Item2);
-			}
-
-			tilesAffected.Clear();
-
-			foreach (var row in rows)
+			foreach (var row in rowsAffected)
 			{
 				listOfRowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullRow(row)));
 			}
-			foreach (var column in columns)
+			foreach (var column in columnsAffected)
 			{
 				listOfRowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullColumn(column)));
 			}
+
+			rowsAffected.Clear();
+			columnsAffected.Clear();
 
 			gameStateEventHandler.RaiseTileSwapped(listOfRowsAndColumnsToCheck);
 		}

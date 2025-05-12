@@ -34,7 +34,7 @@ namespace WordSlide
 
 			ConfigureRendering();
 			ConfigureInputHandling();
-			InitializeEventSubscriptions();
+			SubscribeToEvents();
 			TriggerNewGame();
 		}
 
@@ -57,7 +57,7 @@ namespace WordSlide
 		/// <summary>
 		/// All event subscriptions should be done here.
 		/// </summary>
-		protected virtual void InitializeEventSubscriptions()
+		protected virtual void SubscribeToEvents()
 		{
 			_gameStateEventHandler.AddTileSwappedListener(TilesSwappedByUser);
 			_gameStateEventHandler.AddNewBoardGeneratedListener(BoardGenerated);
