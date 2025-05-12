@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1474588497695224604}
   - component: {fileID: 5109221444007559037}
   - component: {fileID: 6319885573358546760}
+  - component: {fileID: 3152753253900575489}
   m_Layer: 0
   m_Name: ManagersAndSettings
   m_TagString: Untagged
@@ -45,7 +46,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ef2b1c8468fef6459b0807826d3ca66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settingsScriptable: {fileID: 11400000, guid: f0afdf0f404687a48b9337ea8ffe5488, type: 2}
 --- !u!114 &6319885573358546760
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,3 +62,17 @@ MonoBehaviour:
     _keys:
     - _key: tile
       _value: {fileID: 0}
+--- !u!114 &3152753253900575489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453899481120337467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eab2f7fdd73fa624487294a0c3d35530, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gamePrefab: {fileID: 5198193986179874856, guid: c238cdf483a1a3740a18e11158d532f1, type: 3}
+  gameStateEventHandler: {fileID: 11400000, guid: 84d5bd5ec31c72f4281bb5525c54e3ca, type: 2}

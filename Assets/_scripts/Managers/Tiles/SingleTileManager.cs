@@ -188,7 +188,8 @@ public class SingleTileManager : MonoBehaviour
 	/// </summary>
 	public void HighlightAnimationFinished()
 	{
-		TilesManager.Instance.TileHasFinishedSelfDestructSequence(this);
+		// TODo: Tile has finished its self destruct sequence event trigger
+		//TilesManager.Instance.TileHasFinishedSelfDestructSequence(this);
 	}
 
 	public void ResetTileToItsRestingPosition()
@@ -210,7 +211,8 @@ public class SingleTileManager : MonoBehaviour
 			yield return null;
 		}
 
-		TilesManager.Instance.TileFinishedDropIn();
+		// TODO: Tile has finished dropping event trigger
+		//TilesManager.Instance.TileFinishedDropIn();
 	}
 
 	private void SetTileMatrixIndex(int row, int column)
