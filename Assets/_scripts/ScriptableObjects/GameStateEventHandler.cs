@@ -6,6 +6,28 @@ using WordSlide;
 [CreateAssetMenu(fileName = "GameStateEventHandler", menuName = "Scriptable WordSlide/GameStateEvent")]
 public class GameStateEventHandler : ScriptableObject
 {
+	#region Player can interact with tiles
+
+	public Action<bool> PlayerCanInteractWithTilesChanged;
+
+	public void RaisePlayerCanInteractWithTilesChanged(bool canInteract)
+	{
+		PlayerCanInteractWithTilesChanged?.Invoke(canInteract);
+	}
+
+	public void AddPlayerCanInteractWithTilesChangedListener(Action<bool> listener)
+	{
+		PlayerCanInteractWithTilesChanged += listener;
+	}
+
+	public void RemovePlayerCanInteractWithTilesChangedListener(Action<bool> listener)
+	{
+		PlayerCanInteractWithTilesChanged -= listener;
+	}
+
+	#endregion
+
+
 	#region A new board has been generated
 
 	public Action<List<SingleTileManagerSequence>> NewBoardGenerated;
@@ -23,28 +45,6 @@ public class GameStateEventHandler : ScriptableObject
 	public void RemoveNewBoardGeneratedListener(Action<List<SingleTileManagerSequence>> listener)
 	{
 		NewBoardGenerated -= listener;
-	}
-
-	#endregion
-
-
-	#region Requested tile swaps have occourred (This is part of the process of generating a new board)
-
-	public Action<List<SingleTileManagerSequence>> ChangeTilesRequestedDueToContainingWords;
-
-	public void RaiseChangeTilesRequestedDueToContainingWords(List<SingleTileManagerSequence> rowsAndColumnsAffected)
-	{
-		ChangeTilesRequestedDueToContainingWords?.Invoke(rowsAndColumnsAffected);
-	}
-
-	public void AddChangeTilesRequestedDueToContainingWordsListener(Action<List<SingleTileManagerSequence>> listener)
-	{
-		ChangeTilesRequestedDueToContainingWords += listener;
-	}
-
-	public void RemoveChangeTilesRequestedDueToContainingWordsListener(Action<List<SingleTileManagerSequence>> listener)
-	{
-		ChangeTilesRequestedDueToContainingWords -= listener;
 	}
 
 	#endregion
@@ -98,7 +98,6 @@ public class GameStateEventHandler : ScriptableObject
 	{
 		TileSwapped = null;
 		NewGameStarted = null;
-		ChangeTilesRequestedDueToContainingWords = null;
 		NewBoardGenerated = null;
 		NewGameStarted = null;
 	}

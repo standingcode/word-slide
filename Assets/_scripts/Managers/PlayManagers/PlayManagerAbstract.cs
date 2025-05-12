@@ -1,10 +1,7 @@
-using NUnit.Framework.Constraints;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
-using Zenject;
+
 
 namespace WordSlide
 {
@@ -21,23 +18,15 @@ namespace WordSlide
 		public static PlayManagerAbstract Instance { get; private set; }
 
 		[SerializeField]
-		private bool playerCanInteractWithTiles;
-		public bool PlayerCanInteractWithTiles => playerCanInteractWithTiles;
+		protected bool playerCanInteractWithTiles = false;
 
-		private IDictionaryService _dictionaryService;
-		private IWordFinderService _wordFinderService;
+		protected IDictionaryService _dictionaryService;
+		protected IWordFinderService _wordFinderService;
 
 		[SerializeField]
-		private GameStateEventHandler _gameStateEventHandler;
+		protected GameStateEventHandler _gameStateEventHandler;
 
-		public int TilesEnteringDestructSequenceCount { get; set; } = 0;
-
-		public void Awake()
-		{
-			_gameStateEventHandler = (GameStateEventHandler)Resources.Load("ScriptableObjects/GameStateEventHandler");
-		}
-
-		public void Initialize(IDictionaryService dictionaryService, IWordFinderService wordFinderService, GameStateEventHandler gameStateEventHandler)
+		public virtual void Initialize(IDictionaryService dictionaryService, IWordFinderService wordFinderService, GameStateEventHandler gameStateEventHandler)
 		{
 			_dictionaryService = dictionaryService;
 			_wordFinderService = wordFinderService;
@@ -49,34 +38,65 @@ namespace WordSlide
 			TriggerNewGame();
 		}
 
-		private void ConfigureRendering()
+		/// <summary>
+		/// Any intialization relating to rendering should be done here.
+		/// </summary>
+		protected void ConfigureRendering()
 		{
 			Application.targetFrameRate = 120;
 		}
 
-		private void ConfigureInputHandling()
+		/// <summary>
+		/// Any intialization relating to input handling should be done here.
+		/// </summary>
+		protected void ConfigureInputHandling()
 		{
 			InputSystem.pollingFrequency = 120;
 		}
 
-		private void InitializeEventSubscriptions()
+		/// <summary>
+		/// All event subscriptions should be done here.
+		/// </summary>
+		protected virtual void InitializeEventSubscriptions()
 		{
 			_gameStateEventHandler.AddTileSwappedListener(TilesSwappedByUser);
 			_gameStateEventHandler.AddNewBoardGeneratedListener(BoardGenerated);
+			_gameStateEventHandler.AddPlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
 		}
 
-		private void RemoveEventSubscriptions()
+		/// <summary>
+		/// All removal of event subscriptions should be done here.
+		/// </summary>
+		protected virtual void RemoveEventSubscriptions()
 		{
 			_gameStateEventHandler.RemoveTileSwappedListener(TilesSwappedByUser);
+			_gameStateEventHandler.RemoveNewBoardGeneratedListener(BoardGenerated);
+			_gameStateEventHandler.RemovePlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
 		}
 
-		private void TriggerNewGame()
+		/// <summary>
+		/// Updated every time the bool for can player interact is changed
+		/// </summary>
+		/// <param name="value"></param>
+		private void PlayerCanInteractWithTiles(bool value)
+		{
+			playerCanInteractWithTiles = value;
+		}
+
+		/// <summary>
+		/// Triggers a new game by raising the event
+		/// </summary>
+		protected void TriggerNewGame()
 		{
 			// This should trigger the TilesManagerSomeGameMode to generate a new board
 			_gameStateEventHandler.RaiseNewGameStarted();
 		}
 
-		private void BoardGenerated(List<SingleTileManagerSequence> generatedBoard)
+		/// <summary>
+		/// A board has been generated
+		/// </summary>
+		/// <param name="generatedBoard"></param>
+		protected void BoardGenerated(List<SingleTileManagerSequence> generatedBoard)
 		{
 			var foundWords = FindWords(generatedBoard);
 
@@ -90,107 +110,39 @@ namespace WordSlide
 			else
 			{
 				// We need to swap the tiles which contain words and try again
-				_gameStateEventHandler.RaiseChangeTilesRequestedDueToContainingWords(foundWords);
+				TilesManager.Instance.ChangeCharactersForTiles(foundWords);
 			}
 		}
 
-		private void LoadingComplete()
+		/// <summary>
+		/// Loading is complete, usually this means a board is generated without current valid words
+		/// </summary>
+		protected void LoadingComplete()
 		{
 			InGameUIController.Instance.HideLoadingCanvas();
-			playerCanInteractWithTiles = true;
+			_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
 		}
 
-		private void TilesSwappedByUser(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
-		{
-			playerCanInteractWithTiles = false;
-
-			if (rowsAndColumnsToCheck.Count == 0)
-			{
-				playerCanInteractWithTiles = true;
-				return;
-			}
-
-			var validWords = FindWords(rowsAndColumnsToCheck);
-
-			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
-
-			if (validWords.Count == 0)
-			{
-				playerCanInteractWithTiles = true;
-				return;
-			}
-
-			List<SingleTileManager> tilesToDestroy = new();
-
-			foreach (var word in validWords)
-			{
-				foreach (var singleTileManager in word.SingleTileManagers)
-				{
-					// TODO: Need to make sure that we still count this when working out points,
-					// we just don't want to try and double destroy the same tile.
-					if (tilesToDestroy.Contains(singleTileManager))
-					{
-						continue;
-					}
-
-					tilesToDestroy.Add(singleTileManager);
-				}
-			}
-
-			// TODO: Trigger destory tiles event
-			//TilesManager.Instance.DestroyTiles(tilesToDestroy);
-
-
-
-			return;
-
-			//playerCanInteractWithTiles = false;
-
-			//if (rowsAndColumnsToCheck.Count == 0)
-			//{
-			//	playerCanInteractWithTiles = true;
-			//	return;
-			//}
-
-			//var validWords = _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
-			//validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
-
-			//if (validWords.Count == 0)
-			//{
-			//	playerCanInteractWithTiles = true;
-			//	return;
-			//}
-
-			//List<SingleTileManager> tilesToDestroy = new();
-
-			//foreach (var word in validWords)
-			//{
-			//	foreach (var singleTileManager in word.SingleTileManagers)
-			//	{
-			//		// TODO: Need to make sure that we still count this when working out points,
-			//		// we just don't want to try and double destroy the same tile.
-			//		if (tilesToDestroy.Contains(singleTileManager))
-			//		{
-			//			continue;
-			//		}
-
-			//		tilesToDestroy.Add(singleTileManager);
-			//	}
-			//}
-
-			//// TODO: Trigger destory tiles event
-			////TilesManager.Instance.DestroyTiles(tilesToDestroy);
-		}
-
-		private List<SingleTileManagerSequence> FindWords(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
+		/// <summary>
+		/// Find any words in the given rows and columns to check
+		/// </summary>
+		/// <param name="rowsAndColumnsToCheck"></param>
+		/// <returns>A list of SingleTileManagerSequences which is a list of valid words in SingleTileManagerSequence form</returns>
+		protected List<SingleTileManagerSequence> FindWords(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
 			return _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
 		}
 
-		public void OnDestroy()
+		public virtual void OnDestroy()
 		{
 			RemoveEventSubscriptions();
 			Instance = null;
 		}
+
+		/// <summary>
+		/// Abstract method which needs to be implemented by all game modes
+		/// </summary>
+		/// <param name="rowsAndColumnsToCheck"></param>
+		protected abstract void TilesSwappedByUser(List<SingleTileManagerSequence> rowsAndColumnsToCheck);
 	}
 }

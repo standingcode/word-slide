@@ -19,18 +19,21 @@ public class MainMenuManager : MonoBehaviour
 	[Inject]
 	public async Task Construct(IDictionaryService dictionaryService, IWordFinderService wordFinderService)
 	{
+		_dictionaryService = dictionaryService;
+		_wordFinderService = wordFinderService;
+
+		await _dictionaryService.LoadDictionary("english");
+		await _dictionaryService.LoadCharacterSet("english");
+	}
+
+	private void Awake()
+	{
 		if (Instance != null && Instance != this)
 		{
 			Destroy(this);
 			return;
 		}
 		Instance = this;
-
-		_dictionaryService = dictionaryService;
-		_wordFinderService = wordFinderService;
-
-		await _dictionaryService.LoadDictionary("english");
-		await _dictionaryService.LoadCharacterSet("english");
 	}
 
 	void Start()
@@ -41,7 +44,6 @@ public class MainMenuManager : MonoBehaviour
 		var playManager = mainBoardGameObject.AddComponent<PlayManagerClassic>();
 
 		// Initialize the PlayManager with the services
-		playManager.Initialize(_dictionaryService, _wordFinderService, gameStateEventHandler);
 		playManager.Initialize(_dictionaryService, _wordFinderService, gameStateEventHandler);
 	}
 }

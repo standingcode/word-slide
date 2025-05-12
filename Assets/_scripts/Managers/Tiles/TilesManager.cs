@@ -33,6 +33,16 @@ namespace WordSlide
 		[SerializeField]
 		private SettingsScriptable settings;
 
+		private bool playerCanInteractWithTiles = false;
+
+		private List<SingleTileManager> tilesWaitingToBeRemoved = new();
+
+		private int tilesFalling = 0;
+
+		private List<(int, int)> tilesAffected = new();
+
+		private IDictionaryService _dictionaryService;
+
 		public void Awake()
 		{
 			if (Instance != null && Instance != this)
@@ -41,12 +51,17 @@ namespace WordSlide
 				return;
 			}
 			Instance = this;
-		}
 
-		private void Start()
-		{
+
 			clickEventHandler.AddClickDownListener(CheckIfTileWasClicked);
 			clickEventHandler.AddClickUpListener(CheckIfTileNeedsToBeDropped);
+			gameStateEventHandler.AddNewGameStartedListener(GenerateTileBoard);
+			gameStateEventHandler.AddPlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
+		}
+
+		private void PlayerCanInteractWithTiles(bool value)
+		{
+			playerCanInteractWithTiles = value;
 		}
 
 		public void OnDestroy()
@@ -72,71 +87,39 @@ namespace WordSlide
 				}
 			}
 
-
-			return;
-
-			//List<SingleTileManagerSequence> foundWords = new();
-
-			//DestroyExistingTiles();
-
-			//boardTiles = new SingleTileManager[SettingsScriptable.Rows, SettingsScriptable.Columns];
-
-			//for (int i = 0; i < boardTiles.GetLength(0); i++)
-			//{
-			//	for (int j = 0; j < boardTiles.GetLength(1); j++)
-			//	{
-			//		boardTiles[i, j] = GenerateAndInitializeTile(i, j);
-			//	}
-			//}
-
-			//var sw = System.Diagnostics.Stopwatch.StartNew();
-
-			//do
-			//{
-			//	List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
-
-			//	// Get all rows
-			//	for (int i = 0; i < BoardTiles.GetLength(0); i++)
-			//	{
-			//		rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullRow(i)));
-			//	}
-
-			//	// Get all columns
-			//	for (int i = 0; i < BoardTiles.GetLength(1); i++)
-			//	{
-			//		rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullColumn(i)));
-			//	}
-
-			//	foundWords = wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(dictionaryService, rowsAndColumnsToCheck);
-
-			//	if (foundWords.Count > 0)
-			//	{
-			//		foreach (var singleTileManagerSequence in foundWords)
-			//		{
-			//			ChangeCharactersForTiles(singleTileManagerSequence.SingleTileManagers);
-			//		}
-			//	}
-
-			//} while (foundWords.Count > 0);
-
-			//sw.Stop();
-			//Debug.Log($"Generating the board witout words took {sw.ElapsedMilliseconds} milliseconds.");
+			TriggerBoardGeneratedEvent();
 		}
 
 		/// <summary>
 		/// This is used as part of the process to remove words until we get a board without existing words.
 		/// </summary>
-		public void ChangeCharactersForTiles(SingleTileManager[] listOfTilesToChangeCharacter)
+		public void ChangeCharactersForTiles(List<SingleTileManagerSequence> sequencesToChangeCharactersFor)
 		{
-			foreach (var singleTileManager in listOfTilesToChangeCharacter)
+
+			List<SingleTileManager> tilesToChange = new();
+
+			foreach (var sequence in sequencesToChangeCharactersFor)
+			{
+				foreach (var singleTileManager in sequence.SingleTileManagers)
+				{
+					if (!tilesToChange.Contains(singleTileManager))
+					{
+						tilesToChange.Add(singleTileManager);
+					}
+				}
+			}
+
+			foreach (var singleTileManager in tilesToChange)
 			{
 				singleTileManager.SetTileCharacter(dictionaryService.GetRandomChar());
 			}
 
-			// TODO: Will need to trigger the event here with the newly generated board
-			//gameStateEventHandler.RaiseNewBoardGenerated
+			TriggerBoardGeneratedEvent();
 		}
 
+		/// <summary>
+		/// The board has been generated, subscribers to be notified
+		/// </summary>
 		private void TriggerBoardGeneratedEvent()
 		{
 			List<SingleTileManagerSequence> entireBoard = new();
@@ -200,10 +183,10 @@ namespace WordSlide
 			return column.ToArray();
 		}
 
-		List<SingleTileManager> tilesWaitingToBeRemoved = new();
-		private int tilesFalling = 0;
-		private List<(int, int)> tilesAffected = new();
-
+		/// <summary>
+		/// Destroy the given tiles
+		/// </summary>
+		/// <param name="tilesToRemove"></param>
 		public void DestroyTiles(List<SingleTileManager> tilesToRemove)
 		{
 			foreach (var tile in tilesToRemove)
@@ -332,12 +315,11 @@ namespace WordSlide
 		/// <param name="mousePosition"></param>
 		private void CheckIfTileWasClicked(Vector2 mousePosition)
 		{
-			// TODO: Check if the player is allowed to interact with tiles, if not return
 			//If the player is not allowed to interact, return
-			//if (!PlayManagerAbstract.Instance.PlayerCanInteractWithTiles)
-			//{
-			//	return;
-			//}
+			if (!playerCanInteractWithTiles)
+			{
+				return;
+			}
 
 			// If a tile is alerady in motion, it needs dropping first
 			CheckIfTileNeedsToBeDropped();
@@ -383,8 +365,6 @@ namespace WordSlide
 		/// <summary>
 		/// Returns the rows and columns affected by two tiles, which will be ones that have just been swapped.
 		/// </summary>
-		/// <param name="tile1"></param>
-		/// <param name="tile2"></param>
 		private void DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent()
 		{
 			List<SingleTileManagerSequence> listOfRowsAndColumnsToCheck = new();
