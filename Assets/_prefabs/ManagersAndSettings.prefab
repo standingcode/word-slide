@@ -76,3 +76,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gamePrefab: {fileID: 5198193986179874856, guid: c238cdf483a1a3740a18e11158d532f1, type: 3}
   gameStateEventHandler: {fileID: 11400000, guid: 84d5bd5ec31c72f4281bb5525c54e3ca, type: 2}
+  clickEventHandler: {fileID: 11400000, guid: f6cbd98fe27ff2242a9a84bc08cc5e55, type: 2}

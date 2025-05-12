@@ -9,6 +9,27 @@ namespace WordSlide
 	/// </summary>
 	public class PlayManagerClassic : PlayManagerAbstract
 	{
+		/// <summary>
+		/// Check for tile swap or return to original position if click event is up and there is a tile in motion
+		/// </summary>
+		protected override void CheckIfTileNeedsToBeDropped()
+		{
+			if (currentlyMovingTile != null)
+			{
+				var tileToSwapWith = TilesManager.Instance.TileToBeSwappedWithGivenTile(currentlyMovingTile);
+
+				if (tileToSwapWith == null)
+				{
+					currentlyMovingTile.ResetTileToItsRestingPosition();
+				}
+				else
+				{
+					TilesManager.Instance.SwapTiles(currentlyMovingTile, tileToSwapWith);
+				}
+				currentlyMovingTile = null;
+			}
+		}
+
 		protected override void TilesSwappedByUser(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
 			// Block player input

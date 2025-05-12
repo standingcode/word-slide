@@ -23,14 +23,21 @@ namespace WordSlide
 		protected IDictionaryService _dictionaryService;
 		protected IWordFinderService _wordFinderService;
 
-		[SerializeField]
 		protected GameStateEventHandler _gameStateEventHandler;
+		protected ClickEventHandler _clickEventHandler;
 
-		public virtual void Initialize(IDictionaryService dictionaryService, IWordFinderService wordFinderService, GameStateEventHandler gameStateEventHandler)
+		protected SingleTileManager currentlyMovingTile = null;
+
+		public virtual void Initialize(
+			IDictionaryService dictionaryService,
+			IWordFinderService wordFinderService,
+			GameStateEventHandler gameStateEventHandler,
+			ClickEventHandler clickEventHandler)
 		{
 			_dictionaryService = dictionaryService;
 			_wordFinderService = wordFinderService;
 			_gameStateEventHandler = gameStateEventHandler;
+			_clickEventHandler = clickEventHandler;
 
 			ConfigureRendering();
 			ConfigureInputHandling();
@@ -59,6 +66,9 @@ namespace WordSlide
 		/// </summary>
 		protected virtual void SubscribeToEvents()
 		{
+			_clickEventHandler.AddClickDownListener(ClickDown);
+			_clickEventHandler.AddClickUpListener(ClickUp);
+
 			_gameStateEventHandler.AddTileSwappedListener(TilesSwappedByUser);
 			_gameStateEventHandler.AddNewBoardGeneratedListener(BoardGenerated);
 			_gameStateEventHandler.AddPlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
@@ -69,10 +79,49 @@ namespace WordSlide
 		/// </summary>
 		protected virtual void RemoveEventSubscriptions()
 		{
+			_clickEventHandler.RemoveClickDownListener(ClickDown);
+			_clickEventHandler.RemoveClickUpListener(ClickUp);
+
 			_gameStateEventHandler.RemoveTileSwappedListener(TilesSwappedByUser);
 			_gameStateEventHandler.RemoveNewBoardGeneratedListener(BoardGenerated);
 			_gameStateEventHandler.RemovePlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
 		}
+
+		protected void ClickDown(Vector2 mousePosition)
+		{
+			CheckIfTileWasClicked(mousePosition);
+		}
+
+		protected void ClickUp()
+		{
+			CheckIfTileNeedsToBeDropped();
+		}
+
+		/// <summary>
+		/// When mouse is clicked, we fire a ray and see if it hits a tile's collider, we then know if the tile is selected.
+		/// </summary>
+		/// <param name="mousePosition"></param>
+		protected void CheckIfTileWasClicked(Vector2 mousePosition)
+		{
+			//If the player is not allowed to interact, return
+			if (!playerCanInteractWithTiles)
+			{
+				return;
+			}
+
+			// Shoot ray from main camera and detect what it hits
+			Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+			if (Physics.Raycast(ray, out RaycastHit hit))
+			{
+				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
+				{
+					currentlyMovingTile = singleTileManager;
+					currentlyMovingTile.TileWasClickedOn(mousePosition);
+				}
+			}
+		}
+
+		protected abstract void CheckIfTileNeedsToBeDropped();
 
 		/// <summary>
 		/// Updated every time the bool for can player interact is changed

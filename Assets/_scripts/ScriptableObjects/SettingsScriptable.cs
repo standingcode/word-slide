@@ -13,6 +13,9 @@ public class SettingsScriptable : ScriptableObject
 	private static int minimumWordLength = 4;
 	public static int MinimumWordLength => minimumWordLength;
 
+	private static float ratioOfOverlapToSwapTile = 0.7f;
+	public static float RatioOfOverlapToSwapTile => ratioOfOverlapToSwapTile;
+
 	[Header("Sizing")]
 	private static float tilePaddingRatio = 0.1f;
 	public static float TilePaddingRatio => tilePaddingRatio;

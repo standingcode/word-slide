@@ -1,5 +1,6 @@
 using Pooling;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using Zenject;
 
@@ -23,17 +24,10 @@ namespace WordSlide
 		[SerializeField]
 		private GameStateEventHandler gameStateEventHandler;
 
-		[SerializeField]
-		private float ratioToSwapTiles = 0.7f;
-
-		private SingleTileManager currentlyMovingTile = null;
-
 		public static TilesManager Instance { get; private set; }
 
 		[SerializeField]
 		private SettingsScriptable settings;
-
-		private bool playerCanInteractWithTiles = false;
 
 		private HashSet<SingleTileManager> tilesWaitingToBeRemoved = new();
 		private HashSet<int> rowsAffected = new();
@@ -41,7 +35,6 @@ namespace WordSlide
 
 		private int tilesFalling = 0;
 
-		private IDictionaryService _dictionaryService;
 		public void Awake()
 		{
 			if (Instance != null && Instance != this)
@@ -66,10 +59,7 @@ namespace WordSlide
 		/// </summary>
 		private void SubscribeToEvents()
 		{
-			clickEventHandler.AddClickDownListener(CheckIfTileWasClicked);
-			clickEventHandler.AddClickUpListener(CheckIfTileNeedsToBeDropped);
 			gameStateEventHandler.AddNewGameStartedListener(GenerateTileBoard);
-			gameStateEventHandler.AddPlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
 		}
 
 		/// <summary>
@@ -77,19 +67,7 @@ namespace WordSlide
 		/// </summary>
 		private void RemoveEventSubscriptions()
 		{
-			clickEventHandler.RemoveClickDownListener(CheckIfTileWasClicked);
-			clickEventHandler.RemoveClickUpListener(CheckIfTileNeedsToBeDropped);
 			gameStateEventHandler.RemoveNewGameStartedListener(GenerateTileBoard);
-			gameStateEventHandler.RemovePlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
-		}
-
-		/// <summary>
-		/// Method sets the boolean from the event handler to allow or disallow player interaction with the tiles.
-		/// </summary>
-		/// <param name="value"></param>
-		private void PlayerCanInteractWithTiles(bool value)
-		{
-			playerCanInteractWithTiles = value;
 		}
 
 		/// <summary>
@@ -117,7 +95,6 @@ namespace WordSlide
 		/// </summary>
 		public void ChangeCharactersForTiles(List<SingleTileManagerSequence> sequencesToChangeCharactersFor)
 		{
-
 			List<SingleTileManager> tilesToChange = new();
 
 			foreach (var sequence in sequencesToChangeCharactersFor)
@@ -340,63 +317,6 @@ namespace WordSlide
 		}
 
 		/// <summary>
-		/// When mouse is clicked, we fire a ray and see if it hits a tile's collider, we then know if the tile is selected.
-		/// </summary>
-		/// <param name="mousePosition"></param>
-		private void CheckIfTileWasClicked(Vector2 mousePosition)
-		{
-			//If the player is not allowed to interact, return
-			if (!playerCanInteractWithTiles)
-			{
-				return;
-			}
-
-			// If a tile is alerady in motion, it needs dropping first
-			CheckIfTileNeedsToBeDropped();
-
-			// Shoot ray from main camera and detect what it hits
-			Ray ray = Camera.main.ScreenPointToRay(mousePosition);
-			if (Physics.Raycast(ray, out RaycastHit hit))
-			{
-				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
-				{
-					currentlyMovingTile = singleTileManager;
-					currentlyMovingTile.TileWasClickedOn(mousePosition);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Check for tile swap or return to original position if click event is up and there is a tile in motion
-		/// This dropping procedure will then need to check for words eventually
-		/// </summary>
-		private void CheckIfTileNeedsToBeDropped()
-		{
-			if (currentlyMovingTile != null)
-			{
-				var tileToSwapWith = TileToBeSwappedWithCurrentlyMovingTile();
-
-				if (tileToSwapWith == null)
-				{
-					currentlyMovingTile.ResetTileToItsRestingPosition();
-				}
-				else
-				{
-					SwapTiles(currentlyMovingTile, tileToSwapWith);
-
-					rowsAffected.Add(currentlyMovingTile.Row);
-					columnsAffected.Add(currentlyMovingTile.Column);
-
-					rowsAffected.Add(tileToSwapWith.Row);
-					columnsAffected.Add(tileToSwapWith.Column);
-
-					DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent();
-				}
-				currentlyMovingTile = null;
-			}
-		}
-
-		/// <summary>
 		/// Returns the rows and columns affected by two tiles, which will be ones that have just been swapped.
 		/// </summary>
 		private void DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent()
@@ -423,7 +343,7 @@ namespace WordSlide
 		/// </summary>
 		/// <param name="tile1"></param>
 		/// <param name="tile2"></param>
-		private void SwapTiles(SingleTileManager tile1, SingleTileManager tile2)
+		public void SwapTiles(SingleTileManager tile1, SingleTileManager tile2)
 		{
 			// Swap in the matrix
 			boardTiles[tile1.Row, tile1.Column] = tile2;
@@ -435,62 +355,70 @@ namespace WordSlide
 
 			tile1.MoveToNewPositionInGrid(tile2.Row, tile2.Column);
 			tile2.MoveToNewPositionInGrid(tile1Row, tile1Column);
+
+			rowsAffected.Add(tile1.Row);
+			columnsAffected.Add(tile1.Column);
+
+			rowsAffected.Add(tile2.Row);
+			columnsAffected.Add(tile2.Column);
+
+			DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent();
 		}
 
 		/// <summary>
 		/// Check which tile, if any is due to be swapped with the currently moving tile.
 		/// </summary>
 		/// <returns></returns>
-		private SingleTileManager TileToBeSwappedWithCurrentlyMovingTile()
+		public SingleTileManager TileToBeSwappedWithGivenTile(SingleTileManager singleFileManager)
 		{
-			var vectorFromOriginalPosition = currentlyMovingTile.transform.position - currentlyMovingTile.TileRestingPosition;
+			var vectorFromOriginalPosition = singleFileManager.transform.position - singleFileManager.TileRestingPosition;
 
 			// tile went up
 			if (vectorFromOriginalPosition.y > 0)
 			{
-				int indexOfRowAbove = currentlyMovingTile.Row - 1;
+				int indexOfRowAbove = singleFileManager.Row - 1;
 
 				var ratioOfLimit =
-					(currentlyMovingTile.transform.position.y - currentlyMovingTile.TileRestingPosition.y)
-					/ (currentlyMovingTile.MovementRestrictions.yMax - currentlyMovingTile.TileRestingPosition.y);
+					(singleFileManager.transform.position.y - singleFileManager.TileRestingPosition.y)
+					/ (singleFileManager.MovementRestrictions.yMax - singleFileManager.TileRestingPosition.y);
 
-				return ratioOfLimit > ratioToSwapTiles ? boardTiles[indexOfRowAbove, currentlyMovingTile.Column] : null;
+				return ratioOfLimit > SettingsScriptable.RatioOfOverlapToSwapTile ? boardTiles[indexOfRowAbove, singleFileManager.Column] : null;
 			}
 
 			// tile went right
 			if (vectorFromOriginalPosition.x > 0)
 			{
-				int indexOfColumnRight = currentlyMovingTile.Column + 1;
+				int indexOfColumnRight = singleFileManager.Column + 1;
 
 				var ratioOfLimit =
-				(currentlyMovingTile.transform.position.x - currentlyMovingTile.TileRestingPosition.x)
-				/ (currentlyMovingTile.MovementRestrictions.xMax - currentlyMovingTile.TileRestingPosition.x);
+				(singleFileManager.transform.position.x - singleFileManager.TileRestingPosition.x)
+				/ (singleFileManager.MovementRestrictions.xMax - singleFileManager.TileRestingPosition.x);
 
-				return ratioOfLimit > ratioToSwapTiles ? boardTiles[currentlyMovingTile.Row, indexOfColumnRight] : null;
+				return ratioOfLimit > SettingsScriptable.RatioOfOverlapToSwapTile ? boardTiles[singleFileManager.Row, indexOfColumnRight] : null;
 			}
 
 			// tile went down
 			if (vectorFromOriginalPosition.y < 0)
 			{
-				int indexOfRowBelow = currentlyMovingTile.Row + 1;
+				int indexOfRowBelow = singleFileManager.Row + 1;
 
 				var ratioOfLimit =
-				(currentlyMovingTile.TileRestingPosition.y - currentlyMovingTile.transform.position.y)
-				/ (currentlyMovingTile.TileRestingPosition.y - currentlyMovingTile.MovementRestrictions.yMin);
+				(singleFileManager.TileRestingPosition.y - singleFileManager.transform.position.y)
+				/ (singleFileManager.TileRestingPosition.y - singleFileManager.MovementRestrictions.yMin);
 
-				return ratioOfLimit > ratioToSwapTiles ? boardTiles[indexOfRowBelow, currentlyMovingTile.Column] : null;
+				return ratioOfLimit > SettingsScriptable.RatioOfOverlapToSwapTile ? boardTiles[indexOfRowBelow, singleFileManager.Column] : null;
 			}
 
 			// tile went left	
 			if (vectorFromOriginalPosition.x < 0)
 			{
-				int indexOfColumnLeft = currentlyMovingTile.Column - 1;
+				int indexOfColumnLeft = singleFileManager.Column - 1;
 
 				var ratioOfLimit =
-				(currentlyMovingTile.TileRestingPosition.x - currentlyMovingTile.transform.position.x)
-				/ (currentlyMovingTile.TileRestingPosition.x - currentlyMovingTile.MovementRestrictions.xMin);
+				(singleFileManager.TileRestingPosition.x - singleFileManager.transform.position.x)
+				/ (singleFileManager.TileRestingPosition.x - singleFileManager.MovementRestrictions.xMin);
 
-				return ratioOfLimit > ratioToSwapTiles ? boardTiles[currentlyMovingTile.Row, indexOfColumnLeft] : null;
+				return ratioOfLimit > SettingsScriptable.RatioOfOverlapToSwapTile ? boardTiles[singleFileManager.Row, indexOfColumnLeft] : null;
 			}
 
 			return null;
