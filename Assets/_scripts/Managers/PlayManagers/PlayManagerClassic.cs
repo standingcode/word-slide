@@ -30,6 +30,10 @@ namespace WordSlide
 			}
 		}
 
+		/// <summary>
+		/// Method is called when 2 tiles have completed a swap
+		/// </summary>
+		/// <param name="rowsAndColumnsToCheck"></param>
 		protected override void TilesSwappedByUser(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
 			// Block player input

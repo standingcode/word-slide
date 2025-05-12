@@ -87,11 +87,18 @@ namespace WordSlide
 			_gameStateEventHandler.RemovePlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
 		}
 
+		/// <summary>
+		/// Method triggered upon pointer click down
+		/// </summary>
+		/// <param name="mousePosition"></param>
 		protected void ClickDown(Vector2 mousePosition)
 		{
 			CheckIfTileWasClicked(mousePosition);
 		}
 
+		/// <summary>
+		/// Method trigger upon pointer click up
+		/// </summary>
 		protected void ClickUp()
 		{
 			CheckIfTileNeedsToBeDropped();
@@ -121,6 +128,9 @@ namespace WordSlide
 			}
 		}
 
+		/// <summary>
+		/// This abstract method needs to be implemented differently by different game modes.
+		/// </summary>
 		protected abstract void CheckIfTileNeedsToBeDropped();
 
 		/// <summary>
@@ -189,7 +199,7 @@ namespace WordSlide
 		}
 
 		/// <summary>
-		/// Abstract method which needs to be implemented by all game modes
+		/// Abstract method which needs to be implemented differently by all game modes
 		/// </summary>
 		/// <param name="rowsAndColumnsToCheck"></param>
 		protected abstract void TilesSwappedByUser(List<SingleTileManagerSequence> rowsAndColumnsToCheck);
