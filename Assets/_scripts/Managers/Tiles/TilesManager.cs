@@ -1,6 +1,6 @@
 using Pooling;
+using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using Zenject;
 
@@ -24,16 +24,17 @@ namespace WordSlide
 		[SerializeField]
 		private GameStateEventHandler gameStateEventHandler;
 
+		[SerializeField]
+		private TileEventHandler tileEventHandler;
+
 		public static TilesManager Instance { get; private set; }
 
 		[SerializeField]
 		private SettingsScriptable settings;
 
-		private HashSet<SingleTileManager> tilesWaitingToBeRemoved = new();
-		private HashSet<int> rowsAffected = new();
-		private HashSet<int> columnsAffected = new();
-
-		private int tilesFalling = 0;
+		//private HashSet<SingleTileManager> tilesWaitingToBeRemoved = new();
+		//private HashSet<int> rowsAffected = new();
+		//private HashSet<int> columnsAffected = new();		
 
 		public void Awake()
 		{
@@ -135,7 +136,7 @@ namespace WordSlide
 				entireBoard.Add(new SingleTileManagerSequence(GetFullColumn(i)));
 			}
 
-			gameStateEventHandler.RaiseNewBoardGenerated(entireBoard);
+			tileEventHandler.RaiseNewBoardGenerated(entireBoard);
 		}
 
 		/// <summary>
@@ -186,95 +187,15 @@ namespace WordSlide
 		/// Destroy the given tiles
 		/// </summary>
 		/// <param name="tilesToRemove"></param>
-		public void DestroyTiles(List<SingleTileManager> tilesToRemove)
+		public void DestroyTiles(HashSet<SingleTileManager> tilesToRemove)
 		{
 			foreach (var tile in tilesToRemove)
 			{
 				BoardTiles[tile.Row, tile.Column] = null;
-				tilesWaitingToBeRemoved.Add(tile);
+
+				// TODO: Destroy sequence will need to call back to PlayManager
+				//tilesWaitingToBeRemoved.Add(tile);
 				tile.StartDestroySequence();
-			}
-		}
-
-		/// <summary>
-		/// Triggered at the end of tile self-destruct sequence
-		/// </summary>
-		/// <param name="singleTileManagerCaller"></param>
-		public void TileHasFinishedSelfDestructSequence(SingleTileManager singleTileManagerCaller)
-		{
-			tilesWaitingToBeRemoved.Remove(singleTileManagerCaller);
-			singleTileManagerCaller.DeactivateTile();
-			PoolManager.Instance.ReturnObjectToPool(singleTileManagerCaller.GetComponent<PoolObject>());
-
-			if (tilesWaitingToBeRemoved.Count > 0)
-			{
-				return;
-			}
-
-			// For each column
-			for (int columnIndex = 0; columnIndex < BoardTiles.GetLength(1); columnIndex++)
-			{
-				int indexForTileAbove = 0;
-
-				// For each row (each element in the column starting from the bottom)
-				for (int rowIndex = BoardTiles.GetLength(0) - 1; rowIndex >= 0; rowIndex--)
-				{
-					// If a null is found, the tile is destroyed, work up from the index above and find a tile to move down.
-					if (BoardTiles[rowIndex, columnIndex] == null)
-					{
-						// This row and column is affected
-						rowsAffected.Add(rowIndex);
-						columnsAffected.Add(columnIndex);
-
-						// For each of the rows above this null tile
-						for (int rowAbove = rowIndex - 1; rowAbove >= -1; rowAbove--)
-						{
-							// If row above is -1 we need to spawn a tile
-							if (rowAbove == -1)
-							{
-								// Add to number of tiles being dropped in
-								tilesFalling++;
-
-								boardTiles[rowIndex, columnIndex]
-									= GenerateAndInitializeTile(rowIndex, columnIndex, SizeManager.Instance.GetAboveColumnStartingPosition(columnIndex, indexForTileAbove));
-
-								boardTiles[rowIndex, columnIndex].ActivateTile();
-
-								indexForTileAbove++;
-							}
-							else
-							{
-								// If we find a tile
-								if (boardTiles[rowAbove, columnIndex] != null)
-								{
-									// Add to number of tiles being dropped in
-									tilesFalling++;
-
-									// Swap in the matrix
-									boardTiles[rowIndex, columnIndex] = BoardTiles[rowAbove, columnIndex];
-									boardTiles[rowAbove, columnIndex] = null;
-
-									boardTiles[rowIndex, columnIndex].MakeExistingTileDropToNewPosition(rowIndex, columnIndex);
-
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// Called from a single tile when it has finished dropping
-		/// </summary>
-		public void TileFinishedDropIn()
-		{
-			tilesFalling--;
-
-			if (tilesFalling == 0)
-			{
-				DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent();
 			}
 		}
 
@@ -285,12 +206,13 @@ namespace WordSlide
 		/// <param name="j"></param>
 		/// <param name="overrideStartPosition"></param>
 		/// <returns></returns>
-		private SingleTileManager GenerateAndInitializeTile(int i, int j, Vector3? overrideStartPosition = null)
+		public SingleTileManager GenerateAndInitializeTile(int i, int j, Vector3? overrideStartPosition = null)
 		{
 			// Create new tile from the object pool
 			PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile", boardTilesRoot);
 
 			SingleTileManager singletile = boardTile.GetComponent<SingleTileManager>();
+			boardTiles[i, j] = singletile;
 
 			singletile.InitializeTile(dictionaryService.GetRandomChar(), i, j, overrideStartPosition);
 			singletile.ActivateTile();
@@ -317,33 +239,11 @@ namespace WordSlide
 		}
 
 		/// <summary>
-		/// Returns the rows and columns affected by two tiles, which will be ones that have just been swapped.
-		/// </summary>
-		private void DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent()
-		{
-			List<SingleTileManagerSequence> listOfRowsAndColumnsToCheck = new();
-
-			foreach (var row in rowsAffected)
-			{
-				listOfRowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullRow(row)));
-			}
-			foreach (var column in columnsAffected)
-			{
-				listOfRowsAndColumnsToCheck.Add(new SingleTileManagerSequence(GetFullColumn(column)));
-			}
-
-			rowsAffected.Clear();
-			columnsAffected.Clear();
-
-			gameStateEventHandler.RaiseTileSwapped(listOfRowsAndColumnsToCheck);
-		}
-
-		/// <summary>
 		/// Do the actual swap of 2 tiles, this is done by swapping the references in the matrix and then setting the correct positions for each tile.
 		/// </summary>
 		/// <param name="tile1"></param>
 		/// <param name="tile2"></param>
-		public void SwapTiles(SingleTileManager tile1, SingleTileManager tile2)
+		public void SwapTilesAndAnimate(SingleTileManager tile1, SingleTileManager tile2)
 		{
 			// Swap in the matrix
 			boardTiles[tile1.Row, tile1.Column] = tile2;
@@ -353,16 +253,16 @@ namespace WordSlide
 			var tile1Row = tile1.Row;
 			var tile1Column = tile1.Column;
 
-			tile1.MoveToNewPositionInGrid(tile2.Row, tile2.Column);
-			tile2.MoveToNewPositionInGrid(tile1Row, tile1Column);
+			tileEventHandler.RaiseTilesSwappedInMatrix(tile1, tile2);
 
-			rowsAffected.Add(tile1.Row);
-			columnsAffected.Add(tile1.Column);
+			tile1.AnimateToNewPositionInGrid(tile2.Row, tile2.Column);
+			tile2.AnimateToNewPositionInGrid(tile1Row, tile1Column);
+		}
 
-			rowsAffected.Add(tile2.Row);
-			columnsAffected.Add(tile2.Column);
-
-			DetermineWhichRowsAndColumnsAreAffectedAndRaiseEvent();
+		public void MoveTileToNewMatrixPosition(int newRowIndex, int newColumnIndex, int oldRowIndex, int oldcolumnIndex)
+		{
+			boardTiles[newRowIndex, newColumnIndex] = BoardTiles[oldRowIndex, oldcolumnIndex];
+			boardTiles[oldRowIndex, oldcolumnIndex] = null;
 		}
 
 		/// <summary>

@@ -170,7 +170,7 @@ MonoBehaviour:
   boardTilesRoot: {fileID: 5671399881637228800}
   clickEventHandler: {fileID: 11400000, guid: f6cbd98fe27ff2242a9a84bc08cc5e55, type: 2}
   gameStateEventHandler: {fileID: 11400000, guid: 84d5bd5ec31c72f4281bb5525c54e3ca, type: 2}
-  ratioToSwapTiles: 0.7
+  tileEventHandler: {fileID: 11400000, guid: b4703430b4c558e489e62ed164756002, type: 2}
   settings: {fileID: 11400000, guid: f0afdf0f404687a48b9337ea8ffe5488, type: 2}
 --- !u!114 &1971055762343976071
 MonoBehaviour:

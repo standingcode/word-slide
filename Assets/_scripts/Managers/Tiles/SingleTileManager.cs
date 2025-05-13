@@ -1,4 +1,5 @@
 using Pooling;
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -48,6 +49,9 @@ public class SingleTileManager : MonoBehaviour
 
 	public MovementRestrictions MovementRestrictions => singleTileMover.MovementRestrictions;
 
+	[SerializeField]
+	private TileEventHandler tileEventHandler;
+
 	private void Awake()
 	{
 		tileRestingRotation = transform.rotation;
@@ -76,7 +80,8 @@ public class SingleTileManager : MonoBehaviour
 		if (overrideStartPosition != null)
 		{
 			transform.position = overrideStartPosition.Value;
-			StartTileDrop();
+			// TODO: Need to sort this little mess out
+			//StartTileMovingTileToRestingPosition();
 		}
 		else
 		{
@@ -85,29 +90,56 @@ public class SingleTileManager : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Used for tile swaps
+	/// Used usually for initial setting of the tiles
 	/// </summary>
 	/// <param name="row"></param>
 	/// <param name="column"></param>
 	public void MoveToNewPositionInGrid(int row, int column)
 	{
 		singleTileMover.StopMoving();
+		SetNewGridPosition(row, column);
+		transform.position = tileRestingPosition;
+	}
 
+	/// <summary>
+	/// Used for tile swaps
+	/// </summary>
+	/// <param name="row"></param>
+	/// <param name="column"></param>
+	public void AnimateToNewPositionInGrid(int row, int column)
+	{
+		singleTileMover.StopMoving();
+		SetNewGridPosition(row, column);
+		StartTileMovingTileToRestingPosition();
+	}
+
+	/// <summary>
+	/// Use when the tile needs to return to its resting position
+	/// </summary>
+	public void AnimateToRestingPositionInGrid()
+	{
+		singleTileMover.StopMoving();
+		StartTileMovingTileToRestingPosition();
+	}
+
+	/// <summary>
+	/// Sets the grid matric and the resting position of the tile
+	/// </summary>
+	/// <param name="row"></param>
+	/// <param name="column"></param>
+	private void SetNewGridPosition(int row, int column)
+	{
 		SetTileMatrixIndex(row, column);
 		SetTileRestingPosition();
-		transform.position = tileRestingPosition;
 	}
 
 	/// <summary>
 	/// This drops this already existing tile to a new position in the grid.
 	/// </summary>
-	/// <param name="row"></param>
-	/// <param name="column"></param>
-	public void MakeExistingTileDropToNewPosition(int row, int column)
+	public void MakeTileDropToRestingPosition()
 	{
-		SetTileMatrixIndex(row, column);
 		SetTileRestingPosition();
-		StartTileDrop();
+		StartTileMovingTileToRestingPosition();
 	}
 
 	/// <summary>
@@ -139,11 +171,11 @@ public class SingleTileManager : MonoBehaviour
 	/// <summary>
 	/// Start the dropping of the tile
 	/// </summary>
-	public void StartTileDrop()
+	private void StartTileMovingTileToRestingPosition()
 	{
 		if (transform.position != TileRestingPosition)
 		{
-			StartCoroutine(AnimateTileFallingToNewPositionCoroutine());
+			StartCoroutine(AnimateTileMovingToNewPositionCoroutine());
 		}
 	}
 
@@ -156,8 +188,6 @@ public class SingleTileManager : MonoBehaviour
 		boxCollider.enabled = true;
 		visualCube.SetActive(true);
 		textMesh.enabled = true;
-
-
 	}
 
 	/// <summary>
@@ -183,23 +213,14 @@ public class SingleTileManager : MonoBehaviour
 		animator.SetTrigger(destroyMovementAnimationString);
 	}
 
-	/// <summary>
-	/// Called as an event from the animation
-	/// </summary>
-	public void HighlightAnimationFinished()
+	public void DestroySequenceIsComplete()
 	{
-		TilesManager.Instance.TileHasFinishedSelfDestructSequence(this);
-	}
-
-	public void ResetTileToItsRestingPosition()
-	{
-		singleTileMover.StopMoving();
-		transform.position = tileRestingPosition;
+		tileEventHandler.RaiseDestroySequenceComplete(this);
 	}
 
 	// Private methods
 
-	private IEnumerator AnimateTileFallingToNewPositionCoroutine()
+	private IEnumerator AnimateTileMovingToNewPositionCoroutine()
 	{
 		while (transform.position != TileRestingPosition)
 		{
@@ -210,8 +231,7 @@ public class SingleTileManager : MonoBehaviour
 			yield return null;
 		}
 
-		// TODO: Tile has finished dropping event trigger
-		TilesManager.Instance.TileFinishedDropIn();
+		tileEventHandler.RaiseTileAnimationComplete(this);
 	}
 
 	private void SetTileMatrixIndex(int row, int column)

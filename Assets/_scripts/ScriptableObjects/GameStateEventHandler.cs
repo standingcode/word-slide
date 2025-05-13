@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using WordSlide;
 
 [CreateAssetMenu(fileName = "GameStateEventHandler", menuName = "Scriptable WordSlide/GameStateEvent")]
 public class GameStateEventHandler : ScriptableObject
@@ -23,50 +21,6 @@ public class GameStateEventHandler : ScriptableObject
 	public void RemovePlayerCanInteractWithTilesChangedListener(Action<bool> listener)
 	{
 		PlayerCanInteractWithTilesChanged -= listener;
-	}
-
-	#endregion
-
-
-	#region A new board has been generated
-
-	public Action<List<SingleTileManagerSequence>> NewBoardGenerated;
-
-	public void RaiseNewBoardGenerated(List<SingleTileManagerSequence> generatedBoard)
-	{
-		NewBoardGenerated?.Invoke(generatedBoard);
-	}
-
-	public void AddNewBoardGeneratedListener(Action<List<SingleTileManagerSequence>> listener)
-	{
-		NewBoardGenerated += listener;
-	}
-
-	public void RemoveNewBoardGeneratedListener(Action<List<SingleTileManagerSequence>> listener)
-	{
-		NewBoardGenerated -= listener;
-	}
-
-	#endregion
-
-
-	#region Tile swap requested by user play
-
-	public Action<List<SingleTileManagerSequence>> TileSwapped;
-
-	public void RaiseTileSwapped(List<SingleTileManagerSequence> rowsAndColumnsAffected)
-	{
-		TileSwapped?.Invoke(rowsAndColumnsAffected);
-	}
-
-	public void AddTileSwappedListener(Action<List<SingleTileManagerSequence>> listener)
-	{
-		TileSwapped += listener;
-	}
-
-	public void RemoveTileSwappedListener(Action<List<SingleTileManagerSequence>> listener)
-	{
-		TileSwapped -= listener;
 	}
 
 	#endregion
@@ -96,9 +50,7 @@ public class GameStateEventHandler : ScriptableObject
 
 	private void OnDestroy()
 	{
-		TileSwapped = null;
 		NewGameStarted = null;
-		NewBoardGenerated = null;
 		NewGameStarted = null;
 	}
 }

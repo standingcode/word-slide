@@ -10,5 +10,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33539d005f459024297098e11394b84d, type: 3}
-  m_Name: ClickEvent
+  m_Name: ClickEventHandler
   m_EditorClassIdentifier: 

@@ -366,6 +366,7 @@ MonoBehaviour:
   tileIsActive: 0
   destroyMovementAnimationString: MovementBeforeDestroyAnimation
   singleTileMover: {fileID: 240128338872377688}
+  tileEventHandler: {fileID: 11400000, guid: b4703430b4c558e489e62ed164756002, type: 2}
 --- !u!114 &240128338872377688
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -14,6 +14,9 @@ public class MainMenuManager : MonoBehaviour
 	[SerializeField]
 	private ClickEventHandler clickEventHandler;
 
+	[SerializeField]
+	private TileEventHandler tileEventHandler;
+
 	public static MainMenuManager Instance { get; private set; }
 
 	private IDictionaryService _dictionaryService;
@@ -47,6 +50,6 @@ public class MainMenuManager : MonoBehaviour
 		var playManager = mainBoardGameObject.AddComponent<PlayManagerClassic>();
 
 		// Initialize the PlayManager with the services
-		playManager.Initialize(_dictionaryService, _wordFinderService, gameStateEventHandler, clickEventHandler);
+		playManager.Initialize(_dictionaryService, _wordFinderService, gameStateEventHandler, clickEventHandler, tileEventHandler);
 	}
 }

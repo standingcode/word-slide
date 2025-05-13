@@ -25,25 +25,111 @@ namespace WordSlide
 
 		protected GameStateEventHandler _gameStateEventHandler;
 		protected ClickEventHandler _clickEventHandler;
+		protected TileEventHandler _tileEventHandler;
 
 		protected SingleTileManager currentlyMovingTile = null;
 
+		protected bool tilesBeingSwapped = false;
+		protected HashSet<SingleTileManager> tilesBeingAnimated = new();
+		protected HashSet<SingleTileManager> tilesBeingDropped = new();
+		protected HashSet<SingleTileManager> tilesToBeDestroyed = new();
+
+		protected SingleTileManager[,] BoardTiles = TilesManager.Instance.BoardTiles;
+
+		protected HashSet<int> rowsAffected = new();
+		protected HashSet<int> columnsAffected = new();
+
+		// VIRTUAL
 		public virtual void Initialize(
 			IDictionaryService dictionaryService,
 			IWordFinderService wordFinderService,
 			GameStateEventHandler gameStateEventHandler,
-			ClickEventHandler clickEventHandler)
+			ClickEventHandler clickEventHandler,
+			TileEventHandler tileEventHandler)
 		{
 			_dictionaryService = dictionaryService;
 			_wordFinderService = wordFinderService;
+
 			_gameStateEventHandler = gameStateEventHandler;
 			_clickEventHandler = clickEventHandler;
+			_tileEventHandler = tileEventHandler;
 
 			ConfigureRendering();
 			ConfigureInputHandling();
 			SubscribeToEvents();
 			TriggerNewGame();
 		}
+
+		public virtual void OnDestroy()
+		{
+			RemoveEventSubscriptions();
+			Instance = null;
+		}
+
+		/// <summary>
+		/// All event subscriptions should be done here.
+		/// </summary>
+		protected virtual void SubscribeToEvents()
+		{
+			_clickEventHandler.AddClickDownListener(ClickDown);
+			_clickEventHandler.AddClickUpListener(ClickUp);
+
+			_tileEventHandler.AddTilesSwappedInMatrixListener(TilesCompletedSwapInMatrix);
+			_tileEventHandler.AddTileAnimationCompleteListener(TileAnimationComplete);
+			_tileEventHandler.AddDestroySequenceCompleteListener(TileDestructSequenceCompleted);
+			_tileEventHandler.AddNewBoardGeneratedListener(BoardGenerated);
+
+			_gameStateEventHandler.AddPlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
+		}
+
+		/// <summary>
+		/// All removal of event subscriptions should be done here.
+		/// </summary>
+		protected virtual void RemoveEventSubscriptions()
+		{
+			_clickEventHandler.RemoveClickDownListener(ClickDown);
+			_clickEventHandler.RemoveClickUpListener(ClickUp);
+
+			_tileEventHandler.RemoveTilesSwappedInMatrixListener(TilesCompletedSwapInMatrix);
+			_tileEventHandler.RemoveTileAnimationCompleteListener(TileAnimationComplete);
+			_tileEventHandler.RemoveDestroySequenceCompleteListener(TileDestructSequenceCompleted);
+			_tileEventHandler.RemoveNewBoardGeneratedListener(BoardGenerated);
+
+			_gameStateEventHandler.RemovePlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
+		}
+
+		// ABSTRACT		
+
+		/// <summary>
+		/// Method to be called by a TileEvent
+		/// </summary>
+		/// <param name="singleTileManager"></param>
+		public abstract void TileAnimationComplete(SingleTileManager singleTileManager);
+
+		/// <summary>
+		/// Abstract method which needs to be implemented differently by all game modes
+		/// </summary>
+		/// <param name="rowsAndColumnsToCheck"></param>
+		protected abstract void TilesCompletedSwapInMatrix(SingleTileManager tile1, SingleTileManager tile2);
+
+		/// <summary>
+		/// Abstract method which needs to be implemented differently by all game modes
+		/// </summary>
+		/// <param name="singleTileManager"></param>
+		protected abstract void TileDestructSequenceCompleted(SingleTileManager singleTileManager);
+
+		/// <summary>
+		/// This abstract method needs to be implemented differently by different game modes.
+		/// </summary>
+		protected abstract void UserUnClickedPointerCheckNextStep();
+
+		/// <summary>
+		/// This abstract method needs to be implemented differently by different game modes.
+		/// </summary>
+		protected abstract void TileDestructSequenceCompleted();
+
+
+		// NO OVERRIDE
 
 		/// <summary>
 		/// Any intialization relating to rendering should be done here.
@@ -62,37 +148,16 @@ namespace WordSlide
 		}
 
 		/// <summary>
-		/// All event subscriptions should be done here.
-		/// </summary>
-		protected virtual void SubscribeToEvents()
-		{
-			_clickEventHandler.AddClickDownListener(ClickDown);
-			_clickEventHandler.AddClickUpListener(ClickUp);
-
-			_gameStateEventHandler.AddTileSwappedListener(TilesSwappedByUser);
-			_gameStateEventHandler.AddNewBoardGeneratedListener(BoardGenerated);
-			_gameStateEventHandler.AddPlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
-		}
-
-		/// <summary>
-		/// All removal of event subscriptions should be done here.
-		/// </summary>
-		protected virtual void RemoveEventSubscriptions()
-		{
-			_clickEventHandler.RemoveClickDownListener(ClickDown);
-			_clickEventHandler.RemoveClickUpListener(ClickUp);
-
-			_gameStateEventHandler.RemoveTileSwappedListener(TilesSwappedByUser);
-			_gameStateEventHandler.RemoveNewBoardGeneratedListener(BoardGenerated);
-			_gameStateEventHandler.RemovePlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
-		}
-
-		/// <summary>
 		/// Method triggered upon pointer click down
 		/// </summary>
 		/// <param name="mousePosition"></param>
 		protected void ClickDown(Vector2 mousePosition)
 		{
+			if (!playerCanInteractWithTiles)
+			{
+				return;
+			}
+
 			CheckIfTileWasClicked(mousePosition);
 		}
 
@@ -101,7 +166,7 @@ namespace WordSlide
 		/// </summary>
 		protected void ClickUp()
 		{
-			CheckIfTileNeedsToBeDropped();
+			UserUnClickedPointerCheckNextStep();
 		}
 
 		/// <summary>
@@ -127,11 +192,6 @@ namespace WordSlide
 				}
 			}
 		}
-
-		/// <summary>
-		/// This abstract method needs to be implemented differently by different game modes.
-		/// </summary>
-		protected abstract void CheckIfTileNeedsToBeDropped();
 
 		/// <summary>
 		/// Updated every time the bool for can player interact is changed
@@ -191,17 +251,5 @@ namespace WordSlide
 		{
 			return _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
 		}
-
-		public virtual void OnDestroy()
-		{
-			RemoveEventSubscriptions();
-			Instance = null;
-		}
-
-		/// <summary>
-		/// Abstract method which needs to be implemented differently by all game modes
-		/// </summary>
-		/// <param name="rowsAndColumnsToCheck"></param>
-		protected abstract void TilesSwappedByUser(List<SingleTileManagerSequence> rowsAndColumnsToCheck);
 	}
 }

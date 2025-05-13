@@ -9,6 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eddaefe5c706d75488323e75ef2b6912, type: 3}
-  m_Name: PlayerInteractionBoolEvent
+  m_Script: {fileID: 11500000, guid: 7e72f3dad55bb26488e6364eb4f1f6ce, type: 3}
+  m_Name: TileEventHandler
   m_EditorClassIdentifier: 
