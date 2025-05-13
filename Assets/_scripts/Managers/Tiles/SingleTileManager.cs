@@ -123,11 +123,11 @@ public class SingleTileManager : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Sets the grid matric and the resting position of the tile
+	/// Sets the grid matrix and the resting position of the tile
 	/// </summary>
 	/// <param name="row"></param>
 	/// <param name="column"></param>
-	private void SetNewGridPosition(int row, int column)
+	public void SetNewGridPosition(int row, int column)
 	{
 		SetTileMatrixIndex(row, column);
 		SetTileRestingPosition();
@@ -138,7 +138,6 @@ public class SingleTileManager : MonoBehaviour
 	/// </summary>
 	public void MakeTileDropToRestingPosition()
 	{
-		SetTileRestingPosition();
 		StartTileMovingTileToRestingPosition();
 	}
 

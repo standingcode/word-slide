@@ -253,16 +253,26 @@ namespace WordSlide
 			var tile1Row = tile1.Row;
 			var tile1Column = tile1.Column;
 
-			tileEventHandler.RaiseTilesSwappedInMatrix(tile1, tile2);
+			tileEventHandler.RaiseWordCheckNeeded();
 
 			tile1.AnimateToNewPositionInGrid(tile2.Row, tile2.Column);
 			tile2.AnimateToNewPositionInGrid(tile1Row, tile1Column);
 		}
 
+		/// <summary>
+		/// Move a tile at a certain grid position to another position. Also updates the tile's matrix indexes and resting position.
+		/// </summary>
+		/// <param name="newRowIndex"></param>
+		/// <param name="newColumnIndex"></param>
+		/// <param name="oldRowIndex"></param>
+		/// <param name="oldcolumnIndex"></param>
 		public void MoveTileToNewMatrixPosition(int newRowIndex, int newColumnIndex, int oldRowIndex, int oldcolumnIndex)
 		{
-			boardTiles[newRowIndex, newColumnIndex] = BoardTiles[oldRowIndex, oldcolumnIndex];
+			boardTiles[newRowIndex, newColumnIndex] = boardTiles[oldRowIndex, oldcolumnIndex];
 			boardTiles[oldRowIndex, oldcolumnIndex] = null;
+
+			boardTiles[newRowIndex, newColumnIndex].SetNewGridPosition(newRowIndex, newColumnIndex);
+
 		}
 
 		/// <summary>
