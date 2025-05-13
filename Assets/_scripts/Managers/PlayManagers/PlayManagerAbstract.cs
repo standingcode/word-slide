@@ -29,12 +29,11 @@ namespace WordSlide
 
 		protected SingleTileManager currentlyMovingTile = null;
 
-		protected bool tilesBeingSwapped = false;
 		protected HashSet<SingleTileManager> tilesBeingAnimated = new();
 		protected HashSet<SingleTileManager> tilesBeingDropped = new();
 		protected HashSet<SingleTileManager> tilesToBeDestroyed = new();
 
-		protected SingleTileManager[,] BoardTiles = TilesManager.Instance.BoardTiles;
+		protected SingleTileManager[,] BoardTiles => TilesManager.Instance.BoardTiles;
 
 		protected HashSet<int> rowsAffected = new();
 		protected HashSet<int> columnsAffected = new();
@@ -74,7 +73,7 @@ namespace WordSlide
 			_clickEventHandler.AddClickDownListener(ClickDown);
 			_clickEventHandler.AddClickUpListener(ClickUp);
 
-			_tileEventHandler.AddTilesSwappedInMatrixListener(TilesCompletedSwapInMatrix);
+			_tileEventHandler.AddWordCheckNeededListener(CheckWords);
 			_tileEventHandler.AddTileAnimationCompleteListener(TileAnimationComplete);
 			_tileEventHandler.AddDestroySequenceCompleteListener(TileDestructSequenceCompleted);
 			_tileEventHandler.AddNewBoardGeneratedListener(BoardGenerated);
@@ -90,7 +89,7 @@ namespace WordSlide
 			_clickEventHandler.RemoveClickDownListener(ClickDown);
 			_clickEventHandler.RemoveClickUpListener(ClickUp);
 
-			_tileEventHandler.RemoveTilesSwappedInMatrixListener(TilesCompletedSwapInMatrix);
+			_tileEventHandler.RemoveWordCheckNeededListener(CheckWords);
 			_tileEventHandler.RemoveTileAnimationCompleteListener(TileAnimationComplete);
 			_tileEventHandler.RemoveDestroySequenceCompleteListener(TileDestructSequenceCompleted);
 			_tileEventHandler.RemoveNewBoardGeneratedListener(BoardGenerated);
@@ -108,9 +107,8 @@ namespace WordSlide
 
 		/// <summary>
 		/// Abstract method which needs to be implemented differently by all game modes
-		/// </summary>
-		/// <param name="rowsAndColumnsToCheck"></param>
-		protected abstract void TilesCompletedSwapInMatrix(SingleTileManager tile1, SingleTileManager tile2);
+		/// </summary>		
+		protected abstract void CheckWords();
 
 		/// <summary>
 		/// Abstract method which needs to be implemented differently by all game modes

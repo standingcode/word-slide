@@ -27,6 +27,7 @@ namespace WordSlide
 
 			if (tileToSwapWith == null)
 			{
+				// This is to wait for the animation to return the tile
 				tilesBeingAnimated.Add(currentlyMovingTile);
 
 				// Animate back to original position if no swapping
@@ -34,10 +35,14 @@ namespace WordSlide
 			}
 			else
 			{
-				tilesBeingSwapped = true;
-
 				tilesBeingAnimated.Add(currentlyMovingTile);
 				tilesBeingAnimated.Add(tileToSwapWith);
+
+				// Mark the affected rows and columns
+				rowsAffected.Add(currentlyMovingTile.Row);
+				rowsAffected.Add(tileToSwapWith.Row);
+				columnsAffected.Add(currentlyMovingTile.Column);
+				columnsAffected.Add(tileToSwapWith.Column);
 
 				// Animate the swap
 				TilesManager.Instance.SwapTilesAndAnimate(currentlyMovingTile, tileToSwapWith);
@@ -54,31 +59,49 @@ namespace WordSlide
 		{
 			Debug.Log($"Tile animation complete: {singleTileManager.TileCharacter}");
 
-			if (tilesToBeDestroyed.Count == 0)
+			// If the animations ending are swap animations
+			if (tilesBeingAnimated.Count > 0)
 			{
-				_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
+				tilesBeingAnimated.Remove(singleTileManager);
+
+				if (tilesBeingAnimated.Count == 0)
+				{
+					if (tilesToBeDestroyed.Count > 0)
+					{
+						TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
+					}
+					else
+					{
+						_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
+					}
+				}
 			}
-			else
+			// If the animations ending are dropping animations
+			else if (tilesBeingDropped.Count > 0)
 			{
-				// Call TilesManager to destroy the tiles
-				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
+				tilesBeingDropped.Remove(singleTileManager);
+
+				if (tilesBeingDropped.Count == 0)
+				{
+					_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
+				}
 			}
 		}
 
-		public override void TileDropComplete(SingleTileManager singleTileManager)
-		{
-			Debug.Log($"Tile drop complete: {singleTileManager.TileCharacter}");
+		//public override void TileDropComplete(SingleTileManager singleTileManager)
+		//{
+		//	Debug.Log($"Tile drop complete: {singleTileManager.TileCharacter}");
 
-			if (tilesToBeDestroyed.Count == 0)
-			{
-				_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
-			}
-			else
-			{
-				// Call TilesManager to destroy the tiles
-				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
-			}
-		}
+		//	if (tilesToBeDestroyed.Count == 0)
+		//	{
+		//		_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
+		//	}
+		//	else
+		//	{
+		//		// Call TilesManager to destroy the tiles
+		//		TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
+		//	}
+		//}
 
 		/// <summary>
 		/// Once destruction is completed we will need to call the spawn logic
@@ -95,8 +118,6 @@ namespace WordSlide
 				return;
 			}
 
-			tilesToBeDestroyed.Clear();
-
 			Debug.Log("Destruct sequence completed, now we need to spawn new tiles etc");
 
 			TileDestructSequenceCompleted();
@@ -106,16 +127,8 @@ namespace WordSlide
 		/// Method is called when 2 tiles have completed a swap
 		/// </summary>
 		/// <param name="rowsAndColumnsToCheck"></param>
-		protected override void TilesCompletedSwapInMatrix(SingleTileManager tile1, SingleTileManager tile2)
+		protected override void CheckWords()
 		{
-			HashSet<int> rowsAffected = new();
-			HashSet<int> columnsAffected = new();
-
-			rowsAffected.Add(tile1.Row);
-			rowsAffected.Add(tile2.Row);
-			columnsAffected.Add(tile1.Column);
-			columnsAffected.Add(tile2.Column);
-
 			List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
 
 			foreach (var row in rowsAffected)
@@ -144,22 +157,19 @@ namespace WordSlide
 				return;
 			}
 
+			SetDestroyRequest(validWords);
+		}
+
+		private void SetDestroyRequest(List<SingleTileManagerSequence> tileSequencesToDestroy)
+		{
 			// For each of the words (one word is a SingleTileManagerSequence)
-			foreach (var word in validWords)
+			foreach (var word in tileSequencesToDestroy)
 			{
 				// For each of the tiles in the word
 				foreach (var singleTileManager in word.SingleTileManagers)
 				{
 					tilesToBeDestroyed.Add(singleTileManager);
 				}
-			}
-
-			// This should never be called really, but if the swap animations somehow finished first
-			// We can dive straight into the destruction
-			if (tilesBeingAnimated.Count == 0)
-			{
-				// Call TilesManager to destroy the tiles
-				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
 			}
 		}
 
@@ -199,6 +209,8 @@ namespace WordSlide
 
 								// Add to tiles being dropped								
 								tilesBeingDropped.Add(generatedTile);
+
+								generatedTile.MakeTileDropToRestingPosition();
 
 								indexForTileAbove++;
 							}

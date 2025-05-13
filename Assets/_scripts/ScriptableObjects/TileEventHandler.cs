@@ -26,23 +26,23 @@ public class TileEventHandler : ScriptableObject
 	}
 
 
-	// Tile has been swapped in the matrix
+	// Word check needed after tile swap or drop
 
-	public Action<SingleTileManager, SingleTileManager> TileSwappedInMatrix;
+	public Action WordCheckNeeded;
 
-	public void RaiseTilesSwappedInMatrix(SingleTileManager tile1, SingleTileManager tile2)
+	public void RaiseWordCheckNeeded()
 	{
-		TileSwappedInMatrix?.Invoke(tile1, tile2);
+		WordCheckNeeded?.Invoke();
 	}
 
-	public void AddTilesSwappedInMatrixListener(Action<SingleTileManager, SingleTileManager> listener)
+	public void AddWordCheckNeededListener(Action listener)
 	{
-		TileSwappedInMatrix += listener;
+		WordCheckNeeded += listener;
 	}
 
-	public void RemoveTilesSwappedInMatrixListener(Action<SingleTileManager, SingleTileManager> listener)
+	public void RemoveWordCheckNeededListener(Action listener)
 	{
-		TileSwappedInMatrix -= listener;
+		WordCheckNeeded -= listener;
 	}
 
 
@@ -91,7 +91,7 @@ public class TileEventHandler : ScriptableObject
 	{
 		TileAnimationComplete = null;
 		NewBoardGenerated = null;
-		TileSwappedInMatrix = null;
+		WordCheckNeeded = null;
 		DestroySequenceComplete = null;
 	}
 }
