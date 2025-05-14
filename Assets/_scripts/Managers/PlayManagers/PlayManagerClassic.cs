@@ -82,7 +82,14 @@ namespace WordSlide
 
 				if (tilesBeingDropped.Count == 0)
 				{
-					CheckWords();
+					if (tilesToBeDestroyed.Count > 0)
+					{
+						TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
+					}
+					else
+					{
+						_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
+					}
 				}
 			}
 		}
@@ -106,6 +113,11 @@ namespace WordSlide
 
 			MoveAndSpawnTiles();
 		}
+
+		//protected List<SingleTileManagerSequence> GetValidWords()
+		//{
+
+		//}
 
 		/// <summary>
 		/// Method is called when 2 tiles have completed a swap
@@ -157,8 +169,8 @@ namespace WordSlide
 
 			AddTilesToBeDestroyedToList(validWords);
 
-			// If no tiles are being animated, we need to destory the tiles now
-			if (tilesBeingAnimated.Count == 0)
+			// If no tiles are being animated or dropped, we need to destroy the tiles now
+			if (tilesBeingAnimated.Count == 0 && tilesBeingDropped.Count == 0)
 			{
 				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
 			}
@@ -267,6 +279,8 @@ namespace WordSlide
 					}
 				}
 			}
+
+			CheckWords();
 		}
 	}
 }
