@@ -6,11 +6,10 @@ using UnityEngine;
 namespace WordSlide
 {
 	/// <summary>
-	/// "Classic" version of the game
-	/// - Tiles swap back if no words are found
-	/// - Round is timed
+	/// Infinite version of the game
+	/// - Rules not really yet definied but the tiles don't swap back if no words are found
 	/// </summary>
-	public class PlayManagerClassic : PlayManagerAbstract
+	public class PlayManagerInfinite : PlayManagerAbstract
 	{
 		/// <summary>
 		/// Check for tile swap or return to original position if click event is up and there is a tile in motion
@@ -37,13 +36,17 @@ namespace WordSlide
 			}
 			else
 			{
+				tilesBeingAnimated.Add(currentlyMovingTile);
+				tilesBeingAnimated.Add(tileToSwapWith);
+
 				// Mark the affected rows and columns
 				rowsAffected.Add(currentlyMovingTile.Row);
 				rowsAffected.Add(tileToSwapWith.Row);
 				columnsAffected.Add(currentlyMovingTile.Column);
 				columnsAffected.Add(tileToSwapWith.Column);
 
-				SwapTiles(currentlyMovingTile, tileToSwapWith);
+				// Animate the swap
+				TilesManager.Instance.SwapTilesAndAnimate(currentlyMovingTile, tileToSwapWith);
 			}
 
 			currentlyMovingTile = null;
@@ -70,26 +73,8 @@ namespace WordSlide
 				return;
 			}
 
-			// Return control to the player if the grid was being rearranged
-			if (_gameState == GameState.GeneratingNewTilesAndDroppingInProgress)
-			{
-				_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
-				return;
-			}
-
-			// 1. Tiles could have swapped back due to not enough overlap 2. Tiles could have swapped back due to no valid word
-			// Return control to the player	
-			if ((_gameState & GameState.TilesHaveBeenReturnedToOriginalPostionDueToNoValidWordFound) == GameState.TilesHaveBeenReturnedToOriginalPostionDueToNoValidWordFound
-			|| (_gameState & GameState.TilesHaveBeenReturnedToOriginalPostionDueToNotEnoughOverlap) == GameState.TilesHaveBeenReturnedToOriginalPostionDueToNotEnoughOverlap
-			)
-			{
-				_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
-				return;
-			}
-
-			// 3. Tiles could have just finished player swap, but we have no valid words
-			// Need to start the process of returning them tiles
-			SwapTilesBack();
+			// Return control to the player
+			_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
 		}
 
 		/// <summary>
@@ -111,16 +96,12 @@ namespace WordSlide
 		}
 
 		/// <summary>
-		/// Method is called when 2 tiles have completed a swap (animation may still be in progress)
+		/// Method is called when 2 tiles have completed a swap
 		/// </summary>
+		/// <param name="rowsAndColumnsToCheck"></param>
 		protected override void CheckWords()
 		{
 			Debug.Log($"{nameof(CheckWords)} called");
-
-			if (rowsAffected.Count == 0 && columnsAffected.Count == 0)
-			{
-				return;
-			}
 
 			// Get the valid words for the affected rows and columns
 			var validWords = GetValidWordsForAffectedRowsAndColumns();
@@ -137,9 +118,8 @@ namespace WordSlide
 				// If there are no tiles being animated
 				if (tilesBeingAnimated.Count == 0)
 				{
-					// Start tile swap back					
-					SwapTilesBack();
-					return;
+					// Return control to the player
+					_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
 				}
 
 				return;
@@ -163,20 +143,6 @@ namespace WordSlide
 			{
 				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
 			}
-		}
-
-		private void SwapTilesBack()
-		{
-			_gameState = GameState.TilesHaveBeenReturnedToOriginalPostionDueToNoValidWordFound;
-
-			if (tilesLastSwapped.Item1 == null || tilesLastSwapped.Item2 == null)
-			{
-				Debug.LogError($"One or both of the {nameof(tilesLastSwapped)} were null");
-				return;
-			}
-
-			// Swap the tiles back to their original positions
-			SwapTiles(tilesLastSwapped.Item1, tilesLastSwapped.Item2);
 		}
 
 		/// <summary>

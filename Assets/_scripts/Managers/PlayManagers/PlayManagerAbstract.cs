@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -17,12 +18,17 @@ namespace WordSlide
 	/// <summary>
 	/// Game state enum for use by PlayerManagers only
 	/// </summary>
+	[Flags]
 	public enum GameState
 	{
-		Initializing,
-		WaitingForPlayer,
-		TileSwapInProgress,
-		GeneratingNewTilesAndDroppingInProgress
+		None = 0,
+		Initializing = 1,
+		WaitingForPlayer = 2,
+		TileAnimationInProgress = 4,
+		TilesHaveBeenReturnedToOriginalPostionDueToNoValidWordFound = 8,
+		TilesHaveBeenReturnedToOriginalPostionDueToNotEnoughOverlap = 16,
+		TilesAreBeingMovedToNewPosition = 32,
+		GeneratingNewTilesAndDroppingInProgress = 64
 	}
 
 	public abstract class PlayManagerAbstract : MonoBehaviour
@@ -30,7 +36,9 @@ namespace WordSlide
 		public static PlayManagerAbstract Instance { get; private set; }
 
 		[SerializeField]
-		protected GameState _gameState = GameState.Initializing;
+		protected GameState _gameState = GameState.None;
+
+		protected (SingleTileManager, SingleTileManager) tilesLastSwapped = (null, null);
 
 		protected IDictionaryService _dictionaryService;
 		protected IWordFinderService _wordFinderService;
@@ -42,7 +50,6 @@ namespace WordSlide
 		protected SingleTileManager currentlyMovingTile = null;
 
 		protected HashSet<SingleTileManager> tilesBeingAnimated = new();
-		//protected HashSet<SingleTileManager> tilesBeingDropped = new();
 		protected HashSet<SingleTileManager> tilesToBeDestroyed = new();
 		protected SingleTileManager[,] BoardTiles => TilesManager.Instance.BoardTiles;
 
@@ -283,6 +290,17 @@ namespace WordSlide
 
 			// return any valid words from the affected rows and columns to check
 			return FindWords(rowsAndColumnsToCheck);
+		}
+
+		protected void SwapTiles(SingleTileManager tile1, SingleTileManager tile2)
+		{
+			tilesLastSwapped = (tile1, tile2);
+
+			tilesBeingAnimated.Add(tile1);
+			tilesBeingAnimated.Add(tile2);
+
+			// Animate the swap
+			TilesManager.Instance.SwapTilesAndAnimate(tile1, tile2);
 		}
 	}
 }
