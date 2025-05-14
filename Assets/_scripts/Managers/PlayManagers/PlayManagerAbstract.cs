@@ -250,5 +250,29 @@ namespace WordSlide
 		{
 			return _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
 		}
+
+		/// <summary>
+		/// Method valid words for rowsAffected and columnsAffected sequences
+		/// </summary>
+		/// <returns></returns>
+		protected List<SingleTileManagerSequence> GetValidWordsForAffectedRowsAndColumns()
+		{
+			List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
+
+			// We have to check all rows above affected rows since new tiles drop in
+			for (int i = rowsAffected.Max(); i >= 0; i--)
+			{
+				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullRow(i)));
+			}
+
+			// We only need to check affected columns
+			foreach (var column in columnsAffected)
+			{
+				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullColumn(column)));
+			}
+
+			// return any valid words from the affected rows and columns to check
+			return FindWords(rowsAndColumnsToCheck);
+		}
 	}
 }

@@ -114,33 +114,14 @@ namespace WordSlide
 			MoveAndSpawnTiles();
 		}
 
-		//protected List<SingleTileManagerSequence> GetValidWords()
-		//{
-
-		//}
-
 		/// <summary>
 		/// Method is called when 2 tiles have completed a swap
 		/// </summary>
 		/// <param name="rowsAndColumnsToCheck"></param>
 		protected override void CheckWords()
 		{
-			List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
-
-			// We have to check all rows above affected rows since new tiles drop in
-			for (int i = rowsAffected.Max(); i >= 0; i--)
-			{
-				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullRow(i)));
-			}
-
-			// We only need to check affected columns
-			foreach (var column in columnsAffected)
-			{
-				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullColumn(column)));
-			}
-
-			// Get any valid words from the given rows and columns to check
-			var validWords = FindWords(rowsAndColumnsToCheck);
+			// Get the valid words for the affected rows and columns
+			var validWords = GetValidWordsForAffectedRowsAndColumns();
 
 			// Print each of the valid words to console
 			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
@@ -148,16 +129,20 @@ namespace WordSlide
 			rowsAffected.Clear();
 			columnsAffected.Clear();
 
+			// If there are no valid words
 			if (validWords.Count == 0)
 			{
+				// If there are no tiles being animated
 				if (tilesBeingAnimated.Count == 0)
 				{
+					// Return control to the player
 					_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
 				}
 
 				return;
 			}
 
+			// Now set rowsAffected and columnsAffected to be the ones containing valid words.
 			foreach (var word in validWords)
 			{
 				foreach (var tile in word.SingleTileManagers)
@@ -167,9 +152,10 @@ namespace WordSlide
 				}
 			}
 
+			// Valid words are marked for destruction
 			AddTilesToBeDestroyedToList(validWords);
 
-			// If no tiles are being animated or dropped, we need to destroy the tiles now
+			// If no tiles are being animated or dropped, we need to destroy the tiles now (otherwise they will be destroyed when animations are completed)
 			if (tilesBeingAnimated.Count == 0 && tilesBeingDropped.Count == 0)
 			{
 				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
