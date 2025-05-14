@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -124,7 +125,7 @@ namespace WordSlide
 		/// <summary>
 		/// This abstract method needs to be implemented differently by different game modes.
 		/// </summary>
-		protected abstract void TileDestructSequenceCompleted();
+		protected abstract void MoveAndSpawnTiles();
 
 
 		// NO OVERRIDE
@@ -227,7 +228,7 @@ namespace WordSlide
 			else
 			{
 				// We need to swap the tiles which contain words and try again
-				TilesManager.Instance.ChangeCharactersForTiles(foundWords);
+				TilesManager.Instance.ChangeCharactersForTiles(foundWords.SelectMany(x => x.SingleTileManagers).ToList());
 			}
 		}
 

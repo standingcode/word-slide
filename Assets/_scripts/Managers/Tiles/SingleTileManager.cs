@@ -1,6 +1,7 @@
 using Pooling;
 using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 using WordSlide;
@@ -63,6 +64,9 @@ public class SingleTileManager : MonoBehaviour
 		StopAllCoroutines();
 	}
 
+
+	// Initialization, activation and deactivation methods
+
 	/// <summary>
 	/// Initialize the tile, setting character, matrix location, scale, resting position and the movement restrictions
 	/// </summary>
@@ -86,95 +90,6 @@ public class SingleTileManager : MonoBehaviour
 		else
 		{
 			transform.position = tileRestingPosition;
-		}
-	}
-
-	/// <summary>
-	/// Used usually for initial setting of the tiles
-	/// </summary>
-	/// <param name="row"></param>
-	/// <param name="column"></param>
-	public void MoveToNewPositionInGrid(int row, int column)
-	{
-		singleTileMover.StopMoving();
-		SetNewGridPosition(row, column);
-		transform.position = tileRestingPosition;
-	}
-
-	/// <summary>
-	/// Used for tile swaps
-	/// </summary>
-	/// <param name="row"></param>
-	/// <param name="column"></param>
-	public void AnimateToNewPositionInGrid(int row, int column)
-	{
-		singleTileMover.StopMoving();
-		SetNewGridPosition(row, column);
-		StartTileMovingTileToRestingPosition();
-	}
-
-	/// <summary>
-	/// Use when the tile needs to return to its resting position
-	/// </summary>
-	public void AnimateToRestingPositionInGrid()
-	{
-		singleTileMover.StopMoving();
-		StartTileMovingTileToRestingPosition();
-	}
-
-	/// <summary>
-	/// Sets the grid matrix and the resting position of the tile
-	/// </summary>
-	/// <param name="row"></param>
-	/// <param name="column"></param>
-	public void SetNewGridPosition(int row, int column)
-	{
-		SetTileMatrixIndex(row, column);
-		SetTileRestingPosition();
-	}
-
-	/// <summary>
-	/// This drops this already existing tile to a new position in the grid.
-	/// </summary>
-	public void MakeTileDropToRestingPosition()
-	{
-		StartTileMovingTileToRestingPosition();
-	}
-
-	/// <summary>
-	/// Set the character of the tile, needs to be public to allow the generation of board without existing words.
-	/// </summary>
-	/// <param name="character"></param>
-	public void SetTileCharacter(char character)
-	{
-		tileCharacter = character;
-
-		if (textMesh == null)
-		{
-			Debug.Log("TextMesh is not assigned in the inspector.");
-			return;
-		}
-
-		textMesh.text = tileCharacter.ToString().ToUpper();
-	}
-
-	/// <summary>
-	/// When the tile is first selected, this can be called from the tile manager which should get a reference via a ray
-	/// </summary>
-	/// <param name="mousePosition"></param>
-	public void TileWasClickedOn(Vector2 mousePosition)
-	{
-		singleTileMover.StartMoving(mousePosition);
-	}
-
-	/// <summary>
-	/// Start the dropping of the tile
-	/// </summary>
-	private void StartTileMovingTileToRestingPosition()
-	{
-		if (transform.position != TileRestingPosition)
-		{
-			StartCoroutine(AnimateTileMovingToNewPositionCoroutine());
 		}
 	}
 
@@ -203,22 +118,33 @@ public class SingleTileManager : MonoBehaviour
 		StopAllCoroutines();
 	}
 
+
+	// Moving the tile
+
 	/// <summary>
-	/// Called from the PlayManager when this tile is part of a detected word
-	/// The animation is triggered, which will then call HighlightAnimationFinished
+	/// Use when the tile needs to return to its resting position
 	/// </summary>
-	public void StartDestroySequence()
+	public void AnimateToRestingPositionInGrid()
 	{
-		animator.SetTrigger(destroyMovementAnimationString);
+		singleTileMover.StopMoving();
+		StartTileMovingTileToRestingPosition();
 	}
 
-	public void DestroySequenceIsComplete()
+	/// <summary>
+	/// Start the moving of the tile towards the resting position
+	/// </summary>
+	private void StartTileMovingTileToRestingPosition()
 	{
-		tileEventHandler.RaiseDestroySequenceComplete(this);
+		if (transform.position != TileRestingPosition)
+		{
+			StartCoroutine(AnimateTileMovingToNewPositionCoroutine());
+		}
 	}
 
-	// Private methods
-
+	/// <summary>
+	/// Coroutine for animating the tile to its resting position
+	/// </summary>
+	/// <returns></returns>
 	private IEnumerator AnimateTileMovingToNewPositionCoroutine()
 	{
 		while (transform.position != TileRestingPosition)
@@ -232,6 +158,72 @@ public class SingleTileManager : MonoBehaviour
 
 		tileEventHandler.RaiseTileAnimationComplete(this);
 	}
+
+
+	// Setting the tile properties
+
+	/// <summary>
+	/// Sets the grid matrix and the resting position of the tile
+	/// </summary>
+	/// <param name="row"></param>
+	/// <param name="column"></param>
+	public void SetNewGridPosition(int row, int column)
+	{
+		SetTileMatrixIndex(row, column);
+		SetTileRestingPosition();
+	}
+
+	/// <summary>
+	/// Set the character of the tile, needs to be public to allow the generation of board without existing words.
+	/// </summary>
+	/// <param name="character"></param>
+	public void SetTileCharacter(char character)
+	{
+		tileCharacter = character;
+
+		if (textMesh == null)
+		{
+			Debug.Log("TextMesh is not assigned in the inspector.");
+			return;
+		}
+
+		textMesh.text = tileCharacter.ToString().ToUpper();
+	}
+
+
+	// Control of the tile
+
+	/// <summary>
+	/// When the tile is first selected, this can be called from the tile manager which should get a reference via a ray
+	/// </summary>
+	/// <param name="mousePosition"></param>
+	public void TileWasClickedOn(Vector2 mousePosition)
+	{
+		singleTileMover.StartMoving(mousePosition);
+	}
+
+
+	// Destroying the tile
+
+	/// <summary>
+	/// Called from the PlayManager when this tile is part of a detected word
+	/// The animation is triggered, which will then call HighlightAnimationFinished
+	/// </summary>
+	public void StartDestroySequence()
+	{
+		animator.SetTrigger(destroyMovementAnimationString);
+	}
+
+	/// <summary>
+	/// Called once the destory animation is complete
+	/// </summary>
+	public void DestroySequenceIsComplete()
+	{
+		tileEventHandler.RaiseDestroySequenceComplete(this);
+	}
+
+
+	// Helper methods
 
 	private void SetTileMatrixIndex(int row, int column)
 	{

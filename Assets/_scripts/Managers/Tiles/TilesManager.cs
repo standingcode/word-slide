@@ -19,22 +19,12 @@ namespace WordSlide
 		private Transform boardTilesRoot;
 
 		[SerializeField]
-		private ClickEventHandler clickEventHandler;
-
-		[SerializeField]
 		private GameStateEventHandler gameStateEventHandler;
 
 		[SerializeField]
 		private TileEventHandler tileEventHandler;
 
 		public static TilesManager Instance { get; private set; }
-
-		[SerializeField]
-		private SettingsScriptable settings;
-
-		//private HashSet<SingleTileManager> tilesWaitingToBeRemoved = new();
-		//private HashSet<int> rowsAffected = new();
-		//private HashSet<int> columnsAffected = new();		
 
 		public void Awake()
 		{
@@ -94,22 +84,9 @@ namespace WordSlide
 		/// <summary>
 		/// This is used as part of the process to remove words until we get a board without existing words.
 		/// </summary>
-		public void ChangeCharactersForTiles(List<SingleTileManagerSequence> sequencesToChangeCharactersFor)
+		public void ChangeCharactersForTiles(List<SingleTileManager> tilesToChangeCharactersFor)
 		{
-			List<SingleTileManager> tilesToChange = new();
-
-			foreach (var sequence in sequencesToChangeCharactersFor)
-			{
-				foreach (var singleTileManager in sequence.SingleTileManagers)
-				{
-					if (!tilesToChange.Contains(singleTileManager))
-					{
-						tilesToChange.Add(singleTileManager);
-					}
-				}
-			}
-
-			foreach (var singleTileManager in tilesToChange)
+			foreach (var singleTileManager in tilesToChangeCharactersFor)
 			{
 				singleTileManager.SetTileCharacter(dictionaryService.GetRandomChar());
 			}
@@ -125,13 +102,13 @@ namespace WordSlide
 			List<SingleTileManagerSequence> entireBoard = new();
 
 			// Get all rows
-			for (int i = 0; i < BoardTiles.GetLength(0); i++)
+			for (int i = 0; i < boardTiles.GetLength(0); i++)
 			{
 				entireBoard.Add(new SingleTileManagerSequence(GetFullRow(i)));
 			}
 
 			// Get all columns
-			for (int i = 0; i < BoardTiles.GetLength(1); i++)
+			for (int i = 0; i < boardTiles.GetLength(1); i++)
 			{
 				entireBoard.Add(new SingleTileManagerSequence(GetFullColumn(i)));
 			}
@@ -191,10 +168,7 @@ namespace WordSlide
 		{
 			foreach (var tile in tilesToRemove)
 			{
-				BoardTiles[tile.Row, tile.Column] = null;
-
-				// TODO: Destroy sequence will need to call back to PlayManager
-				//tilesWaitingToBeRemoved.Add(tile);
+				boardTiles[tile.Row, tile.Column] = null;
 				tile.StartDestroySequence();
 			}
 		}
@@ -249,14 +223,17 @@ namespace WordSlide
 			boardTiles[tile1.Row, tile1.Column] = tile2;
 			boardTiles[tile2.Row, tile2.Column] = tile1;
 
-			// Now set the SingleTileManage settings correctly
+			// Set the SingleTileManager indexes correctly
 			var tile1Row = tile1.Row;
 			var tile1Column = tile1.Column;
 
+			tile1.SetNewGridPosition(tile2.Row, tile2.Column);
+			tile2.SetNewGridPosition(tile1Row, tile1Column);
+
 			tileEventHandler.RaiseWordCheckNeeded();
 
-			tile1.AnimateToNewPositionInGrid(tile2.Row, tile2.Column);
-			tile2.AnimateToNewPositionInGrid(tile1Row, tile1Column);
+			tile1.AnimateToRestingPositionInGrid();
+			tile2.AnimateToRestingPositionInGrid();
 		}
 
 		/// <summary>

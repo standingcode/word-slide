@@ -168,10 +168,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boardTilesRoot: {fileID: 5671399881637228800}
-  clickEventHandler: {fileID: 11400000, guid: f6cbd98fe27ff2242a9a84bc08cc5e55, type: 2}
   gameStateEventHandler: {fileID: 11400000, guid: 84d5bd5ec31c72f4281bb5525c54e3ca, type: 2}
   tileEventHandler: {fileID: 11400000, guid: b4703430b4c558e489e62ed164756002, type: 2}
-  settings: {fileID: 11400000, guid: f0afdf0f404687a48b9337ea8ffe5488, type: 2}
 --- !u!114 &1971055762343976071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -264,9 +262,9 @@ MonoBehaviour:
     m_ActionName: 'UI/Point[/Mouse/position]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 8765655982903541675}
         m_TargetAssemblyTypeName: WordSlide.TilesManager, MainProject
-        m_MethodName: SetTiles
+        m_MethodName: GenerateTileBoard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

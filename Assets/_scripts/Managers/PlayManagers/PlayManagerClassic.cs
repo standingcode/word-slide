@@ -1,5 +1,6 @@
 using Pooling;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace WordSlide
@@ -57,8 +58,6 @@ namespace WordSlide
 		/// <param name="singleTileManager"></param>
 		public override void TileAnimationComplete(SingleTileManager singleTileManager)
 		{
-			Debug.Log($"Tile animation complete: {singleTileManager.TileCharacter}");
-
 			// If the animations ending are swap animations
 			if (tilesBeingAnimated.Count > 0)
 			{
@@ -83,25 +82,10 @@ namespace WordSlide
 
 				if (tilesBeingDropped.Count == 0)
 				{
-					_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
+					CheckWords();
 				}
 			}
 		}
-
-		//public override void TileDropComplete(SingleTileManager singleTileManager)
-		//{
-		//	Debug.Log($"Tile drop complete: {singleTileManager.TileCharacter}");
-
-		//	if (tilesToBeDestroyed.Count == 0)
-		//	{
-		//		_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
-		//	}
-		//	else
-		//	{
-		//		// Call TilesManager to destroy the tiles
-		//		TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
-		//	}
-		//}
 
 		/// <summary>
 		/// Once destruction is completed we will need to call the spawn logic
@@ -120,7 +104,7 @@ namespace WordSlide
 
 			Debug.Log("Destruct sequence completed, now we need to spawn new tiles etc");
 
-			TileDestructSequenceCompleted();
+			MoveAndSpawnTiles();
 		}
 
 		/// <summary>
@@ -131,11 +115,13 @@ namespace WordSlide
 		{
 			List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
 
-			foreach (var row in rowsAffected)
+			// We have to check all rows above affected rows since new tiles drop in
+			for (int i = rowsAffected.Max(); i >= 0; i--)
 			{
-				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullRow(row)));
+				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullRow(i)));
 			}
 
+			// We only need to check affected columns
 			foreach (var column in columnsAffected)
 			{
 				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullColumn(column)));
@@ -147,6 +133,9 @@ namespace WordSlide
 			// Print each of the valid words to console
 			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
 
+			rowsAffected.Clear();
+			columnsAffected.Clear();
+
 			if (validWords.Count == 0)
 			{
 				if (tilesBeingAnimated.Count == 0)
@@ -157,10 +146,29 @@ namespace WordSlide
 				return;
 			}
 
-			SetDestroyRequest(validWords);
+			foreach (var word in validWords)
+			{
+				foreach (var tile in word.SingleTileManagers)
+				{
+					rowsAffected.Add(tile.Row);
+					columnsAffected.Add(tile.Column);
+				}
+			}
+
+			AddTilesToBeDestroyedToList(validWords);
+
+			// If no tiles are being animated, we need to destory the tiles now
+			if (tilesBeingAnimated.Count == 0)
+			{
+				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
+			}
 		}
 
-		private void SetDestroyRequest(List<SingleTileManagerSequence> tileSequencesToDestroy)
+		/// <summary>
+		/// Add all the tiles to be destroyed to tilesToBeDestroyed
+		/// </summary>
+		/// <param name="tileSequencesToDestroy"></param>
+		private void AddTilesToBeDestroyedToList(List<SingleTileManagerSequence> tileSequencesToDestroy)
 		{
 			// For each of the words (one word is a SingleTileManagerSequence)
 			foreach (var word in tileSequencesToDestroy)
@@ -174,44 +182,76 @@ namespace WordSlide
 		}
 
 		/// <summary>
+		/// Spawn a single tile at the given position above a certain column
+		/// </summary>
+		/// <param name="rowIndex"></param>
+		/// <param name="columnIndex"></param>
+		/// <param name="positionAbove"></param>
+		protected void SpawnANewTile(int rowIndex, int columnIndex, int positionAbove)
+		{
+			var generatedTile = TilesManager.Instance.GenerateAndInitializeTile(
+				rowIndex,
+				columnIndex,
+				SizeManager.Instance.GetAboveColumnStartingPosition(columnIndex, positionAbove)
+				);
+
+			generatedTile.ActivateTile();
+
+			// Important to add it to the matrix
+			BoardTiles[rowIndex, columnIndex] = generatedTile;
+
+			// Add to tiles being dropped								
+			tilesBeingDropped.Add(generatedTile);
+
+			// Animate the tile to its resting position
+			generatedTile.AnimateToRestingPositionInGrid();
+		}
+
+		/// <summary>
+		/// Move a tile from one matrix position to another, this is used when a tile is destroyed and we need to drop tiles from above
+		/// </summary>
+		/// <param name="oldRowIndex"></param>
+		/// <param name="rowIndex"></param>
+		/// <param name="columnIndex"></param>
+		protected void SetTileToNewPosition(int oldRowIndex, int rowIndex, int columnIndex)
+		{
+			// Swap in the matrix
+			TilesManager.Instance.MoveTileToNewMatrixPosition(rowIndex, columnIndex, oldRowIndex, columnIndex);
+			BoardTiles[rowIndex, columnIndex].AnimateToRestingPositionInGrid();
+
+			// Add to tiles being dropped
+			tilesBeingDropped.Add(BoardTiles[rowIndex, columnIndex]);
+		}
+
+		/// <summary>
 		/// When the tiles destruct animation stuff is complete, we spawn or drop existing tiles
 		/// </summary>
-		protected override void TileDestructSequenceCompleted()
+		protected override void MoveAndSpawnTiles()
 		{
+			var listOfColumnsAffected = columnsAffected.ToList();
+			listOfColumnsAffected.Sort();
+
+			var listOfRowsAffected = rowsAffected.ToList();
+			listOfRowsAffected.Sort();
+
 			// For each column
-			for (int columnIndex = 0; columnIndex < BoardTiles.GetLength(1); columnIndex++)
+			foreach (var columnIndex in listOfColumnsAffected)
 			{
 				int indexForTileAbove = 0;
 
-				// For each row (each element in the column starting from the bottom)
-				for (int rowIndex = BoardTiles.GetLength(0) - 1; rowIndex >= 0; rowIndex--)
+				//For each row(each element in the column starting from the bottom)
+				for (int rowIndex = listOfRowsAffected.Max(); rowIndex >= 0; rowIndex--)
 				{
 					// If a null is found, the tile is destroyed, work up from the index above and find a tile to move down.
 					if (BoardTiles[rowIndex, columnIndex] == null)
 					{
-						// This row and column is affected
-						rowsAffected.Add(rowIndex);
-						columnsAffected.Add(columnIndex);
-
 						// For each of the rows above this null tile
 						for (int rowAbove = rowIndex - 1; rowAbove >= -1; rowAbove--)
 						{
 							// If row above is -1 we need to spawn a tile
 							if (rowAbove == -1)
 							{
-								var generatedTile = TilesManager.Instance.GenerateAndInitializeTile(
-									rowIndex,
-									columnIndex,
-									SizeManager.Instance.GetAboveColumnStartingPosition(columnIndex, indexForTileAbove)
-									);
-
-								generatedTile.ActivateTile();
-
-								// Add to tiles being dropped								
-								tilesBeingDropped.Add(generatedTile);
-
-								generatedTile.MakeTileDropToRestingPosition();
-
+								SpawnANewTile(rowIndex, columnIndex, indexForTileAbove);
 								indexForTileAbove++;
 							}
 							else
@@ -219,12 +259,8 @@ namespace WordSlide
 								// If we find a tile
 								if (BoardTiles[rowAbove, columnIndex] != null)
 								{
-									// Add to tiles being dropped
-									tilesBeingDropped.Add(BoardTiles[rowAbove, columnIndex]);
-
-									// Swap in the matrix
-									TilesManager.Instance.MoveTileToNewMatrixPosition(rowIndex, columnIndex, rowAbove, columnIndex);
-									BoardTiles[rowIndex, columnIndex].MakeTileDropToRestingPosition();
+									SetTileToNewPosition(rowAbove, rowIndex, columnIndex);
+									break;
 								}
 							}
 						}
