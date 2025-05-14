@@ -21,8 +21,8 @@ namespace WordSlide
 				return;
 			}
 
-			// Block player input
-			_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(false);
+			// Move to swap checking etc.
+			_gameStateEventHandler.RaiseGameStateChanged(GameState.TileSwapInProgress);
 
 			var tileToSwapWith = TilesManager.Instance.TileToBeSwappedWithGivenTile(currentlyMovingTile);
 
@@ -58,40 +58,23 @@ namespace WordSlide
 		/// <param name="singleTileManager"></param>
 		public override void TileAnimationComplete(SingleTileManager singleTileManager)
 		{
-			// If the animations ending are swap animations
+			tilesBeingAnimated.Remove(singleTileManager);
+
 			if (tilesBeingAnimated.Count > 0)
 			{
-				tilesBeingAnimated.Remove(singleTileManager);
-
-				if (tilesBeingAnimated.Count == 0)
-				{
-					if (tilesToBeDestroyed.Count > 0)
-					{
-						TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
-					}
-					else
-					{
-						_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
-					}
-				}
+				return;
 			}
-			// If the animations ending are dropping animations
-			else if (tilesBeingDropped.Count > 0)
+
+			// By here, No tiles being animated
+
+			if (tilesToBeDestroyed.Count > 0)
 			{
-				tilesBeingDropped.Remove(singleTileManager);
-
-				if (tilesBeingDropped.Count == 0)
-				{
-					if (tilesToBeDestroyed.Count > 0)
-					{
-						TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
-					}
-					else
-					{
-						_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
-					}
-				}
+				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
+				return;
 			}
+
+			// Return control to the player
+			_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
 		}
 
 		/// <summary>
@@ -109,8 +92,6 @@ namespace WordSlide
 				return;
 			}
 
-			Debug.Log("Destruct sequence completed, now we need to spawn new tiles etc");
-
 			MoveAndSpawnTiles();
 		}
 
@@ -120,6 +101,8 @@ namespace WordSlide
 		/// <param name="rowsAndColumnsToCheck"></param>
 		protected override void CheckWords()
 		{
+			Debug.Log($"{nameof(CheckWords)} called");
+
 			// Get the valid words for the affected rows and columns
 			var validWords = GetValidWordsForAffectedRowsAndColumns();
 
@@ -136,7 +119,7 @@ namespace WordSlide
 				if (tilesBeingAnimated.Count == 0)
 				{
 					// Return control to the player
-					_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
+					_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
 				}
 
 				return;
@@ -156,7 +139,7 @@ namespace WordSlide
 			AddTilesToBeDestroyedToList(validWords);
 
 			// If no tiles are being animated or dropped, we need to destroy the tiles now (otherwise they will be destroyed when animations are completed)
-			if (tilesBeingAnimated.Count == 0 && tilesBeingDropped.Count == 0)
+			if (tilesBeingAnimated.Count == 0)
 			{
 				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
 			}
@@ -199,7 +182,7 @@ namespace WordSlide
 			BoardTiles[rowIndex, columnIndex] = generatedTile;
 
 			// Add to tiles being dropped								
-			tilesBeingDropped.Add(generatedTile);
+			tilesBeingAnimated.Add(generatedTile);
 
 			// Animate the tile to its resting position
 			generatedTile.AnimateToRestingPositionInGrid();
@@ -217,8 +200,8 @@ namespace WordSlide
 			TilesManager.Instance.MoveTileToNewMatrixPosition(rowIndex, columnIndex, oldRowIndex, columnIndex);
 			BoardTiles[rowIndex, columnIndex].AnimateToRestingPositionInGrid();
 
-			// Add to tiles being dropped
-			tilesBeingDropped.Add(BoardTiles[rowIndex, columnIndex]);
+			// Add to tiles being animated
+			tilesBeingAnimated.Add(BoardTiles[rowIndex, columnIndex]);
 		}
 
 		/// <summary>
@@ -226,6 +209,8 @@ namespace WordSlide
 		/// </summary>
 		protected override void MoveAndSpawnTiles()
 		{
+			_gameStateEventHandler.RaiseGameStateChanged(GameState.GeneratingNewTilesAndDroppingInProgress);
+
 			var listOfColumnsAffected = columnsAffected.ToList();
 			listOfColumnsAffected.Sort();
 

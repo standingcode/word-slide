@@ -1,26 +1,28 @@
 using System;
 using UnityEngine;
+using WordSlide;
 
 [CreateAssetMenu(fileName = "GameStateEventHandler", menuName = "Scriptable WordSlide/GameStateEvent")]
 public class GameStateEventHandler : ScriptableObject
 {
-	#region Player can interact with tiles
+	#region game state changed
 
-	public Action<bool> PlayerCanInteractWithTilesChanged;
+	public Action<GameState> GameStateChanged;
 
-	public void RaisePlayerCanInteractWithTilesChanged(bool canInteract)
+	public void RaiseGameStateChanged(GameState gameState)
 	{
-		PlayerCanInteractWithTilesChanged?.Invoke(canInteract);
+		Debug.Log($"GameStateEventHandler changing to: {gameState}");
+
+		GameStateChanged?.Invoke(gameState);
 	}
 
-	public void AddPlayerCanInteractWithTilesChangedListener(Action<bool> listener)
+	public void AddGameStateChangedListener(Action<GameState> listener)
 	{
-		PlayerCanInteractWithTilesChanged += listener;
+		GameStateChanged += listener;
 	}
-
-	public void RemovePlayerCanInteractWithTilesChangedListener(Action<bool> listener)
+	public void RemoveGameStateChangedListener(Action<GameState> listener)
 	{
-		PlayerCanInteractWithTilesChanged -= listener;
+		GameStateChanged -= listener;
 	}
 
 	#endregion

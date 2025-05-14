@@ -14,12 +14,20 @@ namespace WordSlide
 		public string word;
 	}
 
+	public enum GameState
+	{
+		Initializing,
+		WaitingForPlayer,
+		TileSwapInProgress,
+		GeneratingNewTilesAndDroppingInProgress
+	}
+
 	public abstract class PlayManagerAbstract : MonoBehaviour
 	{
 		public static PlayManagerAbstract Instance { get; private set; }
 
 		[SerializeField]
-		protected bool playerCanInteractWithTiles = false;
+		protected GameState _gameState = GameState.Initializing;
 
 		protected IDictionaryService _dictionaryService;
 		protected IWordFinderService _wordFinderService;
@@ -31,9 +39,8 @@ namespace WordSlide
 		protected SingleTileManager currentlyMovingTile = null;
 
 		protected HashSet<SingleTileManager> tilesBeingAnimated = new();
-		protected HashSet<SingleTileManager> tilesBeingDropped = new();
+		//protected HashSet<SingleTileManager> tilesBeingDropped = new();
 		protected HashSet<SingleTileManager> tilesToBeDestroyed = new();
-
 		protected SingleTileManager[,] BoardTiles => TilesManager.Instance.BoardTiles;
 
 		protected HashSet<int> rowsAffected = new();
@@ -79,7 +86,7 @@ namespace WordSlide
 			_tileEventHandler.AddDestroySequenceCompleteListener(TileDestructSequenceCompleted);
 			_tileEventHandler.AddNewBoardGeneratedListener(BoardGenerated);
 
-			_gameStateEventHandler.AddPlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
+			_gameStateEventHandler.AddGameStateChangedListener(GameStateChanged);
 		}
 
 		/// <summary>
@@ -95,7 +102,7 @@ namespace WordSlide
 			_tileEventHandler.RemoveDestroySequenceCompleteListener(TileDestructSequenceCompleted);
 			_tileEventHandler.RemoveNewBoardGeneratedListener(BoardGenerated);
 
-			_gameStateEventHandler.RemovePlayerCanInteractWithTilesChangedListener(PlayerCanInteractWithTiles);
+			_gameStateEventHandler.RemoveGameStateChangedListener(GameStateChanged);
 		}
 
 		// ABSTRACT		
@@ -152,7 +159,7 @@ namespace WordSlide
 		/// <param name="mousePosition"></param>
 		protected void ClickDown(Vector2 mousePosition)
 		{
-			if (!playerCanInteractWithTiles)
+			if (_gameState != GameState.WaitingForPlayer)
 			{
 				return;
 			}
@@ -175,7 +182,7 @@ namespace WordSlide
 		protected void CheckIfTileWasClicked(Vector2 mousePosition)
 		{
 			//If the player is not allowed to interact, return
-			if (!playerCanInteractWithTiles)
+			if (_gameState != GameState.WaitingForPlayer)
 			{
 				return;
 			}
@@ -196,9 +203,9 @@ namespace WordSlide
 		/// Updated every time the bool for can player interact is changed
 		/// </summary>
 		/// <param name="value"></param>
-		private void PlayerCanInteractWithTiles(bool value)
+		private void GameStateChanged(GameState gameState)
 		{
-			playerCanInteractWithTiles = value;
+			_gameState = gameState;
 		}
 
 		/// <summary>
@@ -238,7 +245,7 @@ namespace WordSlide
 		protected void LoadingComplete()
 		{
 			InGameUIController.Instance.HideLoadingCanvas();
-			_gameStateEventHandler.RaisePlayerCanInteractWithTilesChanged(true);
+			_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
 		}
 
 		/// <summary>
