@@ -14,6 +14,9 @@ namespace WordSlide
 		public string word;
 	}
 
+	/// <summary>
+	/// Game state enum for use by PlayerManagers only
+	/// </summary>
 	public enum GameState
 	{
 		Initializing,
