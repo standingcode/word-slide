@@ -39,7 +39,7 @@ namespace WordSlide
 
 	public class WordFinderService : IWordFinderService
 	{
-		public List<SingleTileManagerSequence> GetListOfValidWordsFromGivenRowsAndOrColumns(IDictionaryService _dictionaryService, List<SingleTileManagerSequence> rowsAndColumnsToCheck)
+		public HashSet<SingleTileManagerSequence> GetListOfValidWordsFromGivenRowsAndOrColumns(IDictionaryService _dictionaryService, HashSet<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
 			var foundWordsInAllRowsAndColumns = new List<SingleTileManagerSequence>();
 
@@ -54,7 +54,7 @@ namespace WordSlide
 				}
 			}
 
-			return foundWordsInAllRowsAndColumns;
+			return foundWordsInAllRowsAndColumns.ToHashSet();
 		}
 
 		private List<SingleTileManagerSequence> CheckRowOrColumnForWords(IDictionaryService _dictionaryService, SingleTileManagerSequence singleTileManagerStringToCheck)

@@ -50,6 +50,6 @@ public class MainMenuManager : MonoBehaviour
 		var playManager = mainBoardGameObject.AddComponent<PlayManagerClassic>();
 
 		// Initialize the PlayManager with the services
-		playManager.Initialize(_dictionaryService, _wordFinderService, gameStateEventHandler, clickEventHandler, tileEventHandler);
+		playManager.Initialize(_dictionaryService, _wordFinderService, gameStateEventHandler, tileEventHandler, clickEventHandler);
 	}
 }

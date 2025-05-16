@@ -7,6 +7,22 @@ using WordSlide;
 
 public class PlayManager_Tests
 {
+
+	[Test]
+	public async Task TestGameStateSystem()
+	{
+		//GameState gameState = GameState.None;
+
+		//gameState = GameState.Initializing | GameState.WaitingForPlayer | GameState.TileAnimationInProgress;
+
+		//gameState = GameState.None;
+
+		//Debug.Log($"GameState: {gameState}");
+
+		//Assert.IsTrue(true);
+
+	}
+
 	// TODO: Fix or remove this test
 	//[Test]
 	//public async Task TestCheckListOfListOfSingleTileManagerForWords()

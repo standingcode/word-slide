@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
 namespace WordSlide
 {
 	/// <summary>
@@ -22,13 +21,14 @@ namespace WordSlide
 	public enum GameState
 	{
 		None = 0,
-		Initializing = 1,
-		WaitingForPlayer = 2,
-		TileAnimationInProgress = 4,
-		TilesHaveBeenReturnedToOriginalPostionDueToNoValidWordFound = 8,
-		TilesHaveBeenReturnedToOriginalPostionDueToNotEnoughOverlap = 16,
-		TilesAreBeingMovedToNewPosition = 32,
-		GeneratingNewTilesAndDroppingInProgress = 64
+		WaitingForPlayer,
+		NewGameStarted,
+		BoardGeneratedInProgress,
+		TilesAreBeingSwapped,
+		TilesAreBeingSwappedBack,
+		SingleTileIsBeingAnimatedBackToOriginalPosition,
+		TilesAreBeingDestroyed,
+		BoardIsBeingReconfigured
 	}
 
 	public abstract class PlayManagerAbstract : MonoBehaviour
@@ -36,40 +36,32 @@ namespace WordSlide
 		public static PlayManagerAbstract Instance { get; private set; }
 
 		[SerializeField]
-		protected GameState _gameState = GameState.None;
-
-		protected (SingleTileManager, SingleTileManager) tilesLastSwapped = (null, null);
+		protected static GameState _gameState = GameState.None;
+		public static GameState GameState => _gameState;
 
 		protected IDictionaryService _dictionaryService;
 		protected IWordFinderService _wordFinderService;
 
 		protected GameStateEventHandler _gameStateEventHandler;
-		protected ClickEventHandler _clickEventHandler;
 		protected TileEventHandler _tileEventHandler;
+		protected ClickEventHandler _clickEventHandler;
+		protected SingleTileManager[,] boardTiles => TilesManager.Instance.BoardTiles;
 
-		protected SingleTileManager currentlyMovingTile = null;
-
-		protected HashSet<SingleTileManager> tilesBeingAnimated = new();
-		protected HashSet<SingleTileManager> tilesToBeDestroyed = new();
-		protected SingleTileManager[,] BoardTiles => TilesManager.Instance.BoardTiles;
-
-		protected HashSet<int> rowsAffected = new();
-		protected HashSet<int> columnsAffected = new();
 
 		// VIRTUAL
 		public virtual void Initialize(
 			IDictionaryService dictionaryService,
 			IWordFinderService wordFinderService,
 			GameStateEventHandler gameStateEventHandler,
-			ClickEventHandler clickEventHandler,
-			TileEventHandler tileEventHandler)
+			TileEventHandler tileEventHandler,
+			ClickEventHandler clickEventHandler)
 		{
 			_dictionaryService = dictionaryService;
 			_wordFinderService = wordFinderService;
 
 			_gameStateEventHandler = gameStateEventHandler;
-			_clickEventHandler = clickEventHandler;
 			_tileEventHandler = tileEventHandler;
+			_clickEventHandler = clickEventHandler;
 
 			ConfigureRendering();
 			ConfigureInputHandling();
@@ -80,7 +72,6 @@ namespace WordSlide
 		public virtual void OnDestroy()
 		{
 			RemoveEventSubscriptions();
-			Instance = null;
 		}
 
 		/// <summary>
@@ -88,15 +79,12 @@ namespace WordSlide
 		/// </summary>
 		protected virtual void SubscribeToEvents()
 		{
+			_tileEventHandler.AddAllTilesFinishedAnimatingListener(AllTileAnimationsCompleted);
+			_tileEventHandler.AddNewBoardGeneratedListener(BoardGenerated);
+			_gameStateEventHandler.AddGameStateChangedListener(GameStateChanged);
+
 			_clickEventHandler.AddClickDownListener(ClickDown);
 			_clickEventHandler.AddClickUpListener(ClickUp);
-
-			_tileEventHandler.AddWordCheckNeededListener(CheckWords);
-			_tileEventHandler.AddTileAnimationCompleteListener(TileAnimationComplete);
-			_tileEventHandler.AddDestroySequenceCompleteListener(TileDestructSequenceCompleted);
-			_tileEventHandler.AddNewBoardGeneratedListener(BoardGenerated);
-
-			_gameStateEventHandler.AddGameStateChangedListener(GameStateChanged);
 		}
 
 		/// <summary>
@@ -104,15 +92,12 @@ namespace WordSlide
 		/// </summary>
 		protected virtual void RemoveEventSubscriptions()
 		{
+			_tileEventHandler.RemoveAllTilesFinishedAnimatingListener(AllTileAnimationsCompleted);
+			_tileEventHandler.RemoveNewBoardGeneratedListener(BoardGenerated);
+			_gameStateEventHandler.RemoveGameStateChangedListener(GameStateChanged);
+
 			_clickEventHandler.RemoveClickDownListener(ClickDown);
 			_clickEventHandler.RemoveClickUpListener(ClickUp);
-
-			_tileEventHandler.RemoveWordCheckNeededListener(CheckWords);
-			_tileEventHandler.RemoveTileAnimationCompleteListener(TileAnimationComplete);
-			_tileEventHandler.RemoveDestroySequenceCompleteListener(TileDestructSequenceCompleted);
-			_tileEventHandler.RemoveNewBoardGeneratedListener(BoardGenerated);
-
-			_gameStateEventHandler.RemoveGameStateChangedListener(GameStateChanged);
 		}
 
 		// ABSTRACT		
@@ -121,28 +106,23 @@ namespace WordSlide
 		/// Method to be called by a TileEvent
 		/// </summary>
 		/// <param name="singleTileManager"></param>
-		public abstract void TileAnimationComplete(SingleTileManager singleTileManager);
+		public abstract void AllTileAnimationsCompleted(HashSet<SingleTileManager> singleTileManagers);
 
 		/// <summary>
 		/// Abstract method which needs to be implemented differently by all game modes
 		/// </summary>		
-		protected abstract void CheckWords();
-
-		/// <summary>
-		/// Abstract method which needs to be implemented differently by all game modes
-		/// </summary>
-		/// <param name="singleTileManager"></param>
-		protected abstract void TileDestructSequenceCompleted(SingleTileManager singleTileManager);
+		protected abstract void CheckWords(HashSet<SingleTileManager> singleTileManagers);
 
 		/// <summary>
 		/// This abstract method needs to be implemented differently by different game modes.
 		/// </summary>
-		protected abstract void UserUnClickedPointerCheckNextStep();
+		/// <param name="mousePosition"></param>
+		protected abstract void ClickDown(Vector2 mousePosition);
 
 		/// <summary>
 		/// This abstract method needs to be implemented differently by different game modes.
 		/// </summary>
-		protected abstract void MoveAndSpawnTiles();
+		protected abstract void ClickUp();
 
 
 		// NO OVERRIDE
@@ -164,52 +144,6 @@ namespace WordSlide
 		}
 
 		/// <summary>
-		/// Method triggered upon pointer click down
-		/// </summary>
-		/// <param name="mousePosition"></param>
-		protected void ClickDown(Vector2 mousePosition)
-		{
-			if (_gameState != GameState.WaitingForPlayer)
-			{
-				return;
-			}
-
-			CheckIfTileWasClicked(mousePosition);
-		}
-
-		/// <summary>
-		/// Method trigger upon pointer click up
-		/// </summary>
-		protected void ClickUp()
-		{
-			UserUnClickedPointerCheckNextStep();
-		}
-
-		/// <summary>
-		/// When mouse is clicked, we fire a ray and see if it hits a tile's collider, we then know if the tile is selected.
-		/// </summary>
-		/// <param name="mousePosition"></param>
-		protected void CheckIfTileWasClicked(Vector2 mousePosition)
-		{
-			//If the player is not allowed to interact, return
-			if (_gameState != GameState.WaitingForPlayer)
-			{
-				return;
-			}
-
-			// Shoot ray from main camera and detect what it hits
-			Ray ray = Camera.main.ScreenPointToRay(mousePosition);
-			if (Physics.Raycast(ray, out RaycastHit hit))
-			{
-				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
-				{
-					currentlyMovingTile = singleTileManager;
-					currentlyMovingTile.TileWasClickedOn(mousePosition);
-				}
-			}
-		}
-
-		/// <summary>
 		/// Updated every time the bool for can player interact is changed
 		/// </summary>
 		/// <param name="value"></param>
@@ -223,17 +157,17 @@ namespace WordSlide
 		/// </summary>
 		protected void TriggerNewGame()
 		{
-			// This should trigger the TilesManagerSomeGameMode to generate a new board
-			_gameStateEventHandler.RaiseNewGameStarted();
+			// This should trigger the TilesManager to generate a new board
+			_gameStateEventHandler.RaiseGameStateChanged(GameState.NewGameStarted);
 		}
 
 		/// <summary>
 		/// A board has been generated
 		/// </summary>
 		/// <param name="generatedBoard"></param>
-		protected void BoardGenerated(List<SingleTileManagerSequence> generatedBoard)
+		protected void BoardGenerated(HashSet<SingleTileManagerSequence> boardGenerated)
 		{
-			var foundWords = FindWords(generatedBoard);
+			var foundWords = FindWords(boardGenerated);
 
 			// Board contains no words, we are ready to start
 			if (foundWords.Count == 0)
@@ -245,7 +179,7 @@ namespace WordSlide
 			else
 			{
 				// We need to swap the tiles which contain words and try again
-				TilesManager.Instance.ChangeCharactersForTiles(foundWords.SelectMany(x => x.SingleTileManagers).ToList());
+				_tileEventHandler.RaiseChangeCharactersForTiles(foundWords.SelectMany(x => x.SingleTileManagers).ToHashSet());
 			}
 		}
 
@@ -263,7 +197,7 @@ namespace WordSlide
 		/// </summary>
 		/// <param name="rowsAndColumnsToCheck"></param>
 		/// <returns>A list of SingleTileManagerSequences which is a list of valid words in SingleTileManagerSequence form</returns>
-		protected List<SingleTileManagerSequence> FindWords(List<SingleTileManagerSequence> rowsAndColumnsToCheck)
+		protected HashSet<SingleTileManagerSequence> FindWords(HashSet<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
 			return _wordFinderService.GetListOfValidWordsFromGivenRowsAndOrColumns(_dictionaryService, rowsAndColumnsToCheck);
 		}
@@ -272,18 +206,20 @@ namespace WordSlide
 		/// Method valid words for rowsAffected and columnsAffected sequences
 		/// </summary>
 		/// <returns></returns>
-		protected List<SingleTileManagerSequence> GetValidWordsForAffectedRowsAndColumns()
+		protected HashSet<SingleTileManagerSequence> GetValidWordsForAffectedRowsAndColumns(HashSet<SingleTileManager> singletileManagers)
 		{
-			List<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
+			HashSet<SingleTileManagerSequence> rowsAndColumnsToCheck = new();
+
+			var affectedRowsAndColumns = HelperMethods.GetAffectedRowsAndColumns(singletileManagers);
 
 			// We have to check all rows above affected rows since new tiles drop in
-			for (int i = rowsAffected.Max(); i >= 0; i--)
+			for (int i = affectedRowsAndColumns.rows.Max(); i >= 0; i--)
 			{
 				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullRow(i)));
 			}
 
 			// We only need to check affected columns
-			foreach (var column in columnsAffected)
+			foreach (var column in affectedRowsAndColumns.columns)
 			{
 				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullColumn(column)));
 			}
@@ -292,15 +228,5 @@ namespace WordSlide
 			return FindWords(rowsAndColumnsToCheck);
 		}
 
-		protected void SwapTiles(SingleTileManager tile1, SingleTileManager tile2)
-		{
-			tilesLastSwapped = (tile1, tile2);
-
-			tilesBeingAnimated.Add(tile1);
-			tilesBeingAnimated.Add(tile2);
-
-			// Animate the swap
-			TilesManager.Instance.SwapTilesAndAnimate(tile1, tile2);
-		}
 	}
 }

@@ -13,178 +13,112 @@ namespace WordSlide
 	public class PlayManagerClassic : PlayManagerAbstract
 	{
 		/// <summary>
-		/// Check for tile swap or return to original position if click event is up and there is a tile in motion
+		/// Method triggered upon pointer click down
 		/// </summary>
-		protected override void UserUnClickedPointerCheckNextStep()
+		/// <param name="mousePosition"></param>
+		protected override void ClickDown(Vector2 mousePosition)
 		{
-			if (currentlyMovingTile == null)
+			if (PlayManagerAbstract.GameState != GameState.WaitingForPlayer)
 			{
 				return;
 			}
 
-			// Move to swap checking etc.
-			_gameStateEventHandler.RaiseGameStateChanged(GameState.TileAnimationInProgress);
+			CheckIfTileWasClicked(mousePosition);
+		}
 
-			var tileToSwapWith = TilesManager.Instance.TileToBeSwappedWithGivenTile(currentlyMovingTile);
-
-			if (tileToSwapWith == null)
+		/// <summary>
+		/// When mouse is clicked, we fire a ray and see if it hits a tile's collider, we then know if the tile is selected.
+		/// </summary>
+		/// <param name="mousePosition"></param>
+		protected void CheckIfTileWasClicked(Vector2 mousePosition)
+		{
+			//If the player is not allowed to interact, return
+			if (PlayManagerAbstract.GameState != GameState.WaitingForPlayer)
 			{
-				// This is to wait for the animation to return the tile
-				tilesBeingAnimated.Add(currentlyMovingTile);
-
-				// Animate back to original position if no swapping
-				currentlyMovingTile.AnimateToRestingPositionInGrid();
-			}
-			else
-			{
-				// Mark the affected rows and columns
-				rowsAffected.Add(currentlyMovingTile.Row);
-				rowsAffected.Add(tileToSwapWith.Row);
-				columnsAffected.Add(currentlyMovingTile.Column);
-				columnsAffected.Add(tileToSwapWith.Column);
-
-				SwapTiles(currentlyMovingTile, tileToSwapWith);
+				return;
 			}
 
-			currentlyMovingTile = null;
+			// Shoot ray from main camera and detect what it hits
+			Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+			if (Physics.Raycast(ray, out RaycastHit hit))
+			{
+				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
+				{
+					_tileEventHandler.RaiseTileWasClickedOn(singleTileManager, mousePosition);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Method trigger upon pointer click up
+		/// </summary>
+		protected override void ClickUp()
+		{
+			_tileEventHandler.RaiseCheckIfTileWasClickedOff();
 		}
 
 		/// <summary>
 		/// Tile animation complete
 		/// </summary>
 		/// <param name="singleTileManager"></param>
-		public override void TileAnimationComplete(SingleTileManager singleTileManager)
+		public override void AllTileAnimationsCompleted(HashSet<SingleTileManager> singleTileManagers)
 		{
-			tilesBeingAnimated.Remove(singleTileManager);
-
-			if (tilesBeingAnimated.Count > 0)
+			switch (_gameState)
 			{
-				return;
+				case GameState.TilesAreBeingSwapped:
+				case GameState.BoardIsBeingReconfigured:
+					CheckWords(singleTileManagers);
+					break;
+
+				case GameState.SingleTileIsBeingAnimatedBackToOriginalPosition:
+				case GameState.TilesAreBeingSwappedBack:
+					_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
+					break;
+				case GameState.TilesAreBeingDestroyed:
+					_tileEventHandler.RaiseBoardRequiresReconfiguring();
+					break;
 			}
-
-			// By here, No tiles being animated
-
-			if (tilesToBeDestroyed.Count > 0)
-			{
-				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
-				return;
-			}
-
-			// Return control to the player if the grid was being rearranged
-			if (_gameState == GameState.GeneratingNewTilesAndDroppingInProgress)
-			{
-				_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
-				return;
-			}
-
-			// 1. Tiles could have swapped back due to not enough overlap 2. Tiles could have swapped back due to no valid word
-			// Return control to the player	
-			if ((_gameState & GameState.TilesHaveBeenReturnedToOriginalPostionDueToNoValidWordFound) == GameState.TilesHaveBeenReturnedToOriginalPostionDueToNoValidWordFound
-			|| (_gameState & GameState.TilesHaveBeenReturnedToOriginalPostionDueToNotEnoughOverlap) == GameState.TilesHaveBeenReturnedToOriginalPostionDueToNotEnoughOverlap
-			)
-			{
-				_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
-				return;
-			}
-
-			// 3. Tiles could have just finished player swap, but we have no valid words
-			// Need to start the process of returning them tiles
-			SwapTilesBack();
 		}
 
 		/// <summary>
-		/// Once destruction is completed we will need to call the spawn logic
+		/// Method is called when 2 tiles have completed a swap
 		/// </summary>
-		/// <param name="singleTileManager"></param>
-		protected override void TileDestructSequenceCompleted(SingleTileManager singleTileManager)
+		protected override void CheckWords(HashSet<SingleTileManager> singleTileManagers)
 		{
-			tilesToBeDestroyed.Remove(singleTileManager);
-			singleTileManager.DeactivateTile();
-			PoolManager.Instance.ReturnObjectToPool(singleTileManager.GetComponent<PoolObject>());
-
-			if (tilesToBeDestroyed.Count > 0)
-			{
-				return;
-			}
-
-			MoveAndSpawnTiles();
-		}
-
-		/// <summary>
-		/// Method is called when 2 tiles have completed a swap (animation may still be in progress)
-		/// </summary>
-		protected override void CheckWords()
-		{
-			Debug.Log($"{nameof(CheckWords)} called");
-
-			if (rowsAffected.Count == 0 && columnsAffected.Count == 0)
-			{
-				return;
-			}
-
 			// Get the valid words for the affected rows and columns
-			var validWords = GetValidWordsForAffectedRowsAndColumns();
+			var validWords = GetValidWordsForAffectedRowsAndColumns(singleTileManagers);
 
 			// Print each of the valid words to console
-			validWords.ForEach(x => Debug.Log($"{x.ToString()}"));
-
-			rowsAffected.Clear();
-			columnsAffected.Clear();
+			validWords.ToList().ForEach(x => Debug.Log($"{x.ToString()}"));
 
 			// If there are no valid words
 			if (validWords.Count == 0)
 			{
-				// If there are no tiles being animated
-				if (tilesBeingAnimated.Count == 0)
+				if (_gameState == GameState.TilesAreBeingSwapped)
 				{
-					// Start tile swap back					
-					SwapTilesBack();
-					return;
+					var singleTileManagersToSwapBack = singleTileManagers.ToList();
+					_tileEventHandler.RaiseTilesNeedSwappingBack(singleTileManagersToSwapBack[0], singleTileManagersToSwapBack[1]);
+				}
+				else if (_gameState == GameState.BoardIsBeingReconfigured)
+				{
+					_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
 				}
 
 				return;
 			}
 
-			// Now set rowsAffected and columnsAffected to be the ones containing valid words.
-			foreach (var word in validWords)
-			{
-				foreach (var tile in word.SingleTileManagers)
-				{
-					rowsAffected.Add(tile.Row);
-					columnsAffected.Add(tile.Column);
-				}
-			}
-
-			// Valid words are marked for destruction
-			AddTilesToBeDestroyedToList(validWords);
-
-			// If no tiles are being animated or dropped, we need to destroy the tiles now (otherwise they will be destroyed when animations are completed)
-			if (tilesBeingAnimated.Count == 0)
-			{
-				TilesManager.Instance.DestroyTiles(tilesToBeDestroyed);
-			}
-		}
-
-		private void SwapTilesBack()
-		{
-			_gameState = GameState.TilesHaveBeenReturnedToOriginalPostionDueToNoValidWordFound;
-
-			if (tilesLastSwapped.Item1 == null || tilesLastSwapped.Item2 == null)
-			{
-				Debug.LogError($"One or both of the {nameof(tilesLastSwapped)} were null");
-				return;
-			}
-
-			// Swap the tiles back to their original positions
-			SwapTiles(tilesLastSwapped.Item1, tilesLastSwapped.Item2);
+			// If there are valid words, we need to destroy the tiles in the words
+			RaiseDestroy(validWords);
 		}
 
 		/// <summary>
 		/// Add all the tiles to be destroyed to tilesToBeDestroyed
 		/// </summary>
 		/// <param name="tileSequencesToDestroy"></param>
-		private void AddTilesToBeDestroyedToList(List<SingleTileManagerSequence> tileSequencesToDestroy)
+		private void RaiseDestroy(HashSet<SingleTileManagerSequence> tileSequencesToDestroy)
 		{
+			HashSet<SingleTileManager> tilesToBeDestroyed = new HashSet<SingleTileManager>();
+
 			// For each of the words (one word is a SingleTileManagerSequence)
 			foreach (var word in tileSequencesToDestroy)
 			{
@@ -194,98 +128,9 @@ namespace WordSlide
 					tilesToBeDestroyed.Add(singleTileManager);
 				}
 			}
+
+			_tileEventHandler.RaiseTilesNeedsToBeDestroyed(tilesToBeDestroyed);
 		}
 
-		/// <summary>
-		/// Spawn a single tile at the given position above a certain column
-		/// </summary>
-		/// <param name="rowIndex"></param>
-		/// <param name="columnIndex"></param>
-		/// <param name="positionAbove"></param>
-		protected void SpawnANewTile(int rowIndex, int columnIndex, int positionAbove)
-		{
-			var generatedTile = TilesManager.Instance.GenerateAndInitializeTile(
-				rowIndex,
-				columnIndex,
-				SizeManager.Instance.GetAboveColumnStartingPosition(columnIndex, positionAbove)
-				);
-
-			generatedTile.ActivateTile();
-
-			// Important to add it to the matrix
-			BoardTiles[rowIndex, columnIndex] = generatedTile;
-
-			// Add to tiles being dropped								
-			tilesBeingAnimated.Add(generatedTile);
-
-			// Animate the tile to its resting position
-			generatedTile.AnimateToRestingPositionInGrid();
-		}
-
-		/// <summary>
-		/// Move a tile from one matrix position to another, this is used when a tile is destroyed and we need to drop tiles from above
-		/// </summary>
-		/// <param name="oldRowIndex"></param>
-		/// <param name="rowIndex"></param>
-		/// <param name="columnIndex"></param>
-		protected void SetTileToNewPosition(int oldRowIndex, int rowIndex, int columnIndex)
-		{
-			// Swap in the matrix
-			TilesManager.Instance.MoveTileToNewMatrixPosition(rowIndex, columnIndex, oldRowIndex, columnIndex);
-			BoardTiles[rowIndex, columnIndex].AnimateToRestingPositionInGrid();
-
-			// Add to tiles being animated
-			tilesBeingAnimated.Add(BoardTiles[rowIndex, columnIndex]);
-		}
-
-		/// <summary>
-		/// When the tiles destruct animation stuff is complete, we spawn or drop existing tiles
-		/// </summary>
-		protected override void MoveAndSpawnTiles()
-		{
-			_gameStateEventHandler.RaiseGameStateChanged(GameState.GeneratingNewTilesAndDroppingInProgress);
-
-			var listOfColumnsAffected = columnsAffected.ToList();
-			listOfColumnsAffected.Sort();
-
-			var listOfRowsAffected = rowsAffected.ToList();
-			listOfRowsAffected.Sort();
-
-			// For each column
-			foreach (var columnIndex in listOfColumnsAffected)
-			{
-				int indexForTileAbove = 0;
-
-				//For each row(each element in the column starting from the bottom)
-				for (int rowIndex = listOfRowsAffected.Max(); rowIndex >= 0; rowIndex--)
-				{
-					// If a null is found, the tile is destroyed, work up from the index above and find a tile to move down.
-					if (BoardTiles[rowIndex, columnIndex] == null)
-					{
-						// For each of the rows above this null tile
-						for (int rowAbove = rowIndex - 1; rowAbove >= -1; rowAbove--)
-						{
-							// If row above is -1 we need to spawn a tile
-							if (rowAbove == -1)
-							{
-								SpawnANewTile(rowIndex, columnIndex, indexForTileAbove);
-								indexForTileAbove++;
-							}
-							else
-							{
-								// If we find a tile
-								if (BoardTiles[rowAbove, columnIndex] != null)
-								{
-									SetTileToNewPosition(rowAbove, rowIndex, columnIndex);
-									break;
-								}
-							}
-						}
-					}
-				}
-			}
-
-			CheckWords();
-		}
 	}
 }

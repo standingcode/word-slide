@@ -156,7 +156,7 @@ public class SingleTileManager : MonoBehaviour
 			yield return null;
 		}
 
-		tileEventHandler.RaiseTileAnimationComplete(this);
+		tileEventHandler.RaiseSingleTileFinishedAnimation(this);
 	}
 
 
@@ -219,7 +219,7 @@ public class SingleTileManager : MonoBehaviour
 	/// </summary>
 	public void DestroySequenceIsComplete()
 	{
-		tileEventHandler.RaiseDestroySequenceComplete(this);
+		tileEventHandler.RaiseSingleTileFinishedAnimation(this);
 	}
 
 
