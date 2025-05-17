@@ -7,15 +7,13 @@ public enum GameState
 	None = 0,
 	WaitingForPlayer,
 	NewGameStarted,
-	BoardGeneratedInProgress,
+	BoardGenerationInProgress,
 	TilesAreBeingSwapped,
 	TilesAreBeingSwappedBack,
 	SingleTileIsBeingAnimatedBackToOriginalPosition,
 	TilesAreBeingDestroyed,
 	BoardIsBeingReconfigured
 }
-
-
 
 [CreateAssetMenu(fileName = "GameStateEventHandler", menuName = "Scriptable WordSlide/GameStateEvent")]
 public class GameStateEventHandler : ScriptableObject
@@ -27,7 +25,7 @@ public class GameStateEventHandler : ScriptableObject
 
 	public void RaiseChangeGameState(GameState gameState)
 	{
-		//Debug.Log($"GameStateEventHandler changing to: {gameState}");
+		Debug.Log($"GameStateEventHandler changing to: {gameState}");
 		GameState = gameState;
 		GameStateChanged?.Invoke(gameState);
 	}

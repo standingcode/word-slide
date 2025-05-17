@@ -61,7 +61,7 @@ public class TileEventHandler : ScriptableObject
 
 	public void RaiseBoardGenerated(HashSet<SingleTileManagerSequence> boardGenerated)
 	{
-		gameStateEventHandler.RaiseChangeGameState(GameState.BoardGeneratedInProgress);
+		gameStateEventHandler.RaiseChangeGameState(GameState.BoardGenerationInProgress);
 		BoardGenerated?.Invoke(boardGenerated);
 	}
 

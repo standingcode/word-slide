@@ -264,7 +264,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 8765655982903541675}
         m_TargetAssemblyTypeName: WordSlide.TilesManager, MainProject
-        m_MethodName: GenerateTileBoard
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

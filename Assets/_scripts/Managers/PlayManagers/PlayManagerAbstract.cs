@@ -80,26 +80,21 @@ namespace WordSlide
 		// ABSTRACT		
 
 		/// <summary>
-		/// Method to be called by a TileEvent
+		/// Method is called by an event triggerd by TilesManager when all tiles completed animations
 		/// </summary>
 		/// <param name="singleTileManager"></param>
 		public abstract void AllTileAnimationsCompleted(HashSet<SingleTileManager> singleTileManagers);
 
 		/// <summary>
-		/// Abstract method which needs to be implemented differently by all game modes
+		/// Check words (or the outcome at least) is different for different game modes
 		/// </summary>		
 		protected abstract void CheckWords(HashSet<SingleTileManager> singleTileManagers);
 
 		/// <summary>
-		/// This abstract method needs to be implemented differently by different game modes.
+		/// Raise destroy for tiles when a word is found
 		/// </summary>
-		/// <param name="mousePosition"></param>
-		protected abstract void ClickDown(Vector2 mousePosition);
-
-		/// <summary>
-		/// This abstract method needs to be implemented differently by different game modes.
-		/// </summary>
-		protected abstract void ClickUp();
+		/// <param name="tileSequencesToDestroy"></param>
+		protected abstract void RaiseDestroy(HashSet<SingleTileManagerSequence> tileSequencesToDestroy);
 
 
 		// NO OVERRIDE
@@ -118,6 +113,46 @@ namespace WordSlide
 		protected void ConfigureInputHandling()
 		{
 			InputSystem.pollingFrequency = 120;
+		}
+
+		/// <summary>
+		/// Method trigger upon pointer click up
+		/// </summary>
+		protected void ClickUp()
+		{
+			_tileEventHandler.RaiseCheckIfTileWasClickedOff();
+		}
+
+		/// <summary>
+		/// Method triggered upon pointer click down
+		/// </summary>
+		/// <param name="mousePosition"></param>
+		protected void ClickDown(Vector2 mousePosition)
+		{
+			CheckIfTileWasClicked(mousePosition);
+		}
+
+		/// <summary>
+		/// When mouse is clicked, we fire a ray and see if it hits a tile's collider, we then know if the tile is selected.
+		/// </summary>
+		/// <param name="mousePosition"></param>
+		protected void CheckIfTileWasClicked(Vector2 mousePosition)
+		{
+			//If the player is not allowed to interact, return
+			if (GameStateEventHandler.GameState != GameState.WaitingForPlayer)
+			{
+				return;
+			}
+
+			// Shoot ray from main camera and detect what it hits
+			Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+			if (Physics.Raycast(ray, out RaycastHit hit))
+			{
+				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
+				{
+					_tileEventHandler.RaiseTileWasClickedOn(singleTileManager, mousePosition);
+				}
+			}
 		}
 
 		/// <summary>
@@ -181,15 +216,15 @@ namespace WordSlide
 			var affectedRowsAndColumns = HelperMethods.GetAffectedRowsAndColumns(singletileManagers);
 
 			// We have to check all rows above affected rows since new tiles drop in
-			for (int i = affectedRowsAndColumns.rows.Max(); i >= 0; i--)
+			for (int rowIndex = affectedRowsAndColumns.rows.Max(); rowIndex >= 0; rowIndex--)
 			{
-				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullRow(i)));
+				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullRow(rowIndex)));
 			}
 
 			// We only need to check affected columns
-			foreach (var column in affectedRowsAndColumns.columns)
+			foreach (var columnIndex in affectedRowsAndColumns.columns)
 			{
-				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullColumn(column)));
+				rowsAndColumnsToCheck.Add(new SingleTileManagerSequence(TilesManager.Instance.GetFullColumn(columnIndex)));
 			}
 
 			// return any valid words from the affected rows and columns to check

@@ -104,18 +104,14 @@ namespace WordSlide
 		{
 			gameStateEventHandler.AddNewGameStartedListener(GenerateTileBoard);
 
-			tileEventHandler.AddTileWasClickedOnListener(TileWasClickedOn);
 			tileEventHandler.AddChangeCharactersForTilesListener(ChangeCharactersForTiles);
 
 			tileEventHandler.AddTileWasClickedOnListener(TileWasClickedOn);
 			tileEventHandler.AddCheckIfTileWasClickedOffListener(CheckIfTileWasClickedOff);
 
 			tileEventHandler.AddTilesNeedSwappingBackListener(SwapTilesAndAnimate);
-
 			tileEventHandler.AddSingleTileFinishedAnimationListener(SingleTileHasFinishedAnimation);
-
 			tileEventHandler.AddTilesNeedsToBeDestroyedListener(DestroyTiles);
-
 			tileEventHandler.AddBoardRequiresReconfiguringListener(MoveAndSpawnTiles);
 		}
 
@@ -126,18 +122,14 @@ namespace WordSlide
 		{
 			gameStateEventHandler.RemoveNewGameStartedListener(GenerateTileBoard);
 
-			tileEventHandler.RemoveTileWasClickedOnListener(TileWasClickedOn);
 			tileEventHandler.RemoveChangeCharactersForTilesListener(ChangeCharactersForTiles);
 
 			tileEventHandler.RemoveTileWasClickedOnListener(TileWasClickedOn);
 			tileEventHandler.RemoveCheckIfTileWasClickedOffListener(CheckIfTileWasClickedOff);
 
 			tileEventHandler.RemoveTilesNeedSwappingBackListener(SwapTilesAndAnimate);
-
 			tileEventHandler.RemoveSingleTileFinishedAnimationListener(SingleTileHasFinishedAnimation);
-
 			tileEventHandler.RemoveTilesNeedsToBeDestroyedListener(DestroyTiles);
-
 			tileEventHandler.RemoveBoardRequiresReconfiguringListener(MoveAndSpawnTiles);
 		}
 
@@ -431,7 +423,7 @@ namespace WordSlide
 		/// <param name="rowIndex"></param>
 		/// <param name="columnIndex"></param>
 		/// <param name="positionAbove"></param>
-		protected void SpawnANewTile(int rowIndex, int columnIndex, int positionAbove)
+		private void SpawnANewTile(int rowIndex, int columnIndex, int positionAbove)
 		{
 			var generatedTile = GenerateAndInitializeTile(
 				rowIndex,
@@ -458,7 +450,7 @@ namespace WordSlide
 		/// <param name="oldRowIndex"></param>
 		/// <param name="rowIndex"></param>
 		/// <param name="columnIndex"></param>
-		protected void SetTileToNewPosition(int oldRowIndex, int rowIndex, int columnIndex)
+		private void SetTileToNewPosition(int oldRowIndex, int rowIndex, int columnIndex)
 		{
 			// Swap in the matrix
 			MoveTileToNewMatrixPosition(rowIndex, columnIndex, oldRowIndex, columnIndex);
@@ -472,7 +464,7 @@ namespace WordSlide
 		/// <summary>
 		/// When the tiles destruct animation stuff is complete, we spawn or drop existing tiles
 		/// </summary>
-		protected void MoveAndSpawnTiles()
+		private void MoveAndSpawnTiles()
 		{
 			var rowsAndColumnsAffected = HelperMethods.GetAffectedRowsAndColumns(tilesLastAnimated);
 

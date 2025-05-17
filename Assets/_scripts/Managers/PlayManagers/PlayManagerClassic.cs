@@ -12,50 +12,7 @@ namespace WordSlide
 	/// </summary>
 	public class PlayManagerClassic : PlayManagerAbstract
 	{
-		/// <summary>
-		/// Method triggered upon pointer click down
-		/// </summary>
-		/// <param name="mousePosition"></param>
-		protected override void ClickDown(Vector2 mousePosition)
-		{
-			CheckIfTileWasClicked(mousePosition);
-		}
-
-		/// <summary>
-		/// When mouse is clicked, we fire a ray and see if it hits a tile's collider, we then know if the tile is selected.
-		/// </summary>
-		/// <param name="mousePosition"></param>
-		protected void CheckIfTileWasClicked(Vector2 mousePosition)
-		{
-			//If the player is not allowed to interact, return
-			if (GameStateEventHandler.GameState != GameState.WaitingForPlayer)
-			{
-				return;
-			}
-
-			// Shoot ray from main camera and detect what it hits
-			Ray ray = Camera.main.ScreenPointToRay(mousePosition);
-			if (Physics.Raycast(ray, out RaycastHit hit))
-			{
-				if (hit.collider.TryGetComponent(out SingleTileManager singleTileManager))
-				{
-					_tileEventHandler.RaiseTileWasClickedOn(singleTileManager, mousePosition);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Method trigger upon pointer click up
-		/// </summary>
-		protected override void ClickUp()
-		{
-			_tileEventHandler.RaiseCheckIfTileWasClickedOff();
-		}
-
-		/// <summary>
-		/// Tile animation complete
-		/// </summary>
-		/// <param name="singleTileManager"></param>
+		/// <inheritdoc/>
 		public override void AllTileAnimationsCompleted(HashSet<SingleTileManager> singleTileManagers)
 		{
 			switch (GameStateEventHandler.GameState)
@@ -75,9 +32,7 @@ namespace WordSlide
 			}
 		}
 
-		/// <summary>
-		/// Method is called when 2 tiles have completed a swap
-		/// </summary>
+		/// <inheritdoc/>
 		protected override void CheckWords(HashSet<SingleTileManager> singleTileManagers)
 		{
 			// Get the valid words for the affected rows and columns
@@ -106,11 +61,8 @@ namespace WordSlide
 			RaiseDestroy(validWords);
 		}
 
-		/// <summary>
-		/// Add all the tiles to be destroyed to tilesToBeDestroyed
-		/// </summary>
-		/// <param name="tileSequencesToDestroy"></param>
-		private void RaiseDestroy(HashSet<SingleTileManagerSequence> tileSequencesToDestroy)
+		/// <inheritdoc/>
+		protected override void RaiseDestroy(HashSet<SingleTileManagerSequence> tileSequencesToDestroy)
 		{
 			HashSet<SingleTileManager> tilesToBeDestroyed = new HashSet<SingleTileManager>();
 
