@@ -18,11 +18,6 @@ namespace WordSlide
 		/// <param name="mousePosition"></param>
 		protected override void ClickDown(Vector2 mousePosition)
 		{
-			if (PlayManagerAbstract.GameState != GameState.WaitingForPlayer)
-			{
-				return;
-			}
-
 			CheckIfTileWasClicked(mousePosition);
 		}
 
@@ -33,7 +28,7 @@ namespace WordSlide
 		protected void CheckIfTileWasClicked(Vector2 mousePosition)
 		{
 			//If the player is not allowed to interact, return
-			if (PlayManagerAbstract.GameState != GameState.WaitingForPlayer)
+			if (GameStateEventHandler.GameState != GameState.WaitingForPlayer)
 			{
 				return;
 			}
@@ -63,7 +58,7 @@ namespace WordSlide
 		/// <param name="singleTileManager"></param>
 		public override void AllTileAnimationsCompleted(HashSet<SingleTileManager> singleTileManagers)
 		{
-			switch (_gameState)
+			switch (GameStateEventHandler.GameState)
 			{
 				case GameState.TilesAreBeingSwapped:
 				case GameState.BoardIsBeingReconfigured:
@@ -72,7 +67,7 @@ namespace WordSlide
 
 				case GameState.SingleTileIsBeingAnimatedBackToOriginalPosition:
 				case GameState.TilesAreBeingSwappedBack:
-					_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
+					_gameStateEventHandler.RaiseChangeGameState(GameState.WaitingForPlayer);
 					break;
 				case GameState.TilesAreBeingDestroyed:
 					_tileEventHandler.RaiseBoardRequiresReconfiguring();
@@ -94,14 +89,14 @@ namespace WordSlide
 			// If there are no valid words
 			if (validWords.Count == 0)
 			{
-				if (_gameState == GameState.TilesAreBeingSwapped)
+				if (GameStateEventHandler.GameState == GameState.TilesAreBeingSwapped)
 				{
 					var singleTileManagersToSwapBack = singleTileManagers.ToList();
 					_tileEventHandler.RaiseTilesNeedSwappingBack(singleTileManagersToSwapBack[0], singleTileManagersToSwapBack[1]);
 				}
-				else if (_gameState == GameState.BoardIsBeingReconfigured)
+				else if (GameStateEventHandler.GameState == GameState.BoardIsBeingReconfigured)
 				{
-					_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
+					_gameStateEventHandler.RaiseChangeGameState(GameState.WaitingForPlayer);
 				}
 
 				return;

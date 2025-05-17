@@ -2,22 +2,34 @@ using System;
 using UnityEngine;
 using WordSlide;
 
+public enum GameState
+{
+	None = 0,
+	WaitingForPlayer,
+	NewGameStarted,
+	BoardGeneratedInProgress,
+	TilesAreBeingSwapped,
+	TilesAreBeingSwappedBack,
+	SingleTileIsBeingAnimatedBackToOriginalPosition,
+	TilesAreBeingDestroyed,
+	BoardIsBeingReconfigured
+}
+
+
+
 [CreateAssetMenu(fileName = "GameStateEventHandler", menuName = "Scriptable WordSlide/GameStateEvent")]
 public class GameStateEventHandler : ScriptableObject
 {
+	public static GameState GameState { get; private set; } = GameState.None;
+
 	private Action<GameState> GameStateChanged;
 	private Action NewGameStarted;
 
-	public void RaiseGameStateChanged(GameState gameState)
+	public void RaiseChangeGameState(GameState gameState)
 	{
-		Debug.Log($"GameStateEventHandler changing to: {gameState}");
-
+		//Debug.Log($"GameStateEventHandler changing to: {gameState}");
+		GameState = gameState;
 		GameStateChanged?.Invoke(gameState);
-
-		if (gameState == GameState.NewGameStarted)
-		{
-			NewGameStarted?.Invoke();
-		}
 	}
 
 	// GENERAL GAME STATE EVENT
@@ -34,8 +46,12 @@ public class GameStateEventHandler : ScriptableObject
 		GameStateChanged -= listener;
 	}
 
-
 	// NEW GAME EVENT
+	public void RaiseNewGame()
+	{
+		RaiseChangeGameState(GameState.NewGameStarted);
+		NewGameStarted?.Invoke();
+	}
 
 	// Add a new game started listener
 	public void AddNewGameStartedListener(Action listener)
@@ -48,7 +64,6 @@ public class GameStateEventHandler : ScriptableObject
 	{
 		NewGameStarted -= listener;
 	}
-
 
 	private void OnDestroy()
 	{

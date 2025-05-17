@@ -61,7 +61,7 @@ public class TileEventHandler : ScriptableObject
 
 	public void RaiseBoardGenerated(HashSet<SingleTileManagerSequence> boardGenerated)
 	{
-		gameStateEventHandler.RaiseGameStateChanged(GameState.BoardGeneratedInProgress);
+		gameStateEventHandler.RaiseChangeGameState(GameState.BoardGeneratedInProgress);
 		BoardGenerated?.Invoke(boardGenerated);
 	}
 
@@ -79,7 +79,7 @@ public class TileEventHandler : ScriptableObject
 
 	public void RaiseBoardRequiresReconfiguring()
 	{
-		gameStateEventHandler.RaiseGameStateChanged(GameState.BoardIsBeingReconfigured);
+		gameStateEventHandler.RaiseChangeGameState(GameState.BoardIsBeingReconfigured);
 		BoardRequiresReconfiguring?.Invoke();
 	}
 
@@ -114,7 +114,7 @@ public class TileEventHandler : ScriptableObject
 
 	public void RaiseTilesNeedSwappingBack(SingleTileManager tile1, SingleTileManager tile2)
 	{
-		gameStateEventHandler.RaiseGameStateChanged(GameState.TilesAreBeingSwappedBack);
+		gameStateEventHandler.RaiseChangeGameState(GameState.TilesAreBeingSwappedBack);
 		TilesNeedToBeSwappedBack?.Invoke(tile1, tile2);
 	}
 
@@ -133,7 +133,7 @@ public class TileEventHandler : ScriptableObject
 
 	public void RaiseTilesNeedsToBeDestroyed(HashSet<SingleTileManager> tiles)
 	{
-		gameStateEventHandler.RaiseGameStateChanged(GameState.TilesAreBeingDestroyed);
+		gameStateEventHandler.RaiseChangeGameState(GameState.TilesAreBeingDestroyed);
 		TilesNeedToBeDestroyed?.Invoke(tiles);
 	}
 

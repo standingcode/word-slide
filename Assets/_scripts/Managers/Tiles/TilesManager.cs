@@ -115,6 +115,8 @@ namespace WordSlide
 			tileEventHandler.AddSingleTileFinishedAnimationListener(SingleTileHasFinishedAnimation);
 
 			tileEventHandler.AddTilesNeedsToBeDestroyedListener(DestroyTiles);
+
+			tileEventHandler.AddBoardRequiresReconfiguringListener(MoveAndSpawnTiles);
 		}
 
 		/// <summary>
@@ -135,6 +137,8 @@ namespace WordSlide
 			tileEventHandler.RemoveSingleTileFinishedAnimationListener(SingleTileHasFinishedAnimation);
 
 			tileEventHandler.RemoveTilesNeedsToBeDestroyedListener(DestroyTiles);
+
+			tileEventHandler.RemoveBoardRequiresReconfiguringListener(MoveAndSpawnTiles);
 		}
 
 		/// <summary>
@@ -183,7 +187,7 @@ namespace WordSlide
 			if (tileToSwapWith == null)
 			{
 				// Animate back to original position if no swapping
-				gameStateEventHandler.RaiseGameStateChanged(GameState.SingleTileIsBeingAnimatedBackToOriginalPosition);
+				gameStateEventHandler.RaiseChangeGameState(GameState.SingleTileIsBeingAnimatedBackToOriginalPosition);
 
 				tilesBeingAnimated.Clear();
 				tilesLastAnimated.Clear();
@@ -195,7 +199,7 @@ namespace WordSlide
 			}
 			else
 			{
-				gameStateEventHandler.RaiseGameStateChanged(GameState.TilesAreBeingSwapped);
+				gameStateEventHandler.RaiseChangeGameState(GameState.TilesAreBeingSwapped);
 				SwapTilesAndAnimate(currentlyMovingTile, tileToSwapWith);
 			}
 
@@ -248,7 +252,7 @@ namespace WordSlide
 
 			if (tilesBeingAnimated.Count == 0)
 			{
-				if (PlayManagerAbstract.GameState == GameState.TilesAreBeingDestroyed)
+				if (GameStateEventHandler.GameState == GameState.TilesAreBeingDestroyed)
 				{
 					foreach (var tile in tilesLastAnimated)
 					{
@@ -267,7 +271,6 @@ namespace WordSlide
 		/// <param name="tilesToRemove"></param>
 		private void DestroyTiles(HashSet<SingleTileManager> tilesToRemove)
 		{
-			gameStateEventHandler.RaiseGameStateChanged(GameState.TilesAreBeingDestroyed);
 			tilesLastAnimated = tilesToRemove.ToHashSet();
 			tilesBeingAnimated = tilesToRemove.ToHashSet();
 
@@ -471,13 +474,13 @@ namespace WordSlide
 		/// </summary>
 		protected void MoveAndSpawnTiles()
 		{
-			gameStateEventHandler.RaiseGameStateChanged(GameState.BoardIsBeingReconfigured);
-			tilesBeingAnimated.Clear();
-			tilesLastAnimated.Clear();
 			var rowsAndColumnsAffected = HelperMethods.GetAffectedRowsAndColumns(tilesLastAnimated);
 
+			tilesBeingAnimated.Clear();
+			tilesLastAnimated.Clear();
+
 			// For each column
-			foreach (var columnIndex in rowsAndColumnsAffected.rows)
+			foreach (var columnIndex in rowsAndColumnsAffected.columns)
 			{
 				int indexForTileAbove = 0;
 
@@ -488,10 +491,10 @@ namespace WordSlide
 					if (boardTiles[rowIndex, columnIndex] == null)
 					{
 						// For each of the rows above this null tile
-						for (int rowAbove = rowIndex - 1; rowAbove >= -1; rowAbove--)
+						for (int rowAboveIndex = rowIndex - 1; rowAboveIndex >= -1; rowAboveIndex--)
 						{
 							// If row above is -1 we need to spawn a tile
-							if (rowAbove == -1)
+							if (rowAboveIndex == -1)
 							{
 								SpawnANewTile(rowIndex, columnIndex, indexForTileAbove);
 								indexForTileAbove++;
@@ -499,9 +502,9 @@ namespace WordSlide
 							else
 							{
 								// If we find a tile
-								if (boardTiles[rowAbove, columnIndex] != null)
+								if (boardTiles[rowAboveIndex, columnIndex] != null)
 								{
-									SetTileToNewPosition(rowAbove, rowIndex, columnIndex);
+									SetTileToNewPosition(rowAboveIndex, rowIndex, columnIndex);
 									break;
 								}
 							}
@@ -510,5 +513,6 @@ namespace WordSlide
 				}
 			}
 		}
+
 	}
 }

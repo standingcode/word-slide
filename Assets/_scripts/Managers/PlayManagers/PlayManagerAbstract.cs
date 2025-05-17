@@ -14,30 +14,9 @@ namespace WordSlide
 		public string word;
 	}
 
-	/// <summary>
-	/// Game state enum for use by PlayerManagers only
-	/// </summary>
-	[Flags]
-	public enum GameState
-	{
-		None = 0,
-		WaitingForPlayer,
-		NewGameStarted,
-		BoardGeneratedInProgress,
-		TilesAreBeingSwapped,
-		TilesAreBeingSwappedBack,
-		SingleTileIsBeingAnimatedBackToOriginalPosition,
-		TilesAreBeingDestroyed,
-		BoardIsBeingReconfigured
-	}
-
 	public abstract class PlayManagerAbstract : MonoBehaviour
 	{
 		public static PlayManagerAbstract Instance { get; private set; }
-
-		[SerializeField]
-		protected static GameState _gameState = GameState.None;
-		public static GameState GameState => _gameState;
 
 		protected IDictionaryService _dictionaryService;
 		protected IWordFinderService _wordFinderService;
@@ -81,7 +60,6 @@ namespace WordSlide
 		{
 			_tileEventHandler.AddAllTilesFinishedAnimatingListener(AllTileAnimationsCompleted);
 			_tileEventHandler.AddNewBoardGeneratedListener(BoardGenerated);
-			_gameStateEventHandler.AddGameStateChangedListener(GameStateChanged);
 
 			_clickEventHandler.AddClickDownListener(ClickDown);
 			_clickEventHandler.AddClickUpListener(ClickUp);
@@ -94,7 +72,6 @@ namespace WordSlide
 		{
 			_tileEventHandler.RemoveAllTilesFinishedAnimatingListener(AllTileAnimationsCompleted);
 			_tileEventHandler.RemoveNewBoardGeneratedListener(BoardGenerated);
-			_gameStateEventHandler.RemoveGameStateChangedListener(GameStateChanged);
 
 			_clickEventHandler.RemoveClickDownListener(ClickDown);
 			_clickEventHandler.RemoveClickUpListener(ClickUp);
@@ -144,21 +121,12 @@ namespace WordSlide
 		}
 
 		/// <summary>
-		/// Updated every time the bool for can player interact is changed
-		/// </summary>
-		/// <param name="value"></param>
-		private void GameStateChanged(GameState gameState)
-		{
-			_gameState = gameState;
-		}
-
-		/// <summary>
 		/// Triggers a new game by raising the event
 		/// </summary>
 		protected void TriggerNewGame()
 		{
 			// This should trigger the TilesManager to generate a new board
-			_gameStateEventHandler.RaiseGameStateChanged(GameState.NewGameStarted);
+			_gameStateEventHandler.RaiseNewGame();
 		}
 
 		/// <summary>
@@ -189,7 +157,7 @@ namespace WordSlide
 		protected void LoadingComplete()
 		{
 			InGameUIController.Instance.HideLoadingCanvas();
-			_gameStateEventHandler.RaiseGameStateChanged(GameState.WaitingForPlayer);
+			_gameStateEventHandler.RaiseChangeGameState(GameState.WaitingForPlayer);
 		}
 
 		/// <summary>
