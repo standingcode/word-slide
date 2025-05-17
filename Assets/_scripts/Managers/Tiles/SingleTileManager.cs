@@ -139,6 +139,10 @@ public class SingleTileManager : MonoBehaviour
 		{
 			StartCoroutine(AnimateTileMovingToNewPositionCoroutine());
 		}
+		else
+		{
+			tileEventHandler.RaiseSingleTileFinishedAnimation(this);
+		}
 	}
 
 	/// <summary>

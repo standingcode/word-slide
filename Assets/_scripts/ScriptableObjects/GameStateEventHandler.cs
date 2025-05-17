@@ -25,7 +25,7 @@ public class GameStateEventHandler : ScriptableObject
 
 	public void RaiseChangeGameState(GameState gameState)
 	{
-		Debug.Log($"GameStateEventHandler changing to: {gameState}");
+		//Debug.Log($"GameStateEventHandler changing to: {gameState}");
 		GameState = gameState;
 		GameStateChanged?.Invoke(gameState);
 	}
