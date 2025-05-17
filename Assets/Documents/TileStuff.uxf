@@ -4,7 +4,7 @@
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1143</x>
+      <x>1242</x>
       <y>108</y>
       <w>261</w>
       <h>72</h>
@@ -17,7 +17,7 @@ in the initialize method</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1395</x>
+      <x>1494</x>
       <y>126</y>
       <w>63</w>
       <h>27</h>
@@ -28,7 +28,7 @@ in the initialize method</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1440</x>
+      <x>1539</x>
       <y>117</y>
       <w>117</w>
       <h>36</h>
@@ -43,7 +43,7 @@ fontsize=10</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1440</x>
+      <x>1539</x>
       <y>153</y>
       <w>108</w>
       <h>36</h>
@@ -55,7 +55,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1548</x>
+      <x>1647</x>
       <y>207</y>
       <w>216</w>
       <h>54</h>
@@ -68,7 +68,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1485</x>
+      <x>1584</x>
       <y>180</y>
       <w>81</w>
       <h>72</h>
@@ -79,7 +79,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1710</x>
+      <x>1809</x>
       <y>153</y>
       <w>225</w>
       <h>36</h>
@@ -93,7 +93,7 @@ type=sender</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1746</x>
+      <x>1845</x>
       <y>117</y>
       <w>108</w>
       <h>36</h>
@@ -105,7 +105,7 @@ bg=green</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1755</x>
+      <x>1854</x>
       <y>180</y>
       <w>81</w>
       <h>72</h>
@@ -116,7 +116,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1998</x>
+      <x>2097</x>
       <y>36</y>
       <w>216</w>
       <h>54</h>
@@ -129,7 +129,7 @@ the next event</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1782</x>
+      <x>1881</x>
       <y>54</y>
       <w>234</w>
       <h>81</h>
@@ -140,7 +140,7 @@ the next event</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>2277</x>
+      <x>2376</x>
       <y>99</y>
       <w>288</w>
       <h>36</h>
@@ -153,7 +153,7 @@ type=sender</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>2277</x>
+      <x>2376</x>
       <y>135</y>
       <w>189</w>
       <h>36</h>
@@ -165,7 +165,7 @@ bg=green</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2205</x>
+      <x>2304</x>
       <y>54</y>
       <w>153</w>
       <h>63</h>
@@ -177,7 +177,7 @@ lt=&lt;-</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1224</x>
+      <x>1323</x>
       <y>531</y>
       <w>108</w>
       <h>63</h>
@@ -189,7 +189,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1377</x>
+      <x>1476</x>
       <y>513</y>
       <w>270</w>
       <h>81</h>
@@ -201,7 +201,7 @@ to check if tile was unclicked</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1638</x>
+      <x>1737</x>
       <y>549</y>
       <w>90</w>
       <h>27</h>
@@ -212,7 +212,7 @@ to check if tile was unclicked</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>999</x>
+      <x>1098</x>
       <y>855</y>
       <w>360</w>
       <h>207</h>
@@ -226,13 +226,13 @@ lt=-&gt;
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1152</x>
+      <x>1251</x>
       <y>1053</y>
       <w>225</w>
       <h>54</h>
     </coordinates>
     <panel_attributes>Single tile being animated back
-to original position
+OR tiles being swapped back
 lt=-&gt;
 </panel_attributes>
     <additional_attributes>10.0;20.0;230.0;20.0</additional_attributes>
@@ -240,7 +240,7 @@ lt=-&gt;
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1341</x>
+      <x>1440</x>
       <y>837</y>
       <w>279</w>
       <h>54</h>
@@ -251,7 +251,7 @@ lt=-&gt;
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1359</x>
+      <x>1458</x>
       <y>1053</y>
       <w>135</w>
       <h>36</h>
@@ -264,7 +264,7 @@ type=sender</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1359</x>
+      <x>1458</x>
       <y>1089</y>
       <w>108</w>
       <h>36</h>
@@ -277,7 +277,7 @@ bg=green</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1611</x>
+      <x>1710</x>
       <y>846</y>
       <w>171</w>
       <h>36</h>
@@ -289,7 +289,7 @@ lt=-&gt;</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1584</x>
+      <x>1683</x>
       <y>882</y>
       <w>81</w>
       <h>180</h>
@@ -301,7 +301,7 @@ lt=-&gt;</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1557</x>
+      <x>1656</x>
       <y>1044</y>
       <w>297</w>
       <h>117</h>
@@ -315,7 +315,7 @@ to see if tiles were being
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1323</x>
+      <x>1422</x>
       <y>540</y>
       <w>72</w>
       <h>27</h>
@@ -326,7 +326,7 @@ to see if tiles were being
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>2502</x>
+      <x>2601</x>
       <y>1053</y>
       <w>225</w>
       <h>54</h>
@@ -339,7 +339,7 @@ type=sender</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2421</x>
+      <x>2520</x>
       <y>1062</y>
       <w>99</w>
       <h>27</h>
@@ -350,7 +350,7 @@ type=sender</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1764</x>
+      <x>1863</x>
       <y>792</y>
       <w>297</w>
       <h>153</h>
@@ -361,7 +361,7 @@ type=sender</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>2142</x>
+      <x>2241</x>
       <y>855</y>
       <w>189</w>
       <h>36</h>
@@ -374,7 +374,7 @@ type=sender</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2052</x>
+      <x>2151</x>
       <y>864</y>
       <w>108</w>
       <h>27</h>
@@ -385,7 +385,7 @@ type=sender</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>909</x>
+      <x>1008</x>
       <y>1089</y>
       <w>171</w>
       <h>162</h>
@@ -397,7 +397,7 @@ lt=-&gt;</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>810</x>
+      <x>909</x>
       <y>1233</y>
       <w>423</w>
       <h>54</h>
@@ -409,7 +409,7 @@ lt=-&gt;</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1305</x>
+      <x>1404</x>
       <y>1242</y>
       <w>225</w>
       <h>36</h>
@@ -422,7 +422,7 @@ type=sender</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1224</x>
+      <x>1323</x>
       <y>1251</y>
       <w>99</w>
       <h>27</h>
@@ -433,7 +433,7 @@ type=sender</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>2133</x>
+      <x>2232</x>
       <y>1044</y>
       <w>297</w>
       <h>54</h>
@@ -445,7 +445,7 @@ swapped to be swapped back</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1845</x>
+      <x>1944</x>
       <y>1053</y>
       <w>306</w>
       <h>36</h>
@@ -457,7 +457,7 @@ lt=-&gt;</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1818</x>
+      <x>1917</x>
       <y>1152</y>
       <w>180</w>
       <h>117</h>
@@ -470,7 +470,7 @@ lt=-&gt;</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1980</x>
+      <x>2079</x>
       <y>1233</y>
       <w>135</w>
       <h>36</h>
@@ -483,7 +483,7 @@ type=sender</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1980</x>
+      <x>2079</x>
       <y>1269</y>
       <w>108</w>
       <h>36</h>
@@ -496,7 +496,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1710</x>
+      <x>1809</x>
       <y>513</y>
       <w>198</w>
       <h>81</h>
@@ -509,7 +509,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>2142</x>
+      <x>2241</x>
       <y>891</y>
       <w>306</w>
       <h>45</h>
@@ -522,7 +522,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>2250</x>
+      <x>2349</x>
       <y>729</y>
       <w>423</w>
       <h>45</h>
@@ -534,7 +534,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2412</x>
+      <x>2511</x>
       <y>765</y>
       <w>27</w>
       <h>144</h>
@@ -545,7 +545,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>2475</x>
+      <x>2574</x>
       <y>1242</y>
       <w>423</w>
       <h>45</h>
@@ -558,7 +558,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2538</x>
+      <x>2637</x>
       <y>1143</y>
       <w>27</w>
       <h>117</h>
@@ -569,7 +569,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1224</x>
+      <x>1323</x>
       <y>432</y>
       <w>108</w>
       <h>54</h>
@@ -581,7 +581,7 @@ bg=green</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1323</x>
+      <x>1422</x>
       <y>450</y>
       <w>63</w>
       <h>27</h>
@@ -592,7 +592,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1368</x>
+      <x>1467</x>
       <y>423</y>
       <w>288</w>
       <h>72</h>
@@ -605,7 +605,7 @@ on</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1998</x>
+      <x>2097</x>
       <y>423</y>
       <w>288</w>
       <h>72</h>
@@ -621,7 +621,7 @@ bg=LIGHT_GRAY
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1647</x>
+      <x>1746</x>
       <y>450</y>
       <w>81</w>
       <h>27</h>
@@ -632,7 +632,7 @@ bg=LIGHT_GRAY
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1710</x>
+      <x>1809</x>
       <y>423</y>
       <w>189</w>
       <h>81</h>
@@ -645,7 +645,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1998</x>
+      <x>2097</x>
       <y>513</y>
       <w>288</w>
       <h>72</h>
@@ -663,7 +663,7 @@ bg=LIGHT_GRAY
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1161</x>
+      <x>1260</x>
       <y>0</y>
       <w>1323</w>
       <h>45</h>
@@ -676,7 +676,7 @@ Initialisation
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1098</x>
+      <x>1197</x>
       <y>387</y>
       <w>1512</w>
       <h>36</h>
@@ -688,7 +688,7 @@ Pointer clicks</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>9</x>
+      <x>108</x>
       <y>630</y>
       <w>3618</w>
       <h>36</h>
@@ -700,7 +700,7 @@ Main game logic</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>495</x>
+      <x>594</x>
       <y>1044</y>
       <w>252</w>
       <h>54</h>
@@ -713,7 +713,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>9</x>
+      <x>108</x>
       <y>900</y>
       <w>351</w>
       <h>45</h>
@@ -726,7 +726,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>2493</x>
+      <x>2592</x>
       <y>1107</y>
       <w>351</w>
       <h>45</h>
@@ -739,7 +739,7 @@ bg=green</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1890</x>
+      <x>1989</x>
       <y>450</y>
       <w>126</w>
       <h>27</h>
@@ -750,7 +750,7 @@ bg=green</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1899</x>
+      <x>1998</x>
       <y>540</y>
       <w>117</w>
       <h>27</h>
@@ -761,7 +761,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>477</x>
+      <x>576</x>
       <y>891</y>
       <w>306</w>
       <h>72</h>
@@ -775,7 +775,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>351</x>
+      <x>450</x>
       <y>909</y>
       <w>144</w>
       <h>27</h>
@@ -786,7 +786,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>504</x>
+      <x>603</x>
       <y>1008</y>
       <w>225</w>
       <h>36</h>
@@ -799,7 +799,7 @@ type=sender</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>576</x>
+      <x>675</x>
       <y>954</y>
       <w>27</w>
       <h>72</h>
@@ -810,7 +810,7 @@ type=sender</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1305</x>
+      <x>1404</x>
       <y>1278</y>
       <w>180</w>
       <h>36</h>
@@ -823,7 +823,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1548</x>
+      <x>1647</x>
       <y>1269</y>
       <w>243</w>
       <h>54</h>
@@ -835,7 +835,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1476</x>
+      <x>1575</x>
       <y>1287</y>
       <w>90</w>
       <h>27</h>
@@ -846,7 +846,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2070</x>
+      <x>2169</x>
       <y>81</y>
       <w>90</w>
       <h>108</h>
@@ -858,7 +858,7 @@ lt=&lt;-</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1998</x>
+      <x>2097</x>
       <y>171</y>
       <w>261</w>
       <h>36</h>
@@ -871,7 +871,7 @@ type=sender</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>2016</x>
+      <x>2115</x>
       <y>207</y>
       <w>198</w>
       <h>36</h>
@@ -883,7 +883,7 @@ bg=green</panel_attributes>
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>1863</x>
+      <x>1962</x>
       <y>279</y>
       <w>216</w>
       <h>54</h>
@@ -897,7 +897,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>2016</x>
+      <x>2115</x>
       <y>234</y>
       <w>81</w>
       <h>63</h>
@@ -908,7 +908,7 @@ bg=LIGHT_GRAY</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1818</x>
+      <x>1917</x>
       <y>180</y>
       <w>99</w>
       <h>117</h>
@@ -921,16 +921,17 @@ bg=LIGHT_GRAY</panel_attributes>
     <coordinates>
       <x>0</x>
       <y>720</y>
-      <w>288</w>
+      <w>387</w>
       <h>108</h>
     </coordinates>
     <panel_attributes>
 ENTRY POINT
 
-Tiles manager swaps 2 tiles
-from user input, when the animation
-finishes we get AllTilesFinishedAnimating
-event 
+-User moves a tile and then releases it
+- Either overlaps enough to swap or moved 
+back to original position
+- Either way once the animation completes
+	we get AllTilesFinishedAnimating event 
 bg=LIGHT_GRAY
 
 
@@ -940,7 +941,7 @@ bg=LIGHT_GRAY
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>54</x>
+      <x>153</x>
       <y>819</y>
       <w>27</w>
       <h>99</h>
@@ -951,7 +952,7 @@ bg=LIGHT_GRAY
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>252</x>
+      <x>351</x>
       <y>936</y>
       <w>1341</w>
       <h>450</h>
@@ -962,7 +963,7 @@ bg=LIGHT_GRAY
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>90</x>
+      <x>189</x>
       <y>936</y>
       <w>2448</w>
       <h>477</h>
@@ -973,7 +974,7 @@ bg=LIGHT_GRAY
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>324</x>
+      <x>423</x>
       <y>675</y>
       <w>2034</w>
       <h>243</h>
@@ -984,7 +985,7 @@ bg=LIGHT_GRAY
   <element>
     <id>UMLState</id>
     <coordinates>
-      <x>882</x>
+      <x>981</x>
       <y>1044</y>
       <w>279</w>
       <h>54</h>
@@ -995,7 +996,7 @@ bg=LIGHT_GRAY
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>738</x>
+      <x>837</x>
       <y>1062</y>
       <w>162</w>
       <h>27</h>
