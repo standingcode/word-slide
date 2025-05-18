@@ -160,6 +160,11 @@ namespace WordSlide
 		/// <param name="mousePosition"></param>
 		private void TileWasClickedOn(SingleTileManager singleTileManager, Vector2 mousePosition)
 		{
+			if (currentlyMovingTile != null)
+			{
+				return;
+			}
+
 			currentlyMovingTile = singleTileManager;
 			currentlyMovingTile.TileWasClickedOn(mousePosition);
 		}
