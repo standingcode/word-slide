@@ -21,5 +21,10 @@ namespace WordSlide
 				ClickEventHandler.RaiseInputClickReleased();
 			}
 		}
+
+		public void RequestToQuitApplication(InputAction.CallbackContext callbackContext)
+		{
+			Application.Quit();
+		}
 	}
 }

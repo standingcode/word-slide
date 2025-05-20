@@ -1,0 +1,1007 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="15.1">
+  <zoom_level>9</zoom_level>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1242</x>
+      <y>108</y>
+      <w>261</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>PlayManagerAbstract.TriggerNewGame() 
+calls to start a new game 
+in the initialize method</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1494</x>
+      <y>126</y>
+      <w>63</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>50.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1539</x>
+      <y>117</y>
+      <w>117</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>RaiseNewGame
+Changes game state
+bg=yellow
+type=sender
+fontsize=10</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1539</x>
+      <y>153</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>NewGameStarted
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1647</x>
+      <y>207</y>
+      <w>216</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>TilesManager generates a board
+then triggeres the next event
+bg=LIGHT_GRAY</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1584</x>
+      <y>180</y>
+      <w>81</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>70.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1809</x>
+      <y>153</y>
+      <w>225</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>RaiseBoardGenerated(entireboard)
+Change game state
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1845</x>
+      <y>117</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>BoardGenerated
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1854</x>
+      <y>180</y>
+      <w>81</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>70.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2097</x>
+      <y>36</y>
+      <w>216</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>Play manager makes sure there 
+are no valid words then triggeres 
+the next event</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1881</x>
+      <y>54</y>
+      <w>234</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>240.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2376</x>
+      <y>99</y>
+      <w>288</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>RaiseChangeGameState(waiting for player)
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2376</x>
+      <y>135</y>
+      <w>189</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>GameStateChanged event
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2304</x>
+      <y>54</y>
+      <w>153</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>No words
+lt=&lt;-</panel_attributes>
+    <additional_attributes>150.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1323</x>
+      <y>531</y>
+      <w>108</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>Pointer unclicked
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1476</x>
+      <y>513</y>
+      <w>270</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>PlayManager raises event for TilesManager
+to check if tile was unclicked</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1737</x>
+      <y>549</y>
+      <w>90</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>80.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1098</x>
+      <y>855</y>
+      <w>360</w>
+      <h>207</h>
+    </coordinates>
+    <panel_attributes>Tiles are being swapped
+OR Board is being reconfigured
+lt=-&gt;
+</panel_attributes>
+    <additional_attributes>10.0;210.0;380.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1251</x>
+      <y>1053</y>
+      <w>225</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>Single tile being animated back
+OR tiles being swapped back
+lt=-&gt;
+</panel_attributes>
+    <additional_attributes>10.0;20.0;230.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1440</x>
+      <y>837</y>
+      <w>279</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>PlayManager now checks for valid words</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1458</x>
+      <y>1053</y>
+      <w>135</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Waiting for player
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1458</x>
+      <y>1089</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Waiting for player
+event
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1710</x>
+      <y>846</y>
+      <w>171</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Found
+lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;20.0;170.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1683</x>
+      <y>882</y>
+      <w>81</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>Not found
+lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;180.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1656</x>
+      <y>1044</y>
+      <w>297</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>CheckWords now checks game state
+to see if tiles were being 
+- Swapped
+- Board was being reconfigured.</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1422</x>
+      <y>540</y>
+      <w>72</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;60.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2601</x>
+      <y>1053</y>
+      <w>225</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>Raise TilesNeedToBeSwappedBack
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2520</x>
+      <y>1062</y>
+      <w>99</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1863</x>
+      <y>792</y>
+      <w>297</w>
+      <h>153</h>
+    </coordinates>
+    <panel_attributes>PlayManager calls for tiles to be destroyed</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2241</x>
+      <y>855</y>
+      <w>189</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Raise destroy tiles request
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2151</x>
+      <y>864</y>
+      <w>108</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;100.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1008</x>
+      <y>1089</y>
+      <w>171</w>
+      <h>162</h>
+    </coordinates>
+    <panel_attributes>Tiles are being destroyed
+lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;160.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>909</x>
+      <y>1233</y>
+      <w>423</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>PlayManager Raises event to reconfigure the board
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1404</x>
+      <y>1242</y>
+      <w>225</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Raise reconfigure the board
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1323</x>
+      <y>1251</y>
+      <w>99</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2232</x>
+      <y>1044</y>
+      <w>297</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>PlayManager calls for the tiles which were
+swapped to be swapped back</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1944</x>
+      <y>1053</y>
+      <w>306</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>TilesAreBeingSwapped
+lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;20.0;320.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1917</x>
+      <y>1152</y>
+      <w>180</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>Board being reconfigured
+
+lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;180.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2079</x>
+      <y>1233</y>
+      <w>135</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Waiting for player
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2079</x>
+      <y>1269</y>
+      <w>108</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Waiting for player
+event
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1809</x>
+      <y>513</y>
+      <w>198</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>TILE EVENT
+RaiseCheckIfTileWasClickedOff
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2241</x>
+      <y>891</y>
+      <w>306</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>public Action&lt;List&lt;SingleTileManager&gt;&gt; 
+TilesNeedToBeDestroyed;
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2349</x>
+      <y>729</y>
+      <w>423</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>TilesManager starts destruction sequence
+bg=LIGHT_GRAY</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2511</x>
+      <y>765</y>
+      <w>27</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;140.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2574</x>
+      <y>1242</y>
+      <w>423</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>TilesManager starts animating tiles 
+back to their original positions
+bg=LIGHT_GRAY</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2637</x>
+      <y>1143</y>
+      <w>27</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1323</x>
+      <y>432</y>
+      <w>108</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>Pointer clicked
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1422</x>
+      <y>450</y>
+      <w>63</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1467</x>
+      <y>423</y>
+      <w>288</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>PlayManagerAbstract checks and raises
+an event if a tile was clicked
+on</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2097</x>
+      <y>423</y>
+      <w>288</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>
+Tiles manager 
+- Sets currently moving tile
+- calls TileWasClickedOn for the tile
+bg=LIGHT_GRAY
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1746</x>
+      <y>450</y>
+      <w>81</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>70.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1809</x>
+      <y>423</y>
+      <w>189</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>TILE EVENT
+RaiseTileWasClickedOn
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2097</x>
+      <y>513</y>
+      <w>288</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>
+Tiles manager 
+If there is a currently moving tile,
+Checks if it overlaps enough
+Then swaps the tiles
+bg=LIGHT_GRAY
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1260</x>
+      <y>0</y>
+      <w>1323</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=-
+Initialisation
+</panel_attributes>
+    <additional_attributes>10.0;20.0;1450.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1197</x>
+      <y>387</y>
+      <w>1512</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=-
+Pointer clicks</panel_attributes>
+    <additional_attributes>10.0;20.0;1660.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>108</x>
+      <y>630</y>
+      <w>3618</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=-
+Main game logic</panel_attributes>
+    <additional_attributes>10.0;20.0;4000.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>594</x>
+      <y>1044</y>
+      <w>252</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>	public Action&lt;List&lt;SingleTileManager&gt;&gt; 
+	AllTilesFinishedAnimating;
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>108</x>
+      <y>900</y>
+      <w>351</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>public Action&lt;SingleTileManager&gt; 
+SingleTileFinishedAnimation;
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2592</x>
+      <y>1107</y>
+      <w>351</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>public Action&lt;SingleTileManager, SingleTileManager&gt; 
+TilesNeedToBeSwappedBack;
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1989</x>
+      <y>450</y>
+      <w>126</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>120.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1998</x>
+      <y>540</y>
+      <w>117</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>110.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>576</x>
+      <y>891</y>
+      <w>306</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>TilesManager removes from tilesBeingAnimated
+and if count is zero, raises event for all tiles
+finished animating.
+bg=LIGHT_GRAY</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>450</x>
+      <y>909</y>
+      <w>144</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;140.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>603</x>
+      <y>1008</y>
+      <w>225</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Raise all tiles finished animating
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>675</x>
+      <y>954</y>
+      <w>27</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1404</x>
+      <y>1278</y>
+      <w>180</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>ReconfigureTheBoard
+event
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1647</x>
+      <y>1269</y>
+      <w>243</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>TilesManager reconfigures the board
+bg=LIGHT_GRAY</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1575</x>
+      <y>1287</y>
+      <w>90</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;80.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2169</x>
+      <y>81</y>
+      <w>90</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>words found
+lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;100.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2097</x>
+      <y>171</y>
+      <w>261</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>RaiseChangeCharactersForTiles(tiles)
+bg=yellow
+type=sender</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>2115</x>
+      <y>207</y>
+      <w>198</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>ChangeCharactersForTiles
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>1962</x>
+      <y>279</y>
+      <w>216</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>TilesManager changes the requested
+tiles' characters, then raises
+BoardGenerated event
+bg=LIGHT_GRAY</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2115</x>
+      <y>234</y>
+      <w>81</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;70.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1917</x>
+      <y>180</y>
+      <w>99</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>0</x>
+      <y>720</y>
+      <w>387</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>
+ENTRY POINT
+
+-User moves a tile and then releases it
+- Either overlaps enough to swap or moved 
+back to original position
+- Either way once the animation completes
+	we get AllTilesFinishedAnimating event 
+bg=LIGHT_GRAY
+
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>153</x>
+      <y>819</y>
+      <w>27</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>351</x>
+      <y>936</y>
+      <w>1341</w>
+      <h>450</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;480.0;1470.0;480.0;1470.0;430.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>189</x>
+      <y>936</y>
+      <w>2448</w>
+      <h>477</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;510.0;2700.0;510.0;2700.0;390.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>423</x>
+      <y>675</y>
+      <w>2034</w>
+      <h>243</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;250.0;10.0;10.0;2240.0;10.0;2240.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLState</id>
+    <coordinates>
+      <x>981</x>
+      <y>1044</y>
+      <w>279</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>PlayManager switches based on GameState</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>837</x>
+      <y>1062</y>
+      <w>162</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=.&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;160.0;10.0</additional_attributes>
+  </element>
+</diagram>

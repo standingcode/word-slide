@@ -1,5 +1,7 @@
 using Pooling;
+using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 using WordSlide;
@@ -48,6 +50,9 @@ public class SingleTileManager : MonoBehaviour
 
 	public MovementRestrictions MovementRestrictions => singleTileMover.MovementRestrictions;
 
+	[SerializeField]
+	private TileEventHandler tileEventHandler;
+
 	private void Awake()
 	{
 		tileRestingRotation = transform.rotation;
@@ -58,6 +63,9 @@ public class SingleTileManager : MonoBehaviour
 	{
 		StopAllCoroutines();
 	}
+
+
+	// Initialization, activation and deactivation methods
 
 	/// <summary>
 	/// Initialize the tile, setting character, matrix location, scale, resting position and the movement restrictions
@@ -76,7 +84,8 @@ public class SingleTileManager : MonoBehaviour
 		if (overrideStartPosition != null)
 		{
 			transform.position = overrideStartPosition.Value;
-			StartTileDrop();
+			// TODO: Need to sort this little mess out
+			//StartTileMovingTileToRestingPosition();
 		}
 		else
 		{
@@ -85,29 +94,87 @@ public class SingleTileManager : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Used for tile swaps
+	/// Activate the tile to make it visible and interactable
 	/// </summary>
-	/// <param name="row"></param>
-	/// <param name="column"></param>
-	public void MoveToNewPositionInGrid(int row, int column)
+	public void ActivateTile()
 	{
-		singleTileMover.StopMoving();
-
-		SetTileMatrixIndex(row, column);
-		SetTileRestingPosition();
-		transform.position = tileRestingPosition;
+		tileIsActive = true;
+		boxCollider.enabled = true;
+		visualCube.SetActive(true);
+		textMesh.enabled = true;
 	}
 
 	/// <summary>
-	/// This drops this already existing tile to a new position in the grid.
+	/// Deactivate the tile, will be invisible and not interactable
+	/// </summary>
+	public void DeactivateTile()
+	{
+		tileIsActive = false;
+		boxCollider.enabled = false;
+		visualCube.SetActive(false);
+		textMesh.enabled = false;
+		transform.rotation = tileRestingRotation;
+
+		StopAllCoroutines();
+	}
+
+
+	// Moving the tile
+
+	/// <summary>
+	/// Use when the tile needs to return to its resting position
+	/// </summary>
+	public void AnimateToRestingPositionInGrid()
+	{
+		singleTileMover.StopMoving();
+		StartTileMovingTileToRestingPosition();
+	}
+
+	/// <summary>
+	/// Start the moving of the tile towards the resting position
+	/// </summary>
+	private void StartTileMovingTileToRestingPosition()
+	{
+		if (transform.position != TileRestingPosition)
+		{
+			StartCoroutine(AnimateTileMovingToNewPositionCoroutine());
+		}
+		else
+		{
+			tileEventHandler.RaiseSingleTileFinishedAnimation(this);
+		}
+	}
+
+	/// <summary>
+	/// Coroutine for animating the tile to its resting position
+	/// </summary>
+	/// <returns></returns>
+	private IEnumerator AnimateTileMovingToNewPositionCoroutine()
+	{
+		while (transform.position != TileRestingPosition)
+		{
+			transform.position = Vector3.MoveTowards(
+			transform.position,
+			TileRestingPosition,
+			Time.deltaTime * gravitySpeed);
+			yield return null;
+		}
+
+		tileEventHandler.RaiseSingleTileFinishedAnimation(this);
+	}
+
+
+	// Setting the tile properties
+
+	/// <summary>
+	/// Sets the grid matrix and the resting position of the tile
 	/// </summary>
 	/// <param name="row"></param>
 	/// <param name="column"></param>
-	public void MakeExistingTileDropToNewPosition(int row, int column)
+	public void SetNewGridPosition(int row, int column)
 	{
 		SetTileMatrixIndex(row, column);
 		SetTileRestingPosition();
-		StartTileDrop();
 	}
 
 	/// <summary>
@@ -127,6 +194,9 @@ public class SingleTileManager : MonoBehaviour
 		textMesh.text = tileCharacter.ToString().ToUpper();
 	}
 
+
+	// Control of the tile
+
 	/// <summary>
 	/// When the tile is first selected, this can be called from the tile manager which should get a reference via a ray
 	/// </summary>
@@ -136,43 +206,8 @@ public class SingleTileManager : MonoBehaviour
 		singleTileMover.StartMoving(mousePosition);
 	}
 
-	/// <summary>
-	/// Start the dropping of the tile
-	/// </summary>
-	public void StartTileDrop()
-	{
-		if (transform.position != TileRestingPosition)
-		{
-			StartCoroutine(AnimateTileFallingToNewPositionCoroutine());
-		}
-	}
 
-	/// <summary>
-	/// Activate the tile to make it visible and interactable
-	/// </summary>
-	public void ActivateTile()
-	{
-		tileIsActive = true;
-		boxCollider.enabled = true;
-		visualCube.SetActive(true);
-		textMesh.enabled = true;
-
-
-	}
-
-	/// <summary>
-	/// Deactivate the tile, will be invisible and not interactable
-	/// </summary>
-	public void DeactivateTile()
-	{
-		tileIsActive = false;
-		boxCollider.enabled = false;
-		visualCube.SetActive(false);
-		textMesh.enabled = false;
-		transform.rotation = tileRestingRotation;
-
-		StopAllCoroutines();
-	}
+	// Destroying the tile
 
 	/// <summary>
 	/// Called from the PlayManager when this tile is part of a detected word
@@ -184,34 +219,15 @@ public class SingleTileManager : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Called as an event from the animation
+	/// Called once the destory animation is complete
 	/// </summary>
-	public void HighlightAnimationFinished()
+	public void DestroySequenceIsComplete()
 	{
-		TilesManager.Instance.TileHasFinishedSelfDestructSequence(this);
+		tileEventHandler.RaiseSingleTileFinishedAnimation(this);
 	}
 
-	public void ResetTileToItsRestingPosition()
-	{
-		singleTileMover.StopMoving();
-		transform.position = tileRestingPosition;
-	}
 
-	// Private methods
-
-	private IEnumerator AnimateTileFallingToNewPositionCoroutine()
-	{
-		while (transform.position != TileRestingPosition)
-		{
-			transform.position = Vector3.MoveTowards(
-			transform.position,
-			TileRestingPosition,
-			Time.deltaTime * gravitySpeed);
-			yield return null;
-		}
-
-		TilesManager.Instance.TileFinishedDropIn();
-	}
+	// Helper methods
 
 	private void SetTileMatrixIndex(int row, int column)
 	{

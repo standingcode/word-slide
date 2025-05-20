@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace WordSlide
@@ -17,7 +18,8 @@ namespace WordSlide
 
 		public override string ToString()
 		{
-			// TODO: Find out what is calling this after tile destruct
+			Debug.WriteLine(new StackFrame(1).GetMethod().Name);
+
 			if (singleTileManagers.Length == 0 || singleTileManagers == null)
 			{
 				Console.WriteLine("Tried to call ToString() on a SingleTileManagerSequence with no tiles");
@@ -37,7 +39,7 @@ namespace WordSlide
 
 	public class WordFinderService : IWordFinderService
 	{
-		public List<SingleTileManagerSequence> GetListOfValidWordsFromGivenRowsAndOrColumns(IDictionaryService _dictionaryService, List<SingleTileManagerSequence> rowsAndColumnsToCheck)
+		public HashSet<SingleTileManagerSequence> GetListOfValidWordsFromGivenRowsAndOrColumns(IDictionaryService _dictionaryService, HashSet<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
 			var foundWordsInAllRowsAndColumns = new List<SingleTileManagerSequence>();
 
@@ -52,7 +54,7 @@ namespace WordSlide
 				}
 			}
 
-			return foundWordsInAllRowsAndColumns;
+			return foundWordsInAllRowsAndColumns.ToHashSet();
 		}
 
 		private List<SingleTileManagerSequence> CheckRowOrColumnForWords(IDictionaryService _dictionaryService, SingleTileManagerSequence singleTileManagerStringToCheck)

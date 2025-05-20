@@ -357,14 +357,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileCharacter: 0
+  _row: 0
+  _column: 0
   textMesh: {fileID: 7744930552171424848}
   visualCube: {fileID: 1733381061196797719}
   animator: {fileID: 2938429162728358114}
-  gravitySpeed: 9.87
   boxCollider: {fileID: 1435310567558780645}
   tileIsActive: 0
   destroyMovementAnimationString: MovementBeforeDestroyAnimation
   singleTileMover: {fileID: 240128338872377688}
+  tileEventHandler: {fileID: 11400000, guid: b4703430b4c558e489e62ed164756002, type: 2}
 --- !u!114 &240128338872377688
 MonoBehaviour:
   m_ObjectHideFlags: 0
