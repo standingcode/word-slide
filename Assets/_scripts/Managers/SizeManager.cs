@@ -117,6 +117,9 @@ namespace WordSlide
 			tileSpawnTopLeftStartingPoint = new Vector3(startingPointX, startingPointY, 0f);
 		}
 
+		/// <summary>
+		/// Initializes and calculates the spawn positions for tiles based on the grid dimensions and layout settings.
+		/// </summary>		
 		private void SetTileSpawnPositions()
 		{
 			tileSpawnPositions = new Vector3[SettingsScriptable.Rows, SettingsScriptable.Columns];

@@ -303,6 +303,6 @@ public class SingleTileManager : MonoBehaviour
 		transform.localScale = new Vector3(
 		SizeManager.Instance.TileSize.x,
 		SizeManager.Instance.TileSize.y,
-		1f);
+		SizeManager.Instance.TileSize.x);
 	}
 }
