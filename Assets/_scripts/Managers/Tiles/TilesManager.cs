@@ -254,7 +254,7 @@ namespace WordSlide
 					foreach (var tile in tilesLastAnimated)
 					{
 						tile.DeactivateTile();
-						PoolManager.Instance.ReturnObjectToPool(tile.GetComponent<PoolObject>());
+						PoolManager.Instance.ReturnObjectToPool(tile.transform, nameof(SingleTileManager));
 					}
 				}
 
@@ -288,7 +288,7 @@ namespace WordSlide
 		private SingleTileManager GenerateAndInitializeTile(int i, int j, Vector3? overrideStartPosition = null)
 		{
 			// Create new tile from the object pool
-			PoolObject boardTile = PoolManager.Instance.GetObjectFromPool("tile", boardTilesRoot);
+			Transform boardTile = PoolManager.Instance.GetObjectFromPool(nameof(SingleTileManager), boardTilesRoot);
 
 			SingleTileManager singletile = boardTile.GetComponent<SingleTileManager>();
 			boardTiles[i, j] = singletile;
@@ -311,7 +311,7 @@ namespace WordSlide
 					if (tile != null)
 					{
 						tile.DeactivateTile();
-						PoolManager.Instance.ReturnObjectToPool(tile.GetComponent<PoolObject>());
+						PoolManager.Instance.ReturnObjectToPool(tile.transform, nameof(SingleTileManager));
 					}
 				}
 			}

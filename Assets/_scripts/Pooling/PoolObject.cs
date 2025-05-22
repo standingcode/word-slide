@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Pooling
@@ -5,7 +6,7 @@ namespace Pooling
 	public class PoolObject : MonoBehaviour
 	{
 		[SerializeField]
-		protected string poolObjectIdentifier;
-		public string PoolObjectIdentifier { get => poolObjectIdentifier; set => poolObjectIdentifier = value; }
+		protected Type poolObjectIdentifier;
+		public Type PoolObjectIdentifier { get => poolObjectIdentifier; set => poolObjectIdentifier = value; }
 	}
 }

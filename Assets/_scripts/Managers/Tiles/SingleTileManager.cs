@@ -53,6 +53,9 @@ public class SingleTileManager : MonoBehaviour
 	[SerializeField]
 	private TileEventHandler tileEventHandler;
 
+	[SerializeField]
+	private ParticleController particleController;
+
 	private void Awake()
 	{
 		tileRestingRotation = transform.rotation;
@@ -220,9 +223,25 @@ public class SingleTileManager : MonoBehaviour
 
 	/// <summary>
 	/// Called once the destory animation is complete
-	/// </summary>
+	/// </summary>	
 	public void DestroySequenceIsComplete()
 	{
+		DeactivateTile();
+
+		// Explosion
+		var explosionGameObject = PoolManager.Instance.GetObjectFromPool(nameof(ExplosionParticleController));
+		explosionGameObject.transform.SetParent(null);
+		explosionGameObject.transform.position = new Vector3(transform.position.x, transform.position.y, -1f);
+		explosionGameObject.TryGetComponent<ExplosionParticleController>(out var particleController);
+		particleController.PlayParticleAnimationAndCallBack(DestroyExplosionSequenceIsComplete);
+	}
+
+	/// <summary>
+	/// Now callback the TilesManager to report that animation sequences are complete
+	/// </summary>
+	public void DestroyExplosionSequenceIsComplete(Transform explosionParticleControllerTransform)
+	{
+		PoolManager.Instance.ReturnObjectToPool(explosionParticleControllerTransform, nameof(ExplosionParticleController));
 		tileEventHandler.RaiseSingleTileFinishedAnimation(this);
 	}
 

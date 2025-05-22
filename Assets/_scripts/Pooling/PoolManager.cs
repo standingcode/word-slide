@@ -1,4 +1,6 @@
 using NativeSerializableDictionary;
+using System;
+using UnityEditor.Build.Content;
 using UnityEngine;
 
 namespace Pooling
@@ -26,7 +28,7 @@ namespace Pooling
 			Instance = null;
 		}
 
-		public PoolObject GetObjectFromPool(string objectIdentifier, Transform parentForPoolObjectTransform = null)
+		public Transform GetObjectFromPool(string objectIdentifier, Transform parentForPoolObjectTransform = null)
 		{
 			if (!poolableObjectRoots.ContainsKey(objectIdentifier))
 			{
@@ -41,27 +43,22 @@ namespace Pooling
 				instantiatedObject.transform.SetParent(poolableObjectRoot.transform);
 			}
 
-			PoolObject poolObject = poolableObjectRoot.transform.GetChild(0).GetComponent<PoolObject>();
-
-			if (poolObject.PoolObjectIdentifier == null)
-			{
-				poolObject.PoolObjectIdentifier = objectIdentifier;
-			}
+			var poolableObjectTransform = poolableObjectRoot.transform.GetChild(0);
 
 			if (parentForPoolObjectTransform != null)
 			{
-				poolObject.transform.SetParent(parentForPoolObjectTransform);
+				poolableObjectTransform.transform.SetParent(parentForPoolObjectTransform);
 			}
 
-			poolObject.gameObject.SetActive(true);
+			poolableObjectTransform.gameObject.SetActive(true);
 
-			return poolObject;
+			return poolableObjectTransform;
 		}
 
-		public void ReturnObjectToPool(PoolObject poolObject)
+		public void ReturnObjectToPool(Transform objectTransform, string objectIdentifier)
 		{
-			poolObject.transform.SetParent(poolableObjectRoots[poolObject.PoolObjectIdentifier].transform);
-			poolObject.gameObject.SetActive(false);
+			objectTransform.transform.SetParent(poolableObjectRoots[objectIdentifier].transform);
+			objectTransform.gameObject.SetActive(false);
 		}
 
 		public void InstantiateObjectsEnabled(string objectIdentifier, int amountToInstantiate)

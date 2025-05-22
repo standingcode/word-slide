@@ -18,7 +18,7 @@ public class SettingsScriptable : ScriptableObject
 
 	[Header("Game logic")]
 
-	private static int minimumWordLength = 4;
+	private static int minimumWordLength = 3;
 	public static int MinimumWordLength => minimumWordLength;
 
 	[Header("User experience")]
@@ -33,5 +33,4 @@ public class SettingsScriptable : ScriptableObject
 
 	private static float tileMovementSpeed = 10f;
 	public static float TileMovementSpeed => tileMovementSpeed;
-
 }

@@ -60,7 +60,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   poolableObjectRoots:
     _keys:
-    - _key: tile
+    - _key: SingleTileManager
+      _value: {fileID: 0}
+    - _key: ExplosionParticleController
       _value: {fileID: 0}
 --- !u!114 &3152753253900575489
 MonoBehaviour:
