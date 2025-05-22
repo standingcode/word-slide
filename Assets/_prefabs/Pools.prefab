@@ -65,7 +65,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7d77c7eea01a194896ee1b22a3196d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  poolableObjectPrefab: {fileID: 560014183069458990, guid: 621e45f610d611746802ad828f66b094, type: 3}
+  poolableObjectPrefab: {fileID: 9130538258533643426, guid: 6a2da787bedf71e45a10bafea906c46b, type: 3}
 --- !u!1 &3474293066691291421
 GameObject:
   m_ObjectHideFlags: 0
