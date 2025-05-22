@@ -213,33 +213,42 @@ public class SingleTileManager : MonoBehaviour
 	// Destroying the tile
 
 	/// <summary>
-	/// Called from the PlayManager when this tile is part of a detected word
+	/// Called from the TilesManager (initially from a PlayManager) when this tile is part of a detected word
 	/// The animation is triggered, which will then call HighlightAnimationFinished
 	/// </summary>
 	public void StartDestroySequence()
 	{
+		// First call the tile shake animation
 		animator.SetTrigger(destroyMovementAnimationString);
 	}
 
 	/// <summary>
 	/// Called once the destory animation is complete
 	/// </summary>	
-	public void DestroySequenceIsComplete()
+	public void TileShakeAnimationIsCompleted()
 	{
 		DeactivateTile();
+		CreateParticleExplosion();
+	}
 
+	/// <summary>
+	/// Get explosion particle prefab from the pool and request for animation to be played
+	/// Callback to ParticleExplosionAnimationeIsComplete()
+	/// </summary>
+	private void CreateParticleExplosion()
+	{
 		// Explosion
 		var explosionGameObject = PoolManager.Instance.GetObjectFromPool(nameof(ExplosionParticleController));
 		explosionGameObject.transform.SetParent(null);
 		explosionGameObject.transform.position = new Vector3(transform.position.x, transform.position.y, -1f);
 		explosionGameObject.TryGetComponent<ExplosionParticleController>(out var particleController);
-		particleController.PlayParticleAnimationAndCallBack(DestroyExplosionSequenceIsComplete);
+		particleController.PlayParticleAnimationAndCallBack(ParticleExplosionAnimationeIsComplete);
 	}
 
 	/// <summary>
 	/// Now callback the TilesManager to report that animation sequences are complete
 	/// </summary>
-	public void DestroyExplosionSequenceIsComplete(Transform explosionParticleControllerTransform)
+	private void ParticleExplosionAnimationeIsComplete(Transform explosionParticleControllerTransform)
 	{
 		PoolManager.Instance.ReturnObjectToPool(explosionParticleControllerTransform, nameof(ExplosionParticleController));
 		tileEventHandler.RaiseSingleTileFinishedAnimation(this);
