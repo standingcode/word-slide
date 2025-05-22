@@ -19,6 +19,9 @@ namespace WordSlide
 		private Vector3[,] tileSpawnPositions;
 		public Vector3[,] TileSpawnPositions => tileSpawnPositions;
 
+		private Vector2 worldUnitsInCamera = Vector2.zero;
+		public Vector2 WorldUnitsInCamera => worldUnitsInCamera;
+
 		public static SizeManager Instance { get; private set; }
 
 		private void Awake()
@@ -60,20 +63,17 @@ namespace WordSlide
 		/// </summary>
 		private void SetBoardSize()
 		{
+			worldUnitsInCamera = Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, Screen.height)) * 2;
+
 			float sizeForWidthAndHeight;
-			float orthographicVertical = Camera.main.orthographicSize * 2;
 
 			if (ScreenIsLandscape())
 			{
-				// The camera orphograpic size is vertical, so we can use that as the max size of the board
-				sizeForWidthAndHeight = orthographicVertical - (orthographicVertical * (SettingsScriptable.MinimumMarginFromBoardAsRatio * 2));
+				sizeForWidthAndHeight = WorldUnitsInCamera.y - (WorldUnitsInCamera.y * (SettingsScriptable.MinimumMarginFromBoardAsRatio * 2));
 			}
 			else
 			{
-				// The camera orphographic size is vertical, we need to determine the width first using ratios				
-				float ratio = (float)Screen.width / (float)Screen.height;
-				float orthographicSize = ratio * orthographicVertical;
-				sizeForWidthAndHeight = orthographicSize - (orthographicSize * (SettingsScriptable.MinimumMarginFromBoardAsRatio * 2));
+				sizeForWidthAndHeight = WorldUnitsInCamera.x - (WorldUnitsInCamera.x * (SettingsScriptable.MinimumMarginFromBoardAsRatio * 2));
 			}
 
 			boardSize = new Vector2(sizeForWidthAndHeight, sizeForWidthAndHeight);
