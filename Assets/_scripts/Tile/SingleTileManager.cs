@@ -27,9 +27,6 @@ public class SingleTileManager : MonoBehaviour
 	private Animator animator;
 
 	[SerializeField]
-	private float gravitySpeed => SettingsScriptable.GravitySpeed;
-
-	[SerializeField]
 	private BoxCollider boxCollider;
 
 	[SerializeField]
@@ -38,6 +35,8 @@ public class SingleTileManager : MonoBehaviour
 
 	[SerializeField]
 	private string destroyMovementAnimationString;
+
+	private SettingsScriptable settings => MainMenuManager.Instance.SettingsScriptable;
 
 	private Vector3 tileRestingPosition;
 	public Vector3 TileRestingPosition => tileRestingPosition;
@@ -159,7 +158,7 @@ public class SingleTileManager : MonoBehaviour
 			transform.position = Vector3.MoveTowards(
 			transform.position,
 			TileRestingPosition,
-			Time.deltaTime * gravitySpeed);
+			Time.deltaTime * settings.GravitySpeed);
 			yield return null;
 		}
 
@@ -282,7 +281,7 @@ public class SingleTileManager : MonoBehaviour
 
 
 		// if the tile is on the right-hand side of the board, it can only move to the left
-		if (_column == SettingsScriptable.Columns - 1)
+		if (_column == settings.Columns - 1)
 		{
 			movementRestrictions.xMax = tileRestingPosition.x;
 		}
@@ -306,7 +305,7 @@ public class SingleTileManager : MonoBehaviour
 		}
 
 		// if the tile is on the bottom of the board, it can only move up
-		if (_row == SettingsScriptable.Rows - 1)
+		if (_row == settings.Rows - 1)
 		{
 			movementRestrictions.yMin = tileRestingPosition.y;
 		}

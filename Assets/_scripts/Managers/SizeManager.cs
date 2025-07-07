@@ -22,6 +22,8 @@ namespace WordSlide
 		private Vector2 worldUnitsInCamera = Vector2.zero;
 		public Vector2 WorldUnitsInCamera => worldUnitsInCamera;
 
+		private SettingsScriptable settings => MainMenuManager.Instance.SettingsScriptable;
+
 		public static SizeManager Instance { get; private set; }
 
 		private void Awake()
@@ -69,11 +71,11 @@ namespace WordSlide
 
 			if (ScreenIsLandscape())
 			{
-				sizeForWidthAndHeight = WorldUnitsInCamera.y - (WorldUnitsInCamera.y * (SettingsScriptable.MinimumMarginFromBoardAsRatio * 2));
+				sizeForWidthAndHeight = WorldUnitsInCamera.y - (WorldUnitsInCamera.y * (settings.MinimumMarginFromBoardAsRatio * 2));
 			}
 			else
 			{
-				sizeForWidthAndHeight = WorldUnitsInCamera.x - (WorldUnitsInCamera.x * (SettingsScriptable.MinimumMarginFromBoardAsRatio * 2));
+				sizeForWidthAndHeight = WorldUnitsInCamera.x - (WorldUnitsInCamera.x * (settings.MinimumMarginFromBoardAsRatio * 2));
 			}
 
 			boardSize = new Vector2(sizeForWidthAndHeight, sizeForWidthAndHeight);
@@ -86,16 +88,16 @@ namespace WordSlide
 		private void SetTileSizeAndInteriorPaddingSize(Vector2 boardSize)
 		{
 			// Step 1: Calculate the initial tile size based on board dimensions and grid layout  
-			float initialTileSizeX = boardSize.x / SettingsScriptable.Columns;
-			float initialTileSizeY = boardSize.y / SettingsScriptable.Rows;
+			float initialTileSizeX = boardSize.x / settings.Columns;
+			float initialTileSizeY = boardSize.y / settings.Rows;
 
 			// Step 2: Calculate the interior padding as a ratio of the initial tile size  
-			float xInteriorPadding = initialTileSizeX * SettingsScriptable.TilePaddingRatio;
-			float yInteriorPadding = initialTileSizeY * SettingsScriptable.TilePaddingRatio;
+			float xInteriorPadding = initialTileSizeX * settings.TilePaddingRatio;
+			float yInteriorPadding = initialTileSizeY * settings.TilePaddingRatio;
 
 			// Step 3: Adjust the tile size to account for the interior padding  
-			float adjustedTileSizeX = initialTileSizeX - (xInteriorPadding * (SettingsScriptable.Columns - 1) / SettingsScriptable.Columns);
-			float adjustedTileSizeY = initialTileSizeY - (yInteriorPadding * (SettingsScriptable.Rows - 1) / SettingsScriptable.Rows);
+			float adjustedTileSizeX = initialTileSizeX - (xInteriorPadding * (settings.Columns - 1) / settings.Columns);
+			float adjustedTileSizeY = initialTileSizeY - (yInteriorPadding * (settings.Rows - 1) / settings.Rows);
 
 			tileSize = new Vector2(adjustedTileSizeX, adjustedTileSizeY);
 			interiorPaddingSizes = new Vector2(xInteriorPadding, yInteriorPadding);
@@ -122,14 +124,14 @@ namespace WordSlide
 		/// </summary>		
 		private void SetTileSpawnPositions()
 		{
-			tileSpawnPositions = new Vector3[SettingsScriptable.Rows, SettingsScriptable.Columns];
+			tileSpawnPositions = new Vector3[settings.Rows, settings.Columns];
 
-			for (int i = 0; i < SettingsScriptable.Rows; i++)
+			for (int i = 0; i < settings.Rows; i++)
 			{
-				for (int j = 0; j < SettingsScriptable.Columns; j++)
+				for (int j = 0; j < settings.Columns; j++)
 				{
-					int rowMultiplier = i % SettingsScriptable.Rows;
-					int columnMultiplier = j % SettingsScriptable.Columns;
+					int rowMultiplier = i % settings.Rows;
+					int columnMultiplier = j % settings.Columns;
 
 					float requiredXPosition =
 						tileSpawnTopLeftStartingPoint.x + (columnMultiplier * (tileSize.x + interiorPaddingSizes.x));

@@ -29,6 +29,8 @@ namespace WordSlide
 		[SerializeField]
 		private TileEventHandler tileEventHandler;
 
+		private SettingsScriptable settings => MainMenuManager.Instance.SettingsScriptable;
+
 		public static TilesManager Instance { get; private set; }
 
 		public void Awake()
@@ -140,7 +142,7 @@ namespace WordSlide
 		{
 			DestroyExistingTiles();
 
-			boardTiles = new SingleTileManager[SettingsScriptable.Rows, SettingsScriptable.Columns];
+			boardTiles = new SingleTileManager[settings.Rows, settings.Columns];
 
 			for (int i = 0; i < boardTiles.GetLength(0); i++)
 			{
@@ -380,7 +382,7 @@ namespace WordSlide
 					(currentlyMovingTile.transform.position.y - currentlyMovingTile.TileRestingPosition.y)
 					/ (currentlyMovingTile.MovementRestrictions.yMax - currentlyMovingTile.TileRestingPosition.y);
 
-				return ratioOfLimit > SettingsScriptable.RatioOfOverlapToSwapTile ? boardTiles[indexOfRowAbove, currentlyMovingTile.Column] : null;
+				return ratioOfLimit > settings.RatioOfOverlapToSwapTile ? boardTiles[indexOfRowAbove, currentlyMovingTile.Column] : null;
 			}
 
 			// tile went right
@@ -392,7 +394,7 @@ namespace WordSlide
 				(currentlyMovingTile.transform.position.x - currentlyMovingTile.TileRestingPosition.x)
 				/ (currentlyMovingTile.MovementRestrictions.xMax - currentlyMovingTile.TileRestingPosition.x);
 
-				return ratioOfLimit > SettingsScriptable.RatioOfOverlapToSwapTile ? boardTiles[currentlyMovingTile.Row, indexOfColumnRight] : null;
+				return ratioOfLimit > settings.RatioOfOverlapToSwapTile ? boardTiles[currentlyMovingTile.Row, indexOfColumnRight] : null;
 			}
 
 			// tile went down
@@ -404,7 +406,7 @@ namespace WordSlide
 				(currentlyMovingTile.TileRestingPosition.y - currentlyMovingTile.transform.position.y)
 				/ (currentlyMovingTile.TileRestingPosition.y - currentlyMovingTile.MovementRestrictions.yMin);
 
-				return ratioOfLimit > SettingsScriptable.RatioOfOverlapToSwapTile ? boardTiles[indexOfRowBelow, currentlyMovingTile.Column] : null;
+				return ratioOfLimit > settings.RatioOfOverlapToSwapTile ? boardTiles[indexOfRowBelow, currentlyMovingTile.Column] : null;
 			}
 
 			// tile went left	
@@ -416,7 +418,7 @@ namespace WordSlide
 				(currentlyMovingTile.TileRestingPosition.x - currentlyMovingTile.transform.position.x)
 				/ (currentlyMovingTile.TileRestingPosition.x - currentlyMovingTile.MovementRestrictions.xMin);
 
-				return ratioOfLimit > SettingsScriptable.RatioOfOverlapToSwapTile ? boardTiles[currentlyMovingTile.Row, indexOfColumnLeft] : null;
+				return ratioOfLimit > settings.RatioOfOverlapToSwapTile ? boardTiles[currentlyMovingTile.Row, indexOfColumnLeft] : null;
 			}
 
 			return null;

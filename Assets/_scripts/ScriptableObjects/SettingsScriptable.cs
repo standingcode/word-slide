@@ -4,33 +4,25 @@ using UnityEngine;
 public class SettingsScriptable : ScriptableObject
 {
 	[Header("Board")]
-	private static int columns = 8;
-	public static int Columns => columns;
+	public int Columns = 8;
 
-	private static int rows = 8;
-	public static int Rows => rows;
+	public int Rows = 8;
 
-	private static float tilePaddingRatio = 0.1f;
-	public static float TilePaddingRatio => tilePaddingRatio;
+	public float TilePaddingRatio = 0.1f;
 
-	private static float minimumMarginFromBoardAsRatio = 0.05f;
-	public static float MinimumMarginFromBoardAsRatio => minimumMarginFromBoardAsRatio;
+	public float MinimumMarginFromBoardAsRatio = 0.05f;
 
 	[Header("Game logic")]
 
-	private static int minimumWordLength = 3;
-	public static int MinimumWordLength => minimumWordLength;
+	public int MinimumWordLength = 4;
 
 	[Header("User experience")]
 
-	private static float ratioOfOverlapToSwapTile = 0.7f;
-	public static float RatioOfOverlapToSwapTile => ratioOfOverlapToSwapTile;
+	public float RatioOfOverlapToSwapTile = 0.7f;
 
 
 	[Header("Appearance")]
-	private static float gravitySpeed = 5f;
-	public static float GravitySpeed => gravitySpeed;
+	public float GravitySpeed = 5f;
 
-	private static float tileMovementSpeed = 10f;
-	public static float TileMovementSpeed => tileMovementSpeed;
+	public float TileMovementSpeed = 10f;
 }

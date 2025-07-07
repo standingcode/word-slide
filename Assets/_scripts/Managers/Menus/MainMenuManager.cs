@@ -17,6 +17,10 @@ public class MainMenuManager : MonoBehaviour
 	[SerializeField]
 	private TileEventHandler tileEventHandler;
 
+	[SerializeField]
+	private SettingsScriptable settingsScriptable;
+	public SettingsScriptable SettingsScriptable => settingsScriptable;
+
 	public static MainMenuManager Instance { get; private set; }
 
 	private IDictionaryService _dictionaryService;

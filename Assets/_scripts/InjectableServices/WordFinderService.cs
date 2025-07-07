@@ -39,6 +39,8 @@ namespace WordSlide
 
 	public class WordFinderService : IWordFinderService
 	{
+		private SettingsScriptable settings => MainMenuManager.Instance.SettingsScriptable;
+
 		public HashSet<SingleTileManagerSequence> GetListOfValidWordsFromGivenRowsAndOrColumns(IDictionaryService _dictionaryService, HashSet<SingleTileManagerSequence> rowsAndColumnsToCheck)
 		{
 			var foundWordsInAllRowsAndColumns = new List<SingleTileManagerSequence>();
@@ -86,7 +88,7 @@ namespace WordSlide
 			}
 
 			// Main loop starts with stringLength -1 size of sliding window, down to minimum word length
-			for (int slidingWindowLength = singleTileManagerStringToCheck.Length - 1; slidingWindowLength >= SettingsScriptable.MinimumWordLength; slidingWindowLength--)
+			for (int slidingWindowLength = singleTileManagerStringToCheck.Length - 1; slidingWindowLength >= settings.MinimumWordLength; slidingWindowLength--)
 			{
 				// Each iteration of the loop is a sliding window size, reducing from 1 below the length, down to minimum word length
 
