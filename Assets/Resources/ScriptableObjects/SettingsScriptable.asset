@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22d85a63887f8d24397b8a1a0d3b6ee7, type: 3}
   m_Name: SettingsScriptable
   m_EditorClassIdentifier: 
-  Columns: 15
-  Rows: 15
+  Columns: 8
+  Rows: 8
   TilePaddingRatio: 0.1
   MinimumMarginFromBoardAsRatio: 0.05
   MinimumWordLength: 4
   RatioOfOverlapToSwapTile: 0.7
-  GravitySpeed: 5
-  TileMovementSpeed: 10
+  GravitySpeed: 15
+  TileMovementSpeed: 0.1

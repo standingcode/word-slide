@@ -50,9 +50,9 @@ namespace WordSlide
 				if (string.IsNullOrEmpty(word)) { continue; }
 
 				var wordObj = new Word();
-				wordObj.word = word;
+				wordObj.word = word.ToLower();
 
-				dictionary.Add(word, wordObj);
+				dictionary[word.ToLower()] = wordObj;
 			}
 
 			return dictionary;
